@@ -9,6 +9,11 @@
     "lint": "eslint",
     "db:push": "npx drizzle-kit push"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
     "dotenv": "^17.4.2",
