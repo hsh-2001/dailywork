@@ -8,6 +8,7 @@ export async function POST(request: Request) {
     const response = await db.insert(usersTable).values({
         username: body.username,
         email: body.email,
+        password: body.password,
         phone: body.phone,
     }).returning();
     return new Response(JSON.stringify({ message: "User created successfully", data: response }), { status: 201 });
