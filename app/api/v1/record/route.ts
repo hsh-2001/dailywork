@@ -7,9 +7,10 @@ import {
   ApiResponse,
   Pagination,
 } from "../../../../shares/types/apiResponse";
-import { count, desc } from "drizzle-orm";
+import { count, desc, eq } from "drizzle-orm";
 import { getPagination } from "../../utils/pagination";
 import { NextRequest } from "next/server";
+import { id } from "zod/v4/locales/index.js";
 
 export async function GET(req: NextRequest) {
   try {
@@ -54,6 +55,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     const { workDate, startTime, endTime, project, task, note } = body;
+    console.log(body);
 
     if (!workDate || !startTime || !endTime) {
       return ApiResponse.failed(

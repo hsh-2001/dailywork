@@ -18,9 +18,21 @@ const create = async (request: ICreateRecordRequest) => {
   return response.data;
 };
 
+const deleteRecord = async (id: number) => {
+  const response = await api.delete("/record" + `/${id}`);
+  return response.data;
+};
+
+const update = async (id: number, request: ICreateRecordRequest) => {
+  const response = await api.put(`/record/${id}`, request);
+  return response.data;
+};
+
 const recordService = {
   getRecords,
   create,
+  deleteRecord,
+  update,
 };
 
 export default recordService;

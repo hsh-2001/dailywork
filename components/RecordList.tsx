@@ -1,6 +1,7 @@
 import { IRecordResponse } from "@/shares/dtos/record/recordResponse";
-import { Table, Tag } from "antd";
+import { Button, Table, Tag } from "antd";
 import { ColumnsType, TablePaginationConfig } from "antd/lib/table/interface";
+import { Delete, Edit } from "lucide-react";
 
 interface RecordListProps {
   data: IRecordResponse[];
@@ -11,6 +12,8 @@ interface RecordListProps {
     pageSize: number;
   };
   onPaginationChange: (pagination: { page: number; pageSize: number }) => void;
+  onEdit: (id: number) => void;
+  onDelete: (id: number) => void;
 }
 
 export default function RecordList({
@@ -19,6 +22,8 @@ export default function RecordList({
   isLoading,
   pagination,
   onPaginationChange,
+  onEdit,
+  onDelete,
 }: RecordListProps) {
   const columns: ColumnsType<IRecordResponse> = [
     { title: "ID", dataIndex: "id", key: "id", width: 80 },
@@ -79,6 +84,24 @@ export default function RecordList({
       key: "note",
       render: (value: string | null) => value || "-",
     },
+    {
+      title: "Action",
+      dataIndex: "id",
+      key: "id",
+      render: (value: number) => (
+        <div className="flex gap-2">
+          <Button onClick={() => onEdit(value)}>Edit</Button>
+          <Button
+            onClick={() => onDelete(value)}
+            color="danger"
+            variant="solid"
+          >
+            Delete
+          </Button>
+        </div>
+      ),
+    },
+    {},
   ];
 
   const handleTableChange = (tablePagination: TablePaginationConfig) => {
