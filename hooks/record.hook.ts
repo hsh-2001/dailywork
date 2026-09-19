@@ -36,7 +36,7 @@ export const useUpdateRecord = () => {
 export const useDeleteRecord = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => recordService.deleteRecord(id),
+    mutationFn: (id: number) => recordService.deleteRecord(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ot-records"] });
     },
