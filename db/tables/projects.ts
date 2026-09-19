@@ -7,7 +7,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 
-export const projects = pgTable("projects", {
+export const projectTable = pgTable("projects", {
   id: bigserial("id", { mode: "number" }).primaryKey(),
   name: varchar("name", { length: 150 }).notNull(),
   description: text("description"),

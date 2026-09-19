@@ -9,18 +9,17 @@
     "lint": "eslint",
     "db:push": "npx drizzle-kit push"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
-  },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
+    "@tanstack/react-query": "^5.103.1",
+    "antd": "^6.6.4",
+    "axios": "^1.20.0",
     "dotenv": "^17.4.2",
     "drizzle-orm": "1.0.0-rc.4",
     "next": "16.3.5",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
