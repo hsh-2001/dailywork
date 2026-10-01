@@ -17,6 +17,7 @@ export default function OTRecordPage() {
   const [pagination, setPagination] = useState({ page: 1, pageSize: 10 });
   const { data, isLoading, isError, refetch } = useRecords(pagination);
   const [updateId, setUpdateId] = useState<number | null>(null);
+  const [ loading, setLoading ] = useState(false);
 
   const { mutate: createRecord } = useCreateRecord();
   const { mutate: updateRecord } = useUpdateRecord();
@@ -34,16 +35,28 @@ export default function OTRecordPage() {
   };
 
   const handleSubmit = async () => {
+    setLoading(true);
     try {
       const values = await form.validateFields();
       if (!values) return;
       if (!isEditing) {
-        createRecord(values);
+        createRecord(values, {
+          onSuccess: () => {
+            setOpen(false);
+            form.resetFields();
+          },
+        });
       } else {
         if (!updateId) return;
-        updateRecord({ id: updateId, data: values });
+        updateRecord({ id: updateId, data: values }, {
+          onSuccess: () => {
+            setUpdateId(null);
+            setIsEditing(false);
+            setLoading(false);
+            setOpen(false);
+          },
+        })
       }
-      setOpen(false);
     } catch (error) {
       console.log("Validation failed:", error);
     }
@@ -150,7 +163,14 @@ export default function OTRecordPage() {
                     cancelText: "Keep it",
                     onOk: async () => {
                       try {
-                        deleteRecord(id);
+                        setLoading(true);
+                        deleteRecord(id, {
+                          onSuccess: () => {
+                            setUpdateId(null);
+                            setIsEditing(false);
+                            setOpen(false);
+                          }
+                        });
                       } catch (error) {
                         console.error("Error deleting record:", error);
                       }
@@ -177,6 +197,7 @@ export default function OTRecordPage() {
         centered
         width={560}
         destroyOnHidden
+        confirmLoading={loading}
       >
         <div className="pt-3">
           <OTRecordForm form={form} isEditing={isEditing} />
