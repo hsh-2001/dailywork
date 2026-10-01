@@ -2,6 +2,7 @@ import { IRecordResponse } from "@/shares/dtos/record/recordResponse";
 import { Button, Empty, Grid, Pagination, Spin, Table, Tag } from "antd";
 import { ColumnsType, TablePaginationConfig } from "antd/lib/table/interface";
 import { Clock, Pencil, Trash2 } from "lucide-react";
+import { formatTime } from "@/utils/datetime"; // GMT+7 helper
 
 interface RecordListProps {
   data: IRecordResponse[];
@@ -18,11 +19,6 @@ interface RecordListProps {
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
-const formatTime = (value: string) =>
-  new Date(value).toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 
 const formatTotal = (value: number | null) => {
   if (value == null) return "-";

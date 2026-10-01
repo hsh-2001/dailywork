@@ -1,13 +1,14 @@
 "use client";
 
 import { Form, Input, DatePicker, TimePicker, FormInstance, Grid } from "antd";
+import type { Dayjs } from "dayjs";
 import MobileDatePicker from "./MobileDatePicker";
 import MobileTimePicker from "./MobileTimePicker";
 
 export interface OTRecordFormValues {
-  workDate: string;
-  startTime: string;
-  endTime: string;
+  workDate: Dayjs;
+  startTime: Dayjs;
+  endTime: Dayjs;
   project?: string;
   task?: string;
   note?: string;

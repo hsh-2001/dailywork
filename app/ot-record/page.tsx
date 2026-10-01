@@ -12,6 +12,7 @@ import OTRecordForm from "@/components/OTRecordForm";
 import { Clock, Plus } from "lucide-react";
 import { IRecordResponse } from "@/shares/dtos/record/recordResponse";
 import dayjs from "dayjs";
+import { toDateString } from "@/utils/datetime";
 
 export default function OTRecordPage() {
   const [pagination, setPagination] = useState({ page: 1, pageSize: 10 });
@@ -39,8 +40,17 @@ export default function OTRecordPage() {
     try {
       const values = await form.validateFields();
       if (!values) return;
+      const payload = {
+        ...values,
+        // `workDate` is a calendar date, not an instant. Sending the Dayjs
+        // object directly makes JSON serialize it as UTC and can shift the day.
+        workDate: toDateString(values.workDate),
+        // Keep the existing ISO timestamp behavior for the time columns.
+        startTime: values.startTime.toISOString(),
+        endTime: values.endTime.toISOString(),
+      };
       if (!isEditing) {
-        createRecord(values, {
+        createRecord(payload, {
           onSuccess: () => {
             setOpen(false);
             form.resetFields();
@@ -48,7 +58,7 @@ export default function OTRecordPage() {
         });
       } else {
         if (!updateId) return;
-        updateRecord({ id: updateId, data: values }, {
+        updateRecord({ id: updateId, data: payload }, {
           onSuccess: () => {
             setUpdateId(null);
             setIsEditing(false);
@@ -76,11 +86,9 @@ export default function OTRecordPage() {
     if (recordToEdit) {
       form.setFieldsValue({
         ...recordToEdit,
-        workDate: recordToEdit.workDate ? dayjs(recordToEdit.workDate) : null,
-        startTime: recordToEdit.startTime
-          ? dayjs(recordToEdit.startTime)
-          : null,
-        endTime: recordToEdit.endTime ? dayjs(recordToEdit.endTime) : null,
+        workDate: dayjs(recordToEdit.workDate),
+        startTime: dayjs(recordToEdit.startTime),
+        endTime: dayjs(recordToEdit.endTime),
       });
       setIsEditing(true);
       setOpen(true);
