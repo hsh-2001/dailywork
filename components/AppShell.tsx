@@ -32,7 +32,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen pb-24 sm:pb-0">
-      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
         <div className="mx-auto flex h-[4.25rem] max-w-7xl items-center justify-between px-4 sm:h-[4.75rem] sm:px-6 lg:px-8">
           <Link href="/dashboard" className="flex items-center gap-3 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600">
             <Image
@@ -132,10 +132,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         aria-label="Quick navigation"
         className="fixed inset-x-0 bottom-0 z-20 px-3 pt-2 pb-[calc(env(safe-area-inset-bottom)+1rem)] md:hidden"
       >
-        <ul className="relative mx-auto grid max-w-xl grid-cols-5 rounded-full border border-white/30 bg-[linear-gradient(105deg,#1d4ed8_0%,#2563eb_58%,#0875e1_100%)] p-1 shadow-[0_6px_20px_rgba(37,99,235,0.22),inset_0_1px_0_rgba(255,255,255,0.24)] backdrop-blur-2xl">
+        <ul className="relative mx-auto grid max-w-xl grid-cols-5 rounded-full border border-slate-200/80 bg-white/90 p-1 shadow-[0_8px_24px_rgba(15,23,42,0.14)] backdrop-blur-2xl">
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute bottom-1 left-1 top-1 z-0 rounded-full border border-white/35 bg-white/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] backdrop-blur-xl transition-transform duration-300 ease-out motion-reduce:transition-none"
+            className="pointer-events-none absolute bottom-1 left-1 top-1 z-0 rounded-full border border-white/90 bg-white/55 shadow-[0_4px_14px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-xl transition-transform duration-300 ease-out motion-reduce:transition-none"
             style={{
               width: "calc((100% - 0.5rem) / 5)",
               transform: `translateX(${activeQuickIndex * 100}%)`,
@@ -148,8 +148,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <Link
                   href={href}
                   aria-current={active ? "page" : undefined}
-                  className="relative z-10 flex min-h-[2.75rem] flex-col items-center justify-center gap-0 rounded-full border border-transparent px-1 text-center transition-transform duration-200 hover:bg-white/10 active:scale-95 motion-reduce:transition-none motion-reduce:active:scale-100"
-                  style={{ color: "#ffffff" }}
+                  aria-disabled={active || undefined}
+                  tabIndex={active ? -1 : undefined}
+                  onClick={(event) => {
+                    if (active) event.preventDefault();
+                  }}
+                  className={`relative z-10 flex min-h-[2.75rem] flex-col items-center justify-center gap-0 rounded-full border border-transparent px-1 text-center transition-transform duration-200 motion-reduce:transition-none ${active ? "cursor-default" : "hover:bg-slate-100/70 active:scale-95 motion-reduce:active:scale-100"}`}
+                  style={{ color: active ? "#334155" : "#64748b" }}
                 >
                   <span className="flex size-6 items-center justify-center">
                     <Icon size={18} strokeWidth={active ? 2 : 1.8} aria-hidden="true" />
