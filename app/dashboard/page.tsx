@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRecords } from "@/hooks/record.hook";
 import { formatTime } from "@/utils/datetime";
+import type { IRecordResponse } from "@/shares/dtos/record/recordResponse";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -39,7 +40,7 @@ const shortcuts = [
 
 export default function DashboardPage() {
   const { data, isLoading } = useRecords({ page: 1, pageSize: 5 });
-  const recentRecords = data?.data ?? [];
+  const recentRecords: IRecordResponse[] = data?.data ?? [];
   const recordCount = data?.pagination?.total ?? 0;
   const latestRecord = recentRecords[0];
 
