@@ -115,49 +115,51 @@ export default function RecordList({
           {data.map((record) => (
             <div
               key={record.id}
-              className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+              className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_18px_rgba(15,23,42,0.04)] transition-shadow hover:shadow-md"
             >
               {/* Header: date + total */}
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <div className="font-semibold">{record.workDate}</div>
-                  <div className="mt-1 flex items-center gap-1 text-sm text-gray-500">
-                    <Clock size={14} />
+                  <div className="font-semibold tracking-tight text-slate-900">{record.workDate}</div>
+                  <div className="mt-1.5 flex items-center gap-1.5 text-sm text-slate-500">
+                    <Clock size={14} className="text-blue-600" />
                     {formatTime(record.startTime)} –{" "}
                     {formatTime(record.endTime)}
                   </div>
                 </div>
                 {record.totalMinutes != null && (
-                  <Tag className="!m-0">{formatTotal(record.totalMinutes)}</Tag>
+                  <Tag color="blue" className="!m-0 !rounded-full !border-0 !px-2.5 !py-1 !font-semibold">
+                    {formatTotal(record.totalMinutes)}
+                  </Tag>
                 )}
               </div>
 
               {/* Details */}
               {(record.project || record.task || record.note) && (
-                <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
+                <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 rounded-xl bg-slate-50 px-3 py-3 text-sm">
                   {record.project && (
                     <>
-                      <dt className="text-gray-500">Project</dt>
-                      <dd className="m-0 break-words">{record.project}</dd>
+                      <dt className="text-slate-500">Project</dt>
+                      <dd className="m-0 break-words font-medium text-slate-800">{record.project}</dd>
                     </>
                   )}
                   {record.task && (
                     <>
-                      <dt className="text-gray-500">Task</dt>
-                      <dd className="m-0 break-words">{record.task}</dd>
+                      <dt className="text-slate-500">Task</dt>
+                      <dd className="m-0 break-words font-medium text-slate-800">{record.task}</dd>
                     </>
                   )}
                   {record.note && (
                     <>
-                      <dt className="text-gray-500">Note</dt>
-                      <dd className="m-0 break-words">{record.note}</dd>
+                      <dt className="text-slate-500">Note</dt>
+                      <dd className="m-0 break-words font-medium text-slate-800">{record.note}</dd>
                     </>
                   )}
                 </dl>
               )}
 
               {/* Actions */}
-              <div className="mt-3 flex gap-2 border-t border-gray-100 pt-3">
+              <div className="mt-4 flex gap-2 border-t border-slate-100 pt-3">
                 <Button
                   block
                   icon={<Pencil size={14} />}

@@ -101,18 +101,21 @@ export default function OTRecordPage() {
     <main className="min-h-screen bg-slate-50">
       <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
         {/* Header */}
-        <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-              <Clock size={22} strokeWidth={2} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-semibold leading-tight text-slate-900">
-                Overtime records
-              </h1>
-              <p className="text-sm text-slate-500">
-                Log, review and edit the overtime you&apos;ve worked.
-              </p>
+        <header className="mb-7 flex flex-col gap-5 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-blue-700">Your workspace</p>
+            <div className="flex items-center gap-3">
+              <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-600/20">
+                <Clock size={22} strokeWidth={2.2} />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-950 sm:text-3xl">
+                  Work logs
+                </h1>
+                <p className="mt-1 text-sm text-slate-500">
+                  Keep track of your overtime, one entry at a time.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -121,7 +124,7 @@ export default function OTRecordPage() {
             size="large"
             icon={<Plus size={16} />}
             onClick={() => setOpen(true)}
-            className="w-full sm:w-auto"
+            className="hidden w-full sm:inline-flex sm:w-auto"
           >
             New record
           </Button>
@@ -141,14 +144,15 @@ export default function OTRecordPage() {
             }
           />
         ) : (
-          <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-5">
-              <h2 className="text-sm font-medium text-slate-700">
-                All records
-              </h2>
+          <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.04)]">
+            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4 sm:px-6">
+              <div>
+                <h2 className="text-sm font-semibold text-slate-900">All work logs</h2>
+                <p className="mt-0.5 text-xs text-slate-500">Review and manage your entries</p>
+              </div>
               {!isLoading && (
-                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium tabular-nums text-slate-600">
-                  {total} {total === 1 ? "record" : "records"}
+                <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold tabular-nums text-blue-700">
+                  {total} {total === 1 ? "entry" : "entries"}
                 </span>
               )}
             </div>
@@ -211,6 +215,7 @@ export default function OTRecordPage() {
           <OTRecordForm form={form} isEditing={isEditing} />
         </div>
       </Modal>
+
     </main>
   );
 }
