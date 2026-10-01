@@ -1,7 +1,8 @@
 "use client";
 
 import { Form, Input, DatePicker, TimePicker, FormInstance, Grid } from "antd";
-import dayjs, { Dayjs } from "dayjs";
+import MobileDatePicker from "./MobileDatePicker";
+import MobileTimePicker from "./MobileTimePicker";
 
 export interface OTRecordFormValues {
   workDate: string;
@@ -15,56 +16,6 @@ export interface OTRecordFormValues {
 interface OTRecordFormProps {
   form: FormInstance<OTRecordFormValues>;
   isEditing?: boolean;
-}
-
-/**
- * Native <input type="date"> that reads/writes Dayjs, so the form values stay
- * the same shape as with antd's DatePicker (your submit handler doesn't change).
- */
-function NativeDateInput({
-  value,
-  onChange,
-}: {
-  value?: Dayjs | null;
-  onChange?: (value: Dayjs | null) => void;
-}) {
-  return (
-    <Input
-      type="date"
-      size="large"
-      className="w-full min-w-0"
-      value={value ? dayjs(value).format("YYYY-MM-DD") : ""}
-      onChange={(e) => {
-        const v = e.target.value; // "YYYY-MM-DD" or ""
-        onChange?.(v ? dayjs(v) : null);
-      }}
-    />
-  );
-}
-
-/** Native <input type="time"> that reads/writes Dayjs (same shape as antd's TimePicker). */
-function NativeTimeInput({
-  value,
-  onChange,
-}: {
-  value?: Dayjs | null;
-  onChange?: (value: Dayjs | null) => void;
-}) {
-  return (
-    <Input
-      type="time"
-      size="large"
-      step={300} // 5-minute steps where the browser supports it
-      className="w-full min-w-0"
-      value={value ? dayjs(value).format("HH:mm") : ""}
-      onChange={(e) => {
-        const v = e.target.value; // "HH:mm" or ""
-        if (!v) return onChange?.(null);
-        const [h, m] = v.split(":").map(Number);
-        onChange?.(dayjs().hour(h).minute(m).second(0).millisecond(0));
-      }}
-    />
-  );
 }
 
 export default function OTRecordForm({ form, isEditing }: OTRecordFormProps) {
@@ -88,7 +39,7 @@ export default function OTRecordForm({ form, isEditing }: OTRecordFormProps) {
         rules={[{ required: true, message: "Please select work date" }]}
       >
         {isMobile ? (
-          <NativeDateInput />
+          <MobileDatePicker title="Work date" />
         ) : (
           <DatePicker className="w-full" />
         )}
@@ -101,7 +52,7 @@ export default function OTRecordForm({ form, isEditing }: OTRecordFormProps) {
           rules={[{ required: true, message: "Select start time" }]}
         >
           {isMobile ? (
-            <NativeTimeInput />
+            <MobileTimePicker title="Start time" placeholder="Start" />
           ) : (
             <TimePicker className="w-full" format="HH:mm" />
           )}
@@ -126,7 +77,7 @@ export default function OTRecordForm({ form, isEditing }: OTRecordFormProps) {
           ]}
         >
           {isMobile ? (
-            <NativeTimeInput />
+            <MobileTimePicker title="End time" placeholder="End" />
           ) : (
             <TimePicker className="w-full" format="HH:mm" />
           )}

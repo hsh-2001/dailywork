@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/providers/QueryProvider";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
+import { ConfigProvider } from "antd-mobile";
+import enUS from "antd-mobile/es/locales/en-US";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
