@@ -88,7 +88,7 @@ function serializeBlock(node: HTMLElement): string {
     case "UL": case "OL":
       return Array.from(node.children).map((child, index) => {
         const item = child as HTMLElement;
-        const checkbox = item.querySelector("input[type=checkbox]");
+        const checkbox = item.querySelector<HTMLInputElement>('input[type="checkbox"]');
         const text = Array.from(item.childNodes).filter((part) => !(part instanceof HTMLInputElement)).map(serializeInline).join("").trim();
         const prefix = node.tagName === "OL" ? `${index + 1}. ` : checkbox ? `- [${checkbox.checked ? "x" : " "}] ` : "- ";
         return `${prefix}${text}`;
