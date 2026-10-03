@@ -92,29 +92,57 @@ export default function ProjectsPage() {
   };
 
   const projects: IProjectResponse[] = projectsQuery.data?.data ?? [];
+  const activeProjects = projects.filter(
+    (project) => project.status === "ACTIVE",
+  ).length;
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
-        <header className="mb-6 flex items-center justify-between gap-4">
+      <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 sm:py-7">
+        <header className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-950">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-700">Your workspace</p>
+            <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">
               Projects
             </h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-0.5 max-w-2xl text-xs text-slate-500 sm:text-sm">
               Manage projects available in your work logs.
             </p>
           </div>
           <Button
             type="primary"
+            size="small"
             icon={<Plus size={16} />}
             onClick={openCreate}
-            className="shrink-0"
-          >
-            <span className="hidden sm:inline">New project</span>
-            <span className="sm:hidden">Add</span>
-          </Button>
+            aria-label="Add project"
+            title="Add project"
+            className="shrink-0 !h-8 !w-8 !px-0"
+          />
         </header>
+
+        {!projectsQuery.isError &&
+          !projectsQuery.isLoading &&
+          projects.length > 0 && (
+            <section
+              aria-label="Project overview"
+              className="mb-4 grid grid-cols-2 gap-2"
+            >
+              <div className="flex items-baseline justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
+                <p className="text-[11px] font-medium text-slate-500">
+                  Total projects
+                </p>
+                <p className="text-base font-semibold tabular-nums text-slate-900">
+                  {projects.length}
+                </p>
+              </div>
+              <div className="flex items-baseline justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
+                <p className="text-[11px] font-medium text-slate-500">Active</p>
+                <p className="text-base font-semibold tabular-nums text-emerald-700">
+                  {activeProjects}
+                </p>
+              </div>
+            </section>
+          )}
 
         {projectsQuery.isError ? (
           <Alert
@@ -188,25 +216,34 @@ export default function ProjectsPage() {
                 {projects.map((project) => (
                   <li
                     key={project.id}
-                    className="flex items-center justify-between gap-4 px-4 py-3.5 sm:px-5"
+                    className="flex items-center justify-between gap-4 px-4 py-4 transition-colors hover:bg-slate-50/70 sm:px-5"
                   >
                     <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="truncate text-sm font-semibold text-slate-900">
-                          {project.name}
-                        </h3>
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                            project.status === "ACTIVE"
-                              ? "bg-emerald-50 text-emerald-700"
-                              : "bg-slate-100 text-slate-500"
-                          }`}
-                        >
-                          {project.status === "ACTIVE" ? "Active" : "Inactive"}
+                      <div className="flex min-w-0 items-center gap-3">
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                          <FolderKanban size={17} aria-hidden="true" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="flex flex-wrap items-center gap-2">
+                            <h3 className="truncate text-sm font-semibold text-slate-900">
+                              {project.name}
+                            </h3>
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                                project.status === "ACTIVE"
+                                  ? "bg-emerald-50 text-emerald-700"
+                                  : "bg-slate-100 text-slate-500"
+                              }`}
+                            >
+                              {project.status === "ACTIVE"
+                                ? "Active"
+                                : "Inactive"}
+                            </span>
+                          </span>
                         </span>
                       </div>
                       {project.description && (
-                        <p className="mt-1 line-clamp-2 text-sm text-slate-500">
+                        <p className="ml-12 mt-1 line-clamp-2 text-sm text-slate-500">
                           {project.description}
                         </p>
                       )}

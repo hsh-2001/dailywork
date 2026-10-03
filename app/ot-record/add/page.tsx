@@ -5,20 +5,19 @@ import { useCreateRecord, useUpdateRecord } from "@/hooks/record.hook";
 import { useProjects } from "@/hooks/project.hook";
 import { ICreateRecordRequest } from "@/shares/dtos/record/createRequest";
 import { IRecordResponse } from "@/shares/dtos/record/recordResponse";
-import { toDateString } from "@/utils/datetime";
-import { ArrowLeft, Clock, Save } from "lucide-react";
+import { APP_TZ, toDateString } from "@/utils/datetime";
+import { ArrowLeft, Save } from "lucide-react";
 import { Alert, Button, Form, Spin } from "antd";
 import dayjs from "dayjs";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { useEffect, useMemo, useState } from "react";
 
-export default function AddRecordPage() {
+function AddRecordPageContent() {
   const router = useRouter();
-  const [recordParam] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    return new URLSearchParams(window.location.search).get("record");
-  });
+  const searchParams = useSearchParams();
+  const recordParam = searchParams.get("record");
   const record = useMemo<IRecordResponse | null>(() => {
     if (!recordParam) return null;
     try {
@@ -40,9 +39,9 @@ export default function AddRecordPage() {
     if (record) {
       form.setFieldsValue({
         ...record,
-        workDate: dayjs(record.workDate),
-        startTime: dayjs(record.startTime),
-        endTime: dayjs(record.endTime),
+        workDate: dayjs.tz(record.workDate, APP_TZ),
+        startTime: dayjs(record.startTime).tz(APP_TZ),
+        endTime: dayjs(record.endTime).tz(APP_TZ),
         project: record.project ?? undefined,
         task: record.task ?? undefined,
         note: record.note ?? undefined,
@@ -77,24 +76,25 @@ export default function AddRecordPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 sm:py-10">
-        <Link href="/ot-record" className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-blue-700">
-          <ArrowLeft size={16} /> Back to work logs
+      <div className="mx-auto w-full max-w-3xl px-4 py-5 sm:px-6 sm:py-7">
+        <Link
+          href="/ot-record"
+          className="mb-3 inline-flex min-h-8 items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-blue-700 focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+        >
+          <ArrowLeft size={16} aria-hidden="true" /> Work logs
         </Link>
 
-        <header className="mb-7 flex items-center gap-3">
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-600/20">
-            <Clock size={22} strokeWidth={2.2} />
-          </div>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-blue-700">Work logs</p>
-            <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-950 sm:text-3xl">
-              {isEditing ? "Edit record" : "Add a record"}
-            </h1>
-          </div>
+        <header className="mb-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-700">Work logs</p>
+          <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">
+            {isEditing ? "Edit work log" : "Add work log"}
+          </h1>
+          <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">
+            Enter your work hours and add any useful details.
+          </p>
         </header>
 
-        <section className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_8px_30px_rgba(15,23,42,0.04)] sm:p-7">
+        <section className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-5">
           {submitError && <Alert className="mb-5" type="error" showIcon message={submitError} />}
           {projectsQuery.isError && (
             <Alert
@@ -117,11 +117,11 @@ export default function AddRecordPage() {
                 projectsLoading={projectsQuery.isLoading}
                 currentProject={record?.project}
               />
-              <div className="mt-6 flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
-                <Button size="large" onClick={() => router.push("/ot-record")}>
+              <div className="mt-5 flex flex-col-reverse gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
+                <Button onClick={() => router.push("/ot-record")}>
                   Cancel
                 </Button>
-                <Button type="primary" size="large" icon={<Save size={16} />} loading={isPending} onClick={handleSubmit}>
+                <Button type="primary" icon={<Save size={16} />} loading={isPending} onClick={handleSubmit}>
                   {isEditing ? "Save changes" : "Save record"}
                 </Button>
               </div>
@@ -132,5 +132,21 @@ export default function AddRecordPage() {
         </section>
       </div>
     </main>
+  );
+}
+
+export default function AddRecordPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-slate-50 px-4 py-5">
+          <div className="mx-auto flex max-w-3xl justify-center rounded-xl border border-slate-200 bg-white p-5">
+            <Spin />
+          </div>
+        </main>
+      }
+    >
+      <AddRecordPageContent />
+    </Suspense>
   );
 }

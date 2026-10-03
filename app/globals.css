@@ -6,9 +6,49 @@ html {
 }
 
 body {
-  background: #f8fafc;
+  background: #f6f8fb;
   color: #0f172a;
   text-rendering: optimizeLegibility;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline-color: #2563eb;
+}
+
+/* Keep Ant Design surfaces in step with the app's quieter slate-and-blue UI. */
+.ant-table-wrapper .ant-table-thead > tr > th {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ant-table-wrapper .ant-table-tbody > tr > td {
+  color: #334155;
+}
+
+.ant-form-item-label > label {
+  color: #334155;
+  font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 ::selection {

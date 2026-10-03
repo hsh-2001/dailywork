@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Construction } from "lucide-react";
+import { ArrowRight, ChartNoAxesCombined } from "lucide-react";
 
 interface SectionPlaceholderProps {
   title: string;
@@ -8,26 +8,49 @@ interface SectionPlaceholderProps {
 
 export default function SectionPlaceholder({ title, description }: SectionPlaceholderProps) {
   return (
-    <main className="min-h-[calc(100vh-4.75rem)] bg-slate-50 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+    <main className="min-h-screen bg-slate-50 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
       <div className="mx-auto max-w-5xl">
-        <p className="text-sm font-semibold text-blue-700">Daily Work</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">{title}</h1>
-        <p className="mt-2 max-w-2xl text-slate-600">{description}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-700">Your workspace</p>
+        <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">
+          {title}
+        </h1>
+        <p className="mt-0.5 max-w-2xl text-xs text-slate-500 sm:text-sm">{description}</p>
 
-        <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
-          <span className="flex size-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
-            <Construction size={23} aria-hidden="true" />
-          </span>
-          <h2 className="mt-5 text-lg font-semibold text-slate-900">This section is getting ready</h2>
-          <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">
-            This destination is part of the Daily Work workspace. You can continue managing your work logs while this section is being built.
-          </p>
-          <Link
-            href="/ot-record"
-            className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white transition hover:bg-blue-700"
-          >
-            Go to work logs <ArrowRight size={16} aria-hidden="true" />
-          </Link>
+        <section className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <div className="grid gap-5 p-4 sm:grid-cols-[minmax(0,1fr)_13rem] sm:items-center sm:p-5">
+            <div>
+              <span className="inline-flex size-9 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                <ChartNoAxesCombined size={18} aria-hidden="true" />
+              </span>
+              <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-700">
+                In progress
+              </p>
+              <h2 className="mt-1 text-lg font-semibold tracking-tight text-slate-900">
+                {title} are on the way
+              </h2>
+              <p className="mt-1.5 max-w-xl text-xs leading-5 text-slate-600 sm:text-sm">
+                {description} This section is still being developed. Your work
+                logs are ready to manage in the meantime.
+              </p>
+              <Link
+                href="/ot-record"
+                className="mt-3 inline-flex min-h-9 items-center gap-2 rounded-lg bg-blue-700 px-3.5 text-xs font-semibold text-white transition-colors hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 sm:text-sm"
+              >
+                Go to work logs <ArrowRight size={15} aria-hidden="true" />
+              </Link>
+            </div>
+            <div className="hidden rounded-xl bg-slate-50 p-4 sm:block">
+              <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+                <span className="size-2 rounded-full bg-blue-600" />
+                Daily Work
+              </div>
+              <div className="mt-3 space-y-2" aria-hidden="true">
+                <div className="h-2 w-3/4 rounded-full bg-slate-200" />
+                <div className="h-2 w-full rounded-full bg-slate-200" />
+                <div className="h-2 w-2/3 rounded-full bg-blue-100" />
+              </div>
+            </div>
+          </div>
         </section>
       </div>
     </main>

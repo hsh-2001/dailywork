@@ -1,36 +1,41 @@
 import Link from "next/link";
-import { ArrowRight, FolderKanban } from "lucide-react";
+import { ArrowRight, FolderKanban, Settings2 } from "lucide-react";
 
 export default function SettingsPage() {
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+    <main className="min-h-screen bg-slate-50 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
       <div className="mx-auto max-w-5xl">
-        <p className="text-sm font-semibold text-blue-700">Daily Work</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-700">Your workspace</p>
+        <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">
           Settings
         </h1>
-        <p className="mt-2 max-w-2xl text-slate-600">
+        <p className="mt-0.5 max-w-2xl text-xs text-slate-500 sm:text-sm">
           Manage your Daily Work preferences and account options.
         </p>
 
-        <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-          <h2 className="text-lg font-semibold text-slate-900">Workspace</h2>
+        <section className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <div className="border-b border-slate-100 px-4 py-2.5 sm:px-5">
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+              <Settings2 size={16} className="text-slate-500" aria-hidden="true" />
+              Workspace
+            </div>
+          </div>
           <Link
             href="/projects"
-            className="mt-5 flex min-h-16 items-center justify-between gap-4 rounded-2xl border border-slate-200 p-4 transition hover:border-blue-200 hover:bg-blue-50/50"
+            className="group flex min-h-14 items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-blue-600 sm:px-5"
           >
             <span className="flex items-center gap-3">
-              <span className="flex size-11 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
-                <FolderKanban size={20} aria-hidden="true" />
+              <span className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+                <FolderKanban size={18} aria-hidden="true" />
               </span>
               <span>
-                <span className="block font-semibold text-slate-900">Projects</span>
-                <span className="mt-0.5 block text-sm text-slate-500">
+                <span className="block text-sm font-medium text-slate-800">Projects</span>
+                <span className="mt-0.5 block text-xs text-slate-500 sm:text-sm">
                   Create and update the projects available in work logs.
                 </span>
               </span>
             </span>
-            <ArrowRight size={18} className="shrink-0 text-slate-400" aria-hidden="true" />
+            <ArrowRight size={18} className="shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-blue-700" aria-hidden="true" />
           </Link>
         </section>
       </div>

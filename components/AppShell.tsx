@@ -8,7 +8,6 @@ import {
   ClipboardList,
   FolderKanban,
   LayoutDashboard,
-  Plus,
   Settings,
 } from "lucide-react";
 
@@ -33,7 +32,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen pb-24 sm:pb-0">
       <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/85 pt-[env(safe-area-inset-top)] shadow-[0_2px_12px_rgba(15,23,42,0.025)] backdrop-blur-2xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:h-[4.75rem] sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:h-16 sm:px-6 lg:px-8">
           <Link
             href="/dashboard"
             className="group flex min-w-0 items-center gap-2.5 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600 sm:gap-3"
@@ -43,7 +42,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               alt=""
               width={40}
               height={40}
-              className="size-9 rounded-xl object-cover shadow-sm ring-1 ring-slate-900/5 transition-transform group-hover:scale-[1.03] sm:size-10 sm:rounded-[0.9rem]"
+              className="size-8 rounded-lg object-cover shadow-sm ring-1 ring-slate-900/5 transition-transform group-hover:scale-[1.03] sm:size-9 sm:rounded-xl"
               priority
             />
             <span className="min-w-0">
@@ -67,7 +66,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   key={href}
                   href={href}
                   aria-current={active ? "page" : undefined}
-                  className={`relative flex h-9 items-center gap-2 rounded-xl px-2.5 text-[13px] font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 lg:px-3 ${
+                  className={`relative flex h-8 items-center gap-2 rounded-lg px-2.5 text-[13px] font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 lg:px-3 ${
                     active
                       ? "bg-white text-blue-700 shadow-sm ring-1 ring-slate-200/70"
                       : "text-slate-600 hover:bg-white/80 hover:text-slate-950"
@@ -84,14 +83,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          <Link
-            href="/ot-record/add"
-            className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-3 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 active:scale-[0.98] sm:px-4"
-            aria-label="Create a work log"
-          >
-            <Plus size={17} strokeWidth={2.4} aria-hidden="true" />
-            <span className="hidden sm:inline">New log</span>
-          </Link>
         </div>
       </header>
 
