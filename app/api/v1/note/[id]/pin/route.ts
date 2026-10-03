@@ -1,13 +1,17 @@
 import db from "@/db/db";
 import { notesTable } from "@/db/tables/notes";
+import { getCurrentAuthUser } from "@/lib/auth/current-user";
 import { ApiResponse } from "@/shares/types/apiResponse";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
+    const user = await getCurrentAuthUser();
+    if (!user) return ApiResponse.failed("Authentication required", "UNAUTHORIZED", 401);
+
     const { id: rawId } = await context.params;
     const id = Number(rawId);
     if (!Number.isSafeInteger(id) || id <= 0) {
@@ -22,7 +26,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const [updated] = await db
       .update(notesTable)
       .set({ pinned: body.pinned, updatedAt: new Date() })
-      .where(eq(notesTable.id, id))
+      .where(and(eq(notesTable.id, id), eq(notesTable.userId, user.id)))
       .returning();
 
     if (!updated) return ApiResponse.failed("Note not found", "NOT_FOUND", 404);

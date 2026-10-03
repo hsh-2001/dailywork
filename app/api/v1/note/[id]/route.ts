@@ -1,7 +1,8 @@
 import db from "@/db/db";
 import { notesTable } from "@/db/tables/notes";
+import { getCurrentAuthUser } from "@/lib/auth/current-user";
 import { ApiResponse } from "@/shares/types/apiResponse";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { parseNoteRequest } from "../validation";
 
@@ -15,6 +16,9 @@ async function getNoteId(context: RouteContext) {
 
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
+    const user = await getCurrentAuthUser();
+    if (!user) return ApiResponse.failed("Authentication required", "UNAUTHORIZED", 401);
+
     const id = await getNoteId(context);
     if (id === null) {
       return ApiResponse.failed("Invalid note ID", "INVALID_INPUT", 400);
@@ -23,7 +27,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     const [note] = await db
       .select()
       .from(notesTable)
-      .where(eq(notesTable.id, id))
+      .where(and(eq(notesTable.id, id), eq(notesTable.userId, user.id)))
       .limit(1);
 
     if (!note) return ApiResponse.failed("Note not found", "NOT_FOUND", 404);
@@ -36,6 +40,9 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 
 export async function PUT(request: NextRequest, context: RouteContext) {
   try {
+    const user = await getCurrentAuthUser();
+    if (!user) return ApiResponse.failed("Authentication required", "UNAUTHORIZED", 401);
+
     const id = await getNoteId(context);
     if (id === null) {
       return ApiResponse.failed("Invalid note ID", "INVALID_INPUT", 400);
@@ -53,7 +60,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     const [updated] = await db
       .update(notesTable)
       .set({ ...note, updatedAt: new Date() })
-      .where(eq(notesTable.id, id))
+      .where(and(eq(notesTable.id, id), eq(notesTable.userId, user.id)))
       .returning();
 
     if (!updated) return ApiResponse.failed("Note not found", "NOT_FOUND", 404);
@@ -66,6 +73,9 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
 export async function DELETE(_request: NextRequest, context: RouteContext) {
   try {
+    const user = await getCurrentAuthUser();
+    if (!user) return ApiResponse.failed("Authentication required", "UNAUTHORIZED", 401);
+
     const id = await getNoteId(context);
     if (id === null) {
       return ApiResponse.failed("Invalid note ID", "INVALID_INPUT", 400);
@@ -73,7 +83,7 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
 
     const [deleted] = await db
       .delete(notesTable)
-      .where(eq(notesTable.id, id))
+      .where(and(eq(notesTable.id, id), eq(notesTable.userId, user.id)))
       .returning();
 
     if (!deleted) return ApiResponse.failed("Note not found", "NOT_FOUND", 404);

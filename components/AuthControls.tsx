@@ -4,12 +4,25 @@ import { authClient } from "@/lib/auth/client";
 import { Button } from "antd";
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function AuthControls() {
   const router = useRouter();
   const { data: session } = authClient.useSession();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const userId = session?.user.id;
+
+  useEffect(() => {
+    if (!userId) return;
+
+    void fetch("/api/v1/user", { method: "POST" }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`User sync failed (${response.status})`);
+      }
+    }).catch((error: unknown) => {
+      console.error("Unable to sync signed-in user", error);
+    });
+  }, [userId]);
 
   if (!session) return null;
 

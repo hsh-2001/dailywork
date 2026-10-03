@@ -1,13 +1,17 @@
 import db from "@/db/db";
 import { projectTable } from "@/db/tables/projects";
+import { getCurrentAuthUser } from "@/lib/auth/current-user";
 import { ApiResponse } from "@/shares/types/apiResponse";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function PUT(req: NextRequest, { params }: RouteContext) {
   try {
+    const user = await getCurrentAuthUser();
+    if (!user) return ApiResponse.failed("Authentication required", "UNAUTHORIZED", 401);
+
     const { id: rawId } = await params;
     const id = Number(rawId);
     if (!Number.isSafeInteger(id) || id <= 0) {
@@ -61,7 +65,7 @@ export async function PUT(req: NextRequest, { params }: RouteContext) {
         status,
         updatedAt: new Date(),
       })
-      .where(eq(projectTable.id, id))
+      .where(and(eq(projectTable.id, id), eq(projectTable.userId, user.id)))
       .returning();
 
     if (!project) {

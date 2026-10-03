@@ -1,7 +1,9 @@
-"use server";
-
 import db from "@/db/db";
 import { otRecordTable } from "@/db/tables/ot_records";
+import {
+  getCurrentAuthUser,
+  syncAuthUserRecord,
+} from "@/lib/auth/current-user";
 import {
   ApiPageResponse,
   ApiResponse,
@@ -10,15 +12,18 @@ import {
 import { count, desc, eq } from "drizzle-orm";
 import { getPagination } from "../../utils/pagination";
 import { NextRequest } from "next/server";
-import { id } from "zod/v4/locales/index.js";
 
 export async function GET(req: NextRequest) {
   try {
+    const user = await getCurrentAuthUser();
+    if (!user) return ApiResponse.failed("Authentication required", "UNAUTHORIZED", 401);
+
     const { page, pageSize, offset } = getPagination(req);
 
     const records = await db
       .select()
       .from(otRecordTable)
+      .where(eq(otRecordTable.userId, user.id))
       .orderBy(desc(otRecordTable.workDate))
       .limit(pageSize)
       .offset(offset);
@@ -27,7 +32,8 @@ export async function GET(req: NextRequest) {
       .select({
         total: count(),
       })
-      .from(otRecordTable);
+      .from(otRecordTable)
+      .where(eq(otRecordTable.userId, user.id));
 
     const totalPages = Math.ceil(total / pageSize);
 
@@ -52,10 +58,12 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await getCurrentAuthUser();
+    if (!user) return ApiResponse.failed("Authentication required", "UNAUTHORIZED", 401);
+
     const body = await req.json();
 
     const { workDate, startTime, endTime, project, task, note } = body;
-    console.log(body);
 
     if (!workDate || !startTime || !endTime) {
       return ApiResponse.failed(
@@ -88,9 +96,12 @@ export async function POST(req: NextRequest) {
       (end.getTime() - start.getTime()) / (1000 * 60),
     );
 
+    await syncAuthUserRecord(user);
+
     const result = await db
       .insert(otRecordTable)
       .values({
+        userId: user.id,
         workDate: workDate,
         startTime: new Date(startTime),
         endTime: new Date(endTime),

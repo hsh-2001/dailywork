@@ -1,14 +1,22 @@
 import db from "@/db/db";
 import { projectTable } from "@/db/tables/projects";
+import {
+  getCurrentAuthUser,
+  syncAuthUserRecord,
+} from "@/lib/auth/current-user";
 import { ApiResponse } from "@/shares/types/apiResponse";
-import { asc } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
 
 export async function GET() {
   try {
+    const user = await getCurrentAuthUser();
+    if (!user) return ApiResponse.failed("Authentication required", "UNAUTHORIZED", 401);
+
     const projects = await db
       .select()
       .from(projectTable)
+      .where(eq(projectTable.userId, user.id))
       .orderBy(asc(projectTable.name));
 
     return ApiResponse.success(projects, "Projects retrieved successfully");
@@ -20,6 +28,9 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await getCurrentAuthUser();
+    if (!user) return ApiResponse.failed("Authentication required", "UNAUTHORIZED", 401);
+
     const body: unknown = await req.json();
     if (!body || typeof body !== "object" || !("name" in body)) {
       return ApiResponse.failed("Project name is required", "INVALID_INPUT", 400);
@@ -48,9 +59,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    await syncAuthUserRecord(user);
+
     const [project] = await db
       .insert(projectTable)
       .values({
+        userId: user.id,
         name: name.trim(),
         description:
           typeof description === "string" && description.trim()

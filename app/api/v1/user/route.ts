@@ -1,19 +1,21 @@
-"use server";
-import db from "@/db/db";
-import { usersTable } from "@/db/tables/users";
+import {
+  getCurrentAuthUser,
+  syncAuthUserRecord,
+} from "@/lib/auth/current-user";
+import { NextResponse } from "next/server";
 
-export async function POST(request: Request) {
-  const body = await request.json();
+export async function POST() {
   try {
-    const response = await db.insert(usersTable).values({
-        username: body.username,
-        email: body.email,
-        password: body.password,
-        phone: body.phone,
-    }).returning();
-    return new Response(JSON.stringify({ message: "User created successfully", data: response }), { status: 201 });
-  } catch (error) {
-    console.error("Error occurred:", error);
-    return new Response(JSON.stringify({ message: "An error occurred" }), { status: 500 });
+    const user = await getCurrentAuthUser();
+    if (!user) {
+      return NextResponse.json({ message: "Authentication required" }, { status: 401 });
+    }
+
+    const savedUser = await syncAuthUserRecord(user);
+
+    return NextResponse.json({ data: savedUser });
+  } catch (cause) {
+    console.error("Unable to sync authenticated user", cause);
+    return NextResponse.json({ message: "Unable to save user" }, { status: 500 });
   }
 }

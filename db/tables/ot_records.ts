@@ -2,16 +2,22 @@ import {
   pgTable,
   bigint,
   date,
-  timestamp,
-  integer,
+  index,
   varchar,
   text,
+  timestamp,
+  integer,
 } from "drizzle-orm/pg-core";
+import { usersTable } from "@/db/tables/users";
 
 export const otRecordTable = pgTable("ot_records", {
   id: bigint("id", { mode: "number" })
     .primaryKey()
     .generatedByDefaultAsIdentity(),
+
+  userId: varchar("user_id", { length: 255 })
+    .notNull()
+    .references(() => usersTable.authUserId),
 
   workDate: date("work_date").notNull(),
 
@@ -28,4 +34,4 @@ export const otRecordTable = pgTable("ot_records", {
   note: text("note"),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => [index("ot_records_user_id_idx").on(table.userId)]);

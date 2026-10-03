@@ -1,11 +1,15 @@
 import db from "@/db/db";
 import { otRecordTable } from "@/db/tables/ot_records";
+import { getCurrentAuthUser } from "@/lib/auth/current-user";
 import { ApiResponse } from "@/shares/types/apiResponse";
-import { eq } from "drizzle-orm/sql/expressions/conditions";
-import { NextRequest } from "next/dist/server/web/spec-extension/request";
+import { and, eq } from "drizzle-orm";
+import { NextRequest } from "next/server";
 
 export async function PUT(req: NextRequest) {
   try {
+    const user = await getCurrentAuthUser();
+    if (!user) return ApiResponse.failed("Authentication required", "UNAUTHORIZED", 401);
+
     const id = req.nextUrl.pathname.split("/").pop();
     const body = await req.json();
     const { workDate, startTime, endTime, project, task, note } = body;
@@ -52,7 +56,12 @@ export async function PUT(req: NextRequest) {
         task: task ?? null,
         note: note ?? null,
       })
-      .where(eq(otRecordTable.id, Number(id)))
+      .where(
+        and(
+          eq(otRecordTable.id, Number(id)),
+          eq(otRecordTable.userId, user.id),
+        ),
+      )
       .returning();
 
     if (result.length === 0) {
@@ -69,6 +78,9 @@ export async function PUT(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    const user = await getCurrentAuthUser();
+    if (!user) return ApiResponse.failed("Authentication required", "UNAUTHORIZED", 401);
+
     const id = req.nextUrl.pathname.split("/").pop();
     if (!id) {
       return ApiResponse.failed("Record ID is required", "INVALID_INPUT", 400);
@@ -76,7 +88,12 @@ export async function DELETE(req: NextRequest) {
 
     const result = await db
       .delete(otRecordTable)
-      .where(eq(otRecordTable.id, Number(id)))
+      .where(
+        and(
+          eq(otRecordTable.id, Number(id)),
+          eq(otRecordTable.userId, user.id),
+        ),
+      )
       .returning();
 
     if (result.length === 0) {
