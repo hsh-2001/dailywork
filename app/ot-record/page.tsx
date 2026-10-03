@@ -1,32 +1,22 @@
 "use client";
 import { useState } from "react";
 import {
-  useCreateRecord,
   useDeleteRecord,
   useRecords,
-  useUpdateRecord,
 } from "@/hooks/record.hook";
-import { Alert, Button, Form, Modal } from "antd";
+import { Alert, Button } from "antd";
 import RecordList from "@/components/RecordList";
-import OTRecordForm from "@/components/OTRecordForm";
 import { Clock, Plus } from "lucide-react";
 import { IRecordResponse } from "@/shares/dtos/record/recordResponse";
-import dayjs from "dayjs";
-import { toDateString } from "@/utils/datetime";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function OTRecordPage() {
+  const router = useRouter();
   const [pagination, setPagination] = useState({ page: 1, pageSize: 10 });
   const { data, isLoading, isError, refetch } = useRecords(pagination);
-  const [updateId, setUpdateId] = useState<number | null>(null);
-  const [ loading, setLoading ] = useState(false);
 
-  const { mutate: createRecord } = useCreateRecord();
-  const { mutate: updateRecord } = useUpdateRecord();
   const { mutate: deleteRecord } = useDeleteRecord();
-
-  const [open, setOpen] = useState(false);
-  const [form] = Form.useForm();
-  const [isEditing, setIsEditing] = useState(false);
 
   const handlePaginationChange = (pagination: {
     page: number;
@@ -35,64 +25,9 @@ export default function OTRecordPage() {
     setPagination(pagination);
   };
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    try {
-      const values = await form.validateFields();
-      if (!values) return;
-      const payload = {
-        ...values,
-        // `workDate` is a calendar date, not an instant. Sending the Dayjs
-        // object directly makes JSON serialize it as UTC and can shift the day.
-        workDate: toDateString(values.workDate),
-        // Keep the existing ISO timestamp behavior for the time columns.
-        startTime: values.startTime.toISOString(),
-        endTime: values.endTime.toISOString(),
-      };
-      if (!isEditing) {
-        createRecord(payload, {
-          onSuccess: () => {
-            setOpen(false);
-            form.resetFields();
-          },
-        });
-      } else {
-        if (!updateId) return;
-        updateRecord({ id: updateId, data: payload }, {
-          onSuccess: () => {
-            setUpdateId(null);
-            setIsEditing(false);
-            setLoading(false);
-            setOpen(false);
-          },
-        })
-      }
-    } catch (error) {
-      console.log("Validation failed:", error);
-    }
-  };
-
-  const handleCancel = () => {
-    form.resetFields();
-    setOpen(false);
-    setIsEditing(false);
-  };
-
-  const handleEdit = (id: number) => {
-    setUpdateId(id);
-    const recordToEdit = data?.data.find(
-      (record: IRecordResponse) => record.id === id,
-    );
-    if (recordToEdit) {
-      form.setFieldsValue({
-        ...recordToEdit,
-        workDate: dayjs(recordToEdit.workDate),
-        startTime: dayjs(recordToEdit.startTime),
-        endTime: dayjs(recordToEdit.endTime),
-      });
-      setIsEditing(true);
-      setOpen(true);
-    }
+  const handleEdit = (record: IRecordResponse) => {
+    const query = new URLSearchParams({ record: JSON.stringify(record) });
+    router.push(`/ot-record/add?${query.toString()}`);
   };
 
   const total = data?.pagination?.total ?? 0;
@@ -119,18 +54,18 @@ export default function OTRecordPage() {
             </div>
           </div>
 
-          <Button
-            type="primary"
-            size="large"
-            icon={<Plus size={16} />}
-            onClick={() => setOpen(true)}
-            className="hidden w-full sm:inline-flex sm:w-auto"
-          >
-            New record
-          </Button>
+          <Link href="/ot-record/add" className="block w-full sm:w-auto">
+            <Button
+              type="primary"
+              size="large"
+              icon={<Plus size={16} />}
+              className="w-full sm:w-auto"
+            >
+              New record
+            </Button>
+          </Link>
         </header>
 
-        {/* Error state: keeps the page frame so the user can still act */}
         {isError ? (
           <Alert
             type="error"
@@ -164,29 +99,14 @@ export default function OTRecordPage() {
                 isLoading={isLoading}
                 total={total}
                 onPaginationChange={handlePaginationChange}
-                onEdit={handleEdit}
+                onEdit={(id: number) => {
+                  const record = data?.data.find((item: IRecordResponse) => item.id === id);
+                  if (record) handleEdit(record);
+                }}
                 onDelete={(id: number) => {
-                  Modal.confirm({
-                    title: "Delete this record?",
-                    content: "This can't be undone.",
-                    centered: true,
-                    okText: "Delete",
-                    okType: "danger",
-                    cancelText: "Keep it",
-                    onOk: async () => {
-                      try {
-                        setLoading(true);
-                        deleteRecord(id, {
-                          onSuccess: () => {
-                            setUpdateId(null);
-                            setIsEditing(false);
-                            setOpen(false);
-                          }
-                        });
-                      } catch (error) {
-                        console.error("Error deleting record:", error);
-                      }
-                    },
+                  if (!window.confirm("Delete this record? This can't be undone.")) return;
+                  deleteRecord(id, {
+                    onError: (error) => console.error("Error deleting record:", error),
                   });
                 }}
               />
@@ -194,28 +114,6 @@ export default function OTRecordPage() {
           </section>
         )}
       </div>
-
-      <Modal
-        title={
-          <span className="text-lg font-semibold">
-            {isEditing ? "Edit overtime record" : "New overtime record"}
-          </span>
-        }
-        open={open}
-        onCancel={handleCancel}
-        onOk={handleSubmit}
-        okText={isEditing ? "Save changes" : "Create record"}
-        cancelText="Cancel"
-        centered
-        width={560}
-        destroyOnHidden
-        confirmLoading={loading}
-      >
-        <div className="pt-3">
-          <OTRecordForm form={form} isEditing={isEditing} />
-        </div>
-      </Modal>
-
     </main>
   );
 }

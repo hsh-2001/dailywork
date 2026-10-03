@@ -1,7 +1,8 @@
 "use client";
 
-import { Form, Input, DatePicker, TimePicker, FormInstance, Grid } from "antd";
+import { Form, Input, DatePicker, TimePicker, FormInstance, Grid, Select } from "antd";
 import type { Dayjs } from "dayjs";
+import type { IProjectResponse } from "@/shares/dtos/project/projectResponse";
 import MobileDatePicker from "./MobileDatePicker";
 import MobileTimePicker from "./MobileTimePicker";
 
@@ -16,14 +17,30 @@ export interface OTRecordFormValues {
 
 interface OTRecordFormProps {
   form: FormInstance<OTRecordFormValues>;
-  isEditing?: boolean;
+  projects: IProjectResponse[];
+  projectsLoading: boolean;
+  currentProject?: string | null;
 }
 
-export default function OTRecordForm({ form, isEditing }: OTRecordFormProps) {
+export default function OTRecordForm({
+  form,
+  projects,
+  projectsLoading,
+  currentProject,
+}: OTRecordFormProps) {
   const screens = Grid.useBreakpoint();
   // `screens` is {} on the first render, so only treat as mobile once md is explicitly false
   const isMobile = screens.md === false;
   const size = isMobile ? "large" : "middle";
+  const projectOptions = projects
+    .filter((project) => project.status === "ACTIVE")
+    .map((project) => ({ value: project.name, label: project.name }));
+  if (currentProject && !projectOptions.some((option) => option.value === currentProject)) {
+    projectOptions.push({
+      value: currentProject,
+      label: `${currentProject} (inactive)`,
+    });
+  }
 
   return (
     <Form
@@ -86,7 +103,14 @@ export default function OTRecordForm({ form, isEditing }: OTRecordFormProps) {
       </div>
 
       <Form.Item name="project" label="Project">
-        <Input placeholder="Enter project" enterKeyHint="next" allowClear />
+        <Select
+          allowClear
+          showSearch
+          optionFilterProp="label"
+          placeholder="Select a project"
+          options={projectOptions}
+          loading={projectsLoading}
+        />
       </Form.Item>
 
       <Form.Item name="task" label="Task">

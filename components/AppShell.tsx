@@ -1,17 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import {
   ChartNoAxesCombined,
   ClipboardList,
-  LayoutDashboard,
-  Menu,
-  Settings,
-  X,
   FolderKanban,
+  LayoutDashboard,
+  Plus,
+  Settings,
 } from "lucide-react";
 
 const navigation = [
@@ -22,115 +20,86 @@ const navigation = [
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
+const isRouteActive = (pathname: string, href: string) =>
+  pathname === href || pathname.startsWith(`${href}/`);
+
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [menuOpen, setMenuOpen] = useState(false);
   const activeQuickIndex = Math.max(
     0,
-    navigation.findIndex(({ href }) => pathname === href || pathname.startsWith(`${href}/`)),
+    navigation.findIndex(({ href }) => isRouteActive(pathname, href)),
   );
 
   return (
     <div className="min-h-screen pb-24 sm:pb-0">
-      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
-        <div className="mx-auto flex h-[4.25rem] max-w-7xl items-center justify-between px-4 sm:h-[4.75rem] sm:px-6 lg:px-8">
-          <Link href="/dashboard" className="flex items-center gap-3 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600">
+      <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/85 pt-[env(safe-area-inset-top)] shadow-[0_2px_12px_rgba(15,23,42,0.025)] backdrop-blur-2xl">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:h-[4.75rem] sm:px-6 lg:px-8">
+          <Link
+            href="/dashboard"
+            className="group flex min-w-0 items-center gap-2.5 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600 sm:gap-3"
+          >
             <Image
               src="/daily-work-icon.png"
               alt=""
               width={40}
               height={40}
-              className="size-10 rounded-[0.9rem] object-cover shadow-sm"
+              className="size-9 rounded-xl object-cover shadow-sm ring-1 ring-slate-900/5 transition-transform group-hover:scale-[1.03] sm:size-10 sm:rounded-[0.9rem]"
               priority
             />
-            <span>
-              <span className="block text-sm font-bold leading-tight text-slate-900">Daily Work</span>
-              <span className="hidden text-xs text-slate-500 sm:block">Your work, organized</span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-bold leading-tight tracking-tight text-slate-900 sm:text-[0.95rem]">
+                Daily Work
+              </span>
+              <span className="mt-0.5 hidden text-[11px] leading-tight text-slate-500 sm:block">
+                Your work, organized
+              </span>
             </span>
           </Link>
 
-          <nav aria-label="Main navigation" className="hidden items-center gap-1 md:flex">
+          <nav
+            aria-label="Main navigation"
+            className="hidden items-center gap-0.5 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-1 md:flex"
+          >
             {navigation.map(({ label, href, icon: Icon }) => {
-              const active = pathname === href || pathname.startsWith(`${href}/`);
+              const active = isRouteActive(pathname, href);
               return (
                 <Link
                   key={href}
                   href={href}
                   aria-current={active ? "page" : undefined}
-                  className={`flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-medium transition-colors ${
+                  className={`relative flex h-9 items-center gap-2 rounded-xl px-2.5 text-[13px] font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 lg:px-3 ${
                     active
-                      ? "bg-blue-50 text-blue-700"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                      ? "bg-white text-blue-700 shadow-sm ring-1 ring-slate-200/70"
+                      : "text-slate-600 hover:bg-white/80 hover:text-slate-950"
                   }`}
                 >
-                  <Icon size={17} strokeWidth={active ? 2.2 : 1.9} aria-hidden="true" />
+                  <Icon
+                    size={16}
+                    strokeWidth={active ? 2.2 : 1.8}
+                    aria-hidden="true"
+                  />
                   {label}
                 </Link>
               );
             })}
           </nav>
 
-          <button
-            type="button"
-            onClick={() => setMenuOpen((open) => !open)}
-            aria-expanded={menuOpen}
-            aria-controls="mobile-main-navigation"
-            aria-label={menuOpen ? "Close navigation" : "Open navigation"}
-            className="flex size-10 items-center justify-center rounded-xl text-slate-600 transition hover:bg-slate-100 md:hidden"
+          <Link
+            href="/ot-record/add"
+            className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-3 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 active:scale-[0.98] sm:px-4"
+            aria-label="Create a work log"
           >
-            {menuOpen ? <X size={21} /> : <Menu size={21} />}
-          </button>
+            <Plus size={17} strokeWidth={2.4} aria-hidden="true" />
+            <span className="hidden sm:inline">New log</span>
+          </Link>
         </div>
-
-        {menuOpen && (
-          <>
-            <button
-              type="button"
-              aria-label="Close navigation"
-              onClick={() => setMenuOpen(false)}
-              className="fixed inset-0 top-[4.25rem] z-30 bg-slate-950/20 md:hidden"
-            />
-            <nav
-              id="mobile-main-navigation"
-              aria-label="Main navigation"
-              className="absolute inset-x-0 top-full z-40 border-b border-slate-200 bg-white px-4 py-3 shadow-xl md:hidden"
-            >
-              <p className="px-3 pb-2 pt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                Workspace
-              </p>
-              <ul className="space-y-1">
-                {navigation.map(({ label, href, icon: Icon }) => {
-                  const active = pathname === href || pathname.startsWith(`${href}/`);
-                  return (
-                    <li key={href}>
-                      <Link
-                        href={href}
-                        aria-current={active ? "page" : undefined}
-                        onClick={() => setMenuOpen(false)}
-                        className={`flex min-h-12 items-center gap-3 rounded-xl px-3 text-sm font-semibold transition-colors ${
-                          active
-                            ? "bg-blue-50 text-blue-700"
-                            : "text-slate-700 hover:bg-slate-50"
-                        }`}
-                      >
-                        <Icon size={19} aria-hidden="true" />
-                        {label}
-                        {active && <span className="ml-auto text-xs font-medium text-blue-500">Current</span>}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-          </>
-        )}
       </header>
 
       {children}
 
       <nav
         aria-label="Quick navigation"
-        className="fixed inset-x-0 bottom-0 z-20 px-3 pt-2 pb-[calc(env(safe-area-inset-bottom)+1rem)] md:hidden"
+        className="fixed inset-x-0 bottom-0 z-20 px-3 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.2rem)] md:hidden"
       >
         <ul className="relative mx-auto grid max-w-xl grid-cols-5 rounded-full border border-slate-200/80 bg-white/90 p-1 shadow-[0_8px_24px_rgba(15,23,42,0.14)] backdrop-blur-2xl">
           <span
@@ -142,9 +111,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             }}
           />
           {navigation.map(({ label, href, icon: Icon }) => {
-            const active = pathname === href || pathname.startsWith(`${href}/`);
+            const active = isRouteActive(pathname, href);
             return (
-              <li key={href}>
+              <li key={href} className="relative z-10">
                 <Link
                   href={href}
                   aria-current={active ? "page" : undefined}
@@ -153,7 +122,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   onClick={(event) => {
                     if (active) event.preventDefault();
                   }}
-                  className={`relative z-10 flex min-h-[2.75rem] flex-col items-center justify-center gap-0 rounded-full border border-transparent px-1 text-center transition-transform duration-200 motion-reduce:transition-none ${active ? "cursor-default" : "hover:bg-slate-100/70 active:scale-95 motion-reduce:active:scale-100"}`}
+                  className={`relative z-10 flex min-h-11 flex-col items-center justify-center gap-0 rounded-full border border-transparent px-1 text-center transition-transform duration-200 motion-reduce:transition-none ${active ? "cursor-default" : "hover:bg-slate-100/70 active:scale-95 motion-reduce:active:scale-100"}`}
                   style={{ color: active ? "#334155" : "#64748b" }}
                 >
                   <span className="flex size-6 items-center justify-center">
