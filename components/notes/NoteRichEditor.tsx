@@ -2,7 +2,7 @@
 
 import { Button, Tooltip } from "antd";
 import { Bold, Code2, Heading2, Italic, Link2, List, ListChecks, ListOrdered, Quote, Strikethrough } from "lucide-react";
-import { useEffect, useRef, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 
 const htmlEscapes: Record<string, string> = {
   "&": "&amp;",
@@ -132,6 +132,37 @@ interface NoteRichEditorProps { value?: string; onChange?: (value: string) => vo
 export default function NoteRichEditor({ value = "", onChange }: NoteRichEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const lastValue = useRef(value);
+  const [activeTools, setActiveTools] = useState<Record<string, boolean>>({});
+
+  const refreshActiveTools = useCallback(() => {
+    const selection = window.getSelection();
+    const anchor = selection?.anchorNode;
+    const anchorElement = anchor instanceof Element ? anchor : anchor?.parentElement;
+    if (!anchor || !editorRef.current?.contains(anchor)) {
+      setActiveTools({});
+      return;
+    }
+
+    const block = document.queryCommandValue("formatBlock").toLowerCase().replace(/[<>]/g, "");
+    const listItem = anchorElement?.closest("li");
+    setActiveTools({
+      bold: document.queryCommandState("bold"),
+      italic: document.queryCommandState("italic"),
+      strike: document.queryCommandState("strikeThrough"),
+      heading: /^h[1-3]$/.test(block),
+      bulleted: document.queryCommandState("insertUnorderedList") && !listItem?.querySelector("input[type=checkbox]"),
+      numbered: document.queryCommandState("insertOrderedList"),
+      todo: Boolean(listItem?.querySelector("input[type=checkbox]")),
+      quote: block === "blockquote",
+      code: block === "pre",
+      link: Boolean(anchorElement?.closest("a")),
+    });
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener("selectionchange", refreshActiveTools);
+    return () => document.removeEventListener("selectionchange", refreshActiveTools);
+  }, [refreshActiveTools]);
 
   useEffect(() => {
     if (value === lastValue.current) return;
@@ -150,6 +181,7 @@ export default function NoteRichEditor({ value = "", onChange }: NoteRichEditorP
     editorRef.current?.focus();
     document.execCommand(command, false, argument);
     updateValue();
+    requestAnimationFrame(refreshActiveTools);
   };
 
   const formatTaskList = () => {
@@ -164,6 +196,7 @@ export default function NoteRichEditor({ value = "", onChange }: NoteRichEditorP
     if (listItem && !listItem.querySelector("input[type=checkbox]")) addTaskCheckbox(listItem);
     if (listItem?.parentElement) listItem.parentElement.style.listStyleType = "none";
     updateValue();
+    requestAnimationFrame(refreshActiveTools);
   };
 
   const continueTaskList = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -183,28 +216,29 @@ export default function NoteRichEditor({ value = "", onChange }: NoteRichEditorP
       addTaskCheckbox(nextItem);
       if (nextItem.parentElement) nextItem.parentElement.style.listStyleType = "none";
       updateValue();
+      refreshActiveTools();
     });
   };
 
   const tools = [
-    { label: "Bold", icon: <Bold size={15} />, run: () => format("bold") },
-    { label: "Italic", icon: <Italic size={15} />, run: () => format("italic") },
-    { label: "Strikethrough", icon: <Strikethrough size={15} />, run: () => format("strikeThrough") },
-    { label: "Heading", icon: <Heading2 size={15} />, run: () => format("formatBlock", "h2") },
-    { label: "Bulleted list", icon: <List size={15} />, run: () => format("insertUnorderedList") },
-    { label: "Numbered list", icon: <ListOrdered size={15} />, run: () => format("insertOrderedList") },
-    { label: "To-do list", icon: <ListChecks size={15} />, run: formatTaskList },
-    { label: "Quote", icon: <Quote size={15} />, run: () => format("formatBlock", "blockquote") },
-    { label: "Code", icon: <Code2 size={15} />, run: () => format("formatBlock", "pre") },
-    { label: "Link", icon: <Link2 size={15} />, run: () => { const href = window.prompt("Enter link URL"); if (href && /^(https?:\/\/|mailto:)/i.test(href)) format("createLink", href); } },
+    { key: "bold", label: "Bold", icon: <Bold size={15} />, run: () => format("bold") },
+    { key: "italic", label: "Italic", icon: <Italic size={15} />, run: () => format("italic") },
+    { key: "strike", label: "Strikethrough", icon: <Strikethrough size={15} />, run: () => format("strikeThrough") },
+    { key: "heading", label: "Heading", icon: <Heading2 size={15} />, run: () => format("formatBlock", "h2") },
+    { key: "bulleted", label: "Bulleted list", icon: <List size={15} />, run: () => format("insertUnorderedList") },
+    { key: "numbered", label: "Numbered list", icon: <ListOrdered size={15} />, run: () => format("insertOrderedList") },
+    { key: "todo", label: "To-do list", icon: <ListChecks size={15} />, run: formatTaskList },
+    { key: "quote", label: "Quote", icon: <Quote size={15} />, run: () => format("formatBlock", "blockquote") },
+    { key: "code", label: "Code", icon: <Code2 size={15} />, run: () => format("formatBlock", "pre") },
+    { key: "link", label: "Link", icon: <Link2 size={15} />, run: () => { const href = window.prompt("Enter link URL"); if (href && /^(https?:\/\/|mailto:)/i.test(href)) format("createLink", href); } },
   ];
 
   return (
     <div className="overflow-hidden rounded-lg border border-slate-300 bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
       <div className="flex flex-nowrap gap-0 overflow-x-auto border-b border-slate-200 bg-slate-50 p-1">
-        {tools.map((tool) => <Tooltip key={tool.label} title={tool.label}><Button type="text" size="small" htmlType="button" aria-label={tool.label} icon={tool.icon} onMouseDown={(event) => event.preventDefault()} onClick={tool.run} className="!h-7 !w-7 !min-w-7 shrink-0 !px-0 !text-slate-600" /></Tooltip>)}
+        {tools.map((tool) => <Tooltip key={tool.label} title={tool.label}><Button type="text" size="small" htmlType="button" aria-label={tool.label} aria-pressed={Boolean(activeTools[tool.key])} icon={tool.icon} onMouseDown={(event) => event.preventDefault()} onClick={tool.run} className={`!h-7 !w-7 !min-w-7 shrink-0 !px-0 ${activeTools[tool.key] ? "!bg-blue-100 !text-blue-700" : "!text-slate-600"}`} /></Tooltip>)}
       </div>
-      <div ref={editorRef} contentEditable suppressContentEditableWarning role="textbox" aria-multiline="true" data-placeholder="Write your note... Formatting appears as you type." onInput={updateValue} onKeyDown={continueTaskList} onBlur={updateValue} onClick={(event) => { if ((event.target as HTMLElement).matches('input[type="checkbox"]')) requestAnimationFrame(updateValue); }} onPaste={(event) => { event.preventDefault(); const text = event.clipboardData.getData("text/plain"); document.execCommand("insertText", false, text); updateValue(); }} className="min-h-36 whitespace-pre-wrap break-words px-3 py-2 text-base leading-7 text-slate-800 outline-none sm:min-h-44 [&_blockquote]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-slate-300 [&_blockquote]:pl-3 [&_h1]:my-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:my-2 [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:my-2 [&_h3]:text-lg [&_h3]:font-semibold [&_ol]:my-2 [&_ol]:list-inside [&_ol]:list-decimal [&_pre]:my-2 [&_pre]:overflow-x-auto [&_pre]:rounded [&_pre]:bg-slate-100 [&_pre]:p-3 [&_ul]:my-2 [&_ul]:list-inside [&_ul]:list-disc" />
+      <div ref={editorRef} contentEditable suppressContentEditableWarning role="textbox" aria-multiline="true" data-placeholder="Write your note... Formatting appears as you type." onInput={() => { updateValue(); refreshActiveTools(); }} onKeyUp={refreshActiveTools} onMouseUp={refreshActiveTools} onKeyDown={continueTaskList} onBlur={updateValue} onClick={(event) => { if ((event.target as HTMLElement).matches('input[type="checkbox"]')) requestAnimationFrame(updateValue); }} onPaste={(event) => { event.preventDefault(); const text = event.clipboardData.getData("text/plain"); document.execCommand("insertText", false, text); updateValue(); }} className="min-h-36 whitespace-pre-wrap break-words px-3 py-2 text-base leading-7 text-slate-800 outline-none sm:min-h-44 [&_blockquote]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-slate-300 [&_blockquote]:pl-3 [&_h1]:my-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:my-2 [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:my-2 [&_h3]:text-lg [&_h3]:font-semibold [&_ol]:my-2 [&_ol]:list-inside [&_ol]:list-decimal [&_pre]:my-2 [&_pre]:overflow-x-auto [&_pre]:rounded [&_pre]:bg-slate-100 [&_pre]:p-3 [&_ul]:my-2 [&_ul]:list-inside [&_ul]:list-disc" />
       <style jsx>{`[data-placeholder]:empty:before { content: attr(data-placeholder); color: #94a3b8; pointer-events: none; }`}</style>
     </div>
   );

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import AuthControls from "@/components/AuthControls";
 import {
   ChartNoAxesCombined,
   ClipboardList,
@@ -25,6 +26,7 @@ const isRouteActive = (pathname: string, href: string) =>
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isAuthRoute = pathname.startsWith("/auth/");
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const activeQuickIndex = Math.max(
     0,
@@ -78,8 +80,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div className={`min-h-screen ${keyboardOpen ? "pb-0" : "pb-24"} lg:pb-0`}>
-      <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/85 pt-[env(safe-area-inset-top)] shadow-[0_2px_12px_rgba(15,23,42,0.025)] backdrop-blur-2xl">
+    <div className={`min-h-screen ${keyboardOpen || isAuthRoute ? "pb-0" : "pb-24"} lg:pb-0`}>
+      {!isAuthRoute && (
+        <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/85 pt-[env(safe-area-inset-top)] shadow-[0_2px_12px_rgba(15,23,42,0.025)] backdrop-blur-2xl">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:h-16 sm:px-6 lg:px-8">
           <Link
             href="/dashboard"
@@ -130,8 +133,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               );
             })}
           </nav>
+          <AuthControls />
         </div>
-      </header>
+        </header>
+      )}
 
       <div key={pathname} className="page-transition">
         {children}
@@ -139,8 +144,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <nav
         aria-label="Quick navigation"
-        aria-hidden={keyboardOpen}
-        className={`${keyboardOpen ? "hidden" : "fixed inset-x-0 bottom-0 z-20 px-3 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.2rem)]"} lg:hidden`}
+        aria-hidden={keyboardOpen || isAuthRoute}
+        className={`${keyboardOpen || isAuthRoute ? "hidden" : "fixed inset-x-0 bottom-0 z-20 px-3 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.2rem)]"} lg:hidden`}
       >
         <ul className="relative mx-auto grid max-w-xl grid-cols-5 rounded-full border border-slate-200/80 bg-white/90 p-1 shadow-[0_8px_24px_rgba(15,23,42,0.14)] backdrop-blur-2xl">
           <span

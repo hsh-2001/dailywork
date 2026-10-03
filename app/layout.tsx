@@ -4,6 +4,7 @@ import "./globals.css";
 import QueryProvider from "@/providers/QueryProvider";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import AppShell from "@/components/AppShell";
+import AuthProvider from "@/app/auth-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,9 +35,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <AntdRegistry>
-          <QueryProvider>
-            <AppShell>{children}</AppShell>
-          </QueryProvider>
+          <AuthProvider>
+            <QueryProvider>
+              <AppShell>{children}</AppShell>
+            </QueryProvider>
+          </AuthProvider>
         </AntdRegistry>
       </body>
     </html>
