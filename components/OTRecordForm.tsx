@@ -105,8 +105,6 @@ export default function OTRecordForm({
       <Form.Item name="project" label="Project">
         <Select
           allowClear
-          showSearch
-          optionFilterProp="label"
           placeholder="Select a project"
           options={projectOptions}
           loading={projectsLoading}

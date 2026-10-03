@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   ChartNoAxesCombined,
   ClipboardList,
@@ -24,13 +25,60 @@ const isRouteActive = (pathname: string, href: string) =>
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
   const activeQuickIndex = Math.max(
     0,
     navigation.findIndex(({ href }) => isRouteActive(pathname, href)),
   );
 
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    let focusTimeout: ReturnType<typeof setTimeout> | undefined;
+
+    const updateKeyboardState = (focusedFieldCounts = false) => {
+      const activeElement = document.activeElement;
+      const editableField =
+        (activeElement instanceof HTMLInputElement &&
+          !activeElement.readOnly &&
+          !activeElement.disabled) ||
+        (activeElement instanceof HTMLTextAreaElement &&
+          !activeElement.readOnly &&
+          !activeElement.disabled);
+      const viewportResized =
+        viewport !== null && window.innerHeight - viewport.height > 120;
+
+      setKeyboardOpen(
+        viewport
+          ? viewportResized || (focusedFieldCounts && editableField)
+          : editableField,
+      );
+    };
+
+    const handleFocusIn = () => updateKeyboardState(true);
+    const handleViewportChange = () => updateKeyboardState();
+    const handleFocusOut = () => {
+      if (focusTimeout) clearTimeout(focusTimeout);
+      focusTimeout = setTimeout(updateKeyboardState, 250);
+    };
+
+    document.addEventListener("focusin", handleFocusIn);
+    document.addEventListener("focusout", handleFocusOut);
+    window.addEventListener("resize", handleViewportChange);
+    viewport?.addEventListener("resize", handleViewportChange);
+    viewport?.addEventListener("scroll", handleViewportChange);
+
+    return () => {
+      document.removeEventListener("focusin", handleFocusIn);
+      document.removeEventListener("focusout", handleFocusOut);
+      window.removeEventListener("resize", handleViewportChange);
+      viewport?.removeEventListener("resize", handleViewportChange);
+      viewport?.removeEventListener("scroll", handleViewportChange);
+      if (focusTimeout) clearTimeout(focusTimeout);
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen pb-24 sm:pb-0">
+    <div className={`min-h-screen ${keyboardOpen ? "pb-0" : "pb-24"} sm:pb-0`}>
       <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/85 pt-[env(safe-area-inset-top)] shadow-[0_2px_12px_rgba(15,23,42,0.025)] backdrop-blur-2xl">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:h-16 sm:px-6 lg:px-8">
           <Link
@@ -82,7 +130,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               );
             })}
           </nav>
-
         </div>
       </header>
 
@@ -90,7 +137,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <nav
         aria-label="Quick navigation"
-        className="fixed inset-x-0 bottom-0 z-20 px-3 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.2rem)] md:hidden"
+        aria-hidden={keyboardOpen}
+        className={`${keyboardOpen ? "hidden" : "fixed inset-x-0 bottom-0 z-20 px-3 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.2rem)]"} md:hidden`}
       >
         <ul className="relative mx-auto grid max-w-xl grid-cols-5 rounded-full border border-slate-200/80 bg-white/90 p-1 shadow-[0_8px_24px_rgba(15,23,42,0.14)] backdrop-blur-2xl">
           <span
