@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Daily Work",
-  description: "Organize work logs, projects, and daily reports.",
+  description: "Organize work logs, projects, notes, and daily reports.",
 };
 
 export const viewport: Viewport = {

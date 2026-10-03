@@ -10,11 +10,13 @@ import {
   FolderKanban,
   LayoutDashboard,
   Settings,
+  StickyNote,
 } from "lucide-react";
 
 const navigation = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Work logs", href: "/ot-record", icon: ClipboardList },
+  { label: "Notes", href: "/notes", icon: StickyNote },
   { label: "Projects", href: "/projects", icon: FolderKanban },
   { label: "Reports", href: "/reports", icon: ChartNoAxesCombined },
   { label: "Settings", href: "/settings", icon: Settings },
@@ -78,7 +80,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div className={`min-h-screen ${keyboardOpen ? "pb-0" : "pb-24"} sm:pb-0`}>
+    <div className={`min-h-screen ${keyboardOpen ? "pb-0" : "pb-24"} lg:pb-0`}>
       <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/85 pt-[env(safe-area-inset-top)] shadow-[0_2px_12px_rgba(15,23,42,0.025)] backdrop-blur-2xl">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:h-16 sm:px-6 lg:px-8">
           <Link
@@ -105,7 +107,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
           <nav
             aria-label="Main navigation"
-            className="hidden items-center gap-0.5 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-1 md:flex"
+            className="hidden items-center gap-0.5 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-1 lg:flex"
           >
             {navigation.map(({ label, href, icon: Icon }) => {
               const active = isRouteActive(pathname, href);
@@ -138,14 +140,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <nav
         aria-label="Quick navigation"
         aria-hidden={keyboardOpen}
-        className={`${keyboardOpen ? "hidden" : "fixed inset-x-0 bottom-0 z-20 px-3 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.2rem)]"} md:hidden`}
+        className={`${keyboardOpen ? "hidden" : "fixed inset-x-0 bottom-0 z-20 px-3 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.2rem)]"} lg:hidden`}
       >
-        <ul className="relative mx-auto grid max-w-xl grid-cols-5 rounded-full border border-slate-200/80 bg-white/90 p-1 shadow-[0_8px_24px_rgba(15,23,42,0.14)] backdrop-blur-2xl">
+        <ul className="relative mx-auto grid max-w-xl grid-cols-6 rounded-full border border-slate-200/80 bg-white/90 p-1 shadow-[0_8px_24px_rgba(15,23,42,0.14)] backdrop-blur-2xl">
           <span
             aria-hidden="true"
             className="pointer-events-none absolute bottom-1 left-1 top-1 z-0 rounded-full border border-white/90 bg-white/55 shadow-[0_4px_14px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-xl transition-transform duration-300 ease-out motion-reduce:transition-none"
             style={{
-              width: "calc((100% - 0.5rem) / 5)",
+              width: "calc((100% - 0.5rem) / 6)",
               transform: `translateX(${activeQuickIndex * 100}%)`,
             }}
           />
@@ -156,6 +158,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <Link
                   href={href}
                   aria-current={active ? "page" : undefined}
+                  aria-label={label}
                   aria-disabled={active || undefined}
                   tabIndex={active ? -1 : undefined}
                   onClick={(event) => {
@@ -167,7 +170,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   <span className="flex size-6 items-center justify-center">
                     <Icon size={18} strokeWidth={active ? 2 : 1.8} aria-hidden="true" />
                   </span>
-                  <span className={`text-[10px] leading-none ${active ? "font-semibold" : "font-medium"}`}>{label}</span>
+                  <span className={`text-[9px] leading-none max-[359px]:hidden ${active ? "font-semibold" : "font-medium"}`}>{label}</span>
                 </Link>
               </li>
             );

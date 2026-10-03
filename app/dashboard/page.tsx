@@ -12,6 +12,7 @@ import {
   ClipboardList,
   FolderKanban,
   Plus,
+  StickyNote,
 } from "lucide-react";
 import { Button, Skeleton } from "antd";
 
@@ -26,6 +27,12 @@ const shortcuts = [
     description: "Manage your project list",
     href: "/projects",
     icon: FolderKanban,
+  },
+  {
+    title: "Notes",
+    description: "Keep useful thoughts close at hand",
+    href: "/notes",
+    icon: StickyNote,
   },
   {
     title: "Reports",
