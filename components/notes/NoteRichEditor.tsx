@@ -111,6 +111,22 @@ function htmlToMarkdown(element: HTMLDivElement) {
   return blocks.join("\n\n");
 }
 
+function addTaskCheckbox(listItem: HTMLLIElement) {
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.setAttribute("contenteditable", "false");
+  const spacer = document.createTextNode(" ");
+  listItem.insertBefore(checkbox, listItem.firstChild);
+  listItem.insertBefore(spacer, checkbox.nextSibling);
+
+  const range = document.createRange();
+  range.setStartAfter(spacer);
+  range.collapse(true);
+  const selection = window.getSelection();
+  selection?.removeAllRanges();
+  selection?.addRange(range);
+}
+
 interface NoteRichEditorProps { value?: string; onChange?: (value: string) => void; }
 
 export default function NoteRichEditor({ value = "", onChange }: NoteRichEditorProps) {
@@ -145,13 +161,7 @@ export default function NoteRichEditor({ value = "", onChange }: NoteRichEditorP
     const anchor = selection?.anchorNode;
     const anchorElement = anchor instanceof Element ? anchor : anchor?.parentElement;
     const listItem = anchorElement?.closest("li");
-    if (listItem && !listItem.querySelector("input[type=checkbox]")) {
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.setAttribute("contenteditable", "false");
-      listItem.insertBefore(checkbox, listItem.firstChild);
-      listItem.insertBefore(document.createTextNode(" "), checkbox.nextSibling);
-    }
+    if (listItem && !listItem.querySelector("input[type=checkbox]")) addTaskCheckbox(listItem);
     if (listItem?.parentElement) listItem.parentElement.style.listStyleType = "none";
     updateValue();
   };
@@ -170,11 +180,7 @@ export default function NoteRichEditor({ value = "", onChange }: NoteRichEditorP
       const nextElement = nextAnchor instanceof Element ? nextAnchor : nextAnchor?.parentElement;
       const nextItem = nextElement?.closest("li");
       if (!nextItem || nextItem.querySelector("input[type=checkbox]")) return;
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.setAttribute("contenteditable", "false");
-      nextItem.insertBefore(checkbox, nextItem.firstChild);
-      nextItem.insertBefore(document.createTextNode(" "), checkbox.nextSibling);
+      addTaskCheckbox(nextItem);
       if (nextItem.parentElement) nextItem.parentElement.style.listStyleType = "none";
       updateValue();
     });
@@ -195,10 +201,10 @@ export default function NoteRichEditor({ value = "", onChange }: NoteRichEditorP
 
   return (
     <div className="overflow-hidden rounded-lg border border-slate-300 bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
-      <div className="flex flex-wrap gap-1 border-b border-slate-200 bg-slate-50 p-1">
-        {tools.map((tool) => <Tooltip key={tool.label} title={tool.label}><Button type="text" size="small" htmlType="button" aria-label={tool.label} icon={tool.icon} onMouseDown={(event) => event.preventDefault()} onClick={tool.run} className="!h-8 !w-8 !min-w-8 !text-slate-600" /></Tooltip>)}
+      <div className="flex flex-nowrap gap-0 overflow-x-auto border-b border-slate-200 bg-slate-50 p-1">
+        {tools.map((tool) => <Tooltip key={tool.label} title={tool.label}><Button type="text" size="small" htmlType="button" aria-label={tool.label} icon={tool.icon} onMouseDown={(event) => event.preventDefault()} onClick={tool.run} className="!h-7 !w-7 !min-w-7 shrink-0 !px-0 !text-slate-600" /></Tooltip>)}
       </div>
-      <div ref={editorRef} contentEditable suppressContentEditableWarning role="textbox" aria-multiline="true" data-placeholder="Write your note... Formatting appears as you type." onInput={updateValue} onKeyDown={continueTaskList} onBlur={updateValue} onClick={(event) => { if ((event.target as HTMLElement).matches('input[type="checkbox"]')) requestAnimationFrame(updateValue); }} onPaste={(event) => { event.preventDefault(); const text = event.clipboardData.getData("text/plain"); document.execCommand("insertText", false, text); updateValue(); }} className="min-h-56 whitespace-pre-wrap break-words px-3 py-2.5 text-base leading-7 text-slate-800 outline-none sm:min-h-64 [&_blockquote]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-slate-300 [&_blockquote]:pl-3 [&_h1]:my-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:my-2 [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:my-2 [&_h3]:text-lg [&_h3]:font-semibold [&_ol]:my-2 [&_ol]:list-inside [&_ol]:list-decimal [&_pre]:my-2 [&_pre]:overflow-x-auto [&_pre]:rounded [&_pre]:bg-slate-100 [&_pre]:p-3 [&_ul]:my-2 [&_ul]:list-inside [&_ul]:list-disc" />
+      <div ref={editorRef} contentEditable suppressContentEditableWarning role="textbox" aria-multiline="true" data-placeholder="Write your note... Formatting appears as you type." onInput={updateValue} onKeyDown={continueTaskList} onBlur={updateValue} onClick={(event) => { if ((event.target as HTMLElement).matches('input[type="checkbox"]')) requestAnimationFrame(updateValue); }} onPaste={(event) => { event.preventDefault(); const text = event.clipboardData.getData("text/plain"); document.execCommand("insertText", false, text); updateValue(); }} className="min-h-36 whitespace-pre-wrap break-words px-3 py-2 text-base leading-7 text-slate-800 outline-none sm:min-h-44 [&_blockquote]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-slate-300 [&_blockquote]:pl-3 [&_h1]:my-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:my-2 [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:my-2 [&_h3]:text-lg [&_h3]:font-semibold [&_ol]:my-2 [&_ol]:list-inside [&_ol]:list-decimal [&_pre]:my-2 [&_pre]:overflow-x-auto [&_pre]:rounded [&_pre]:bg-slate-100 [&_pre]:p-3 [&_ul]:my-2 [&_ul]:list-inside [&_ul]:list-disc" />
       <style jsx>{`[data-placeholder]:empty:before { content: attr(data-placeholder); color: #94a3b8; pointer-events: none; }`}</style>
     </div>
   );

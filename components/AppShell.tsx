@@ -40,12 +40,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     const updateKeyboardState = (focusedFieldCounts = false) => {
       const activeElement = document.activeElement;
       const editableField =
-        (activeElement instanceof HTMLInputElement &&
-          !activeElement.readOnly &&
+        ((activeElement instanceof HTMLInputElement ||
+          activeElement instanceof HTMLTextAreaElement ||
+          activeElement instanceof HTMLSelectElement) &&
           !activeElement.disabled) ||
-        (activeElement instanceof HTMLTextAreaElement &&
-          !activeElement.readOnly &&
-          !activeElement.disabled);
+        (activeElement instanceof HTMLElement &&
+          (activeElement.isContentEditable ||
+            activeElement.getAttribute("role") === "textbox"));
       const viewportResized =
         viewport !== null && window.innerHeight - viewport.height > 120;
 
@@ -56,7 +57,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       );
     };
 
-    const handleFocusIn = () => updateKeyboardState(true);
+    const handleFocusIn = () => {
+      if (focusTimeout) clearTimeout(focusTimeout);
+      updateKeyboardState(true);
+    };
     const handleViewportChange = () => updateKeyboardState();
     const handleFocusOut = () => {
       if (focusTimeout) clearTimeout(focusTimeout);
