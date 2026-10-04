@@ -114,7 +114,7 @@ export default function RecordList({
                     </p>
                   </div>
                   {record.note && (
-                    <p className="mt-0.5 truncate text-[10px] leading-4 text-slate-500">
+                    <p className="mt-1 line-clamp-2 whitespace-pre-line break-words border-l-2 border-slate-200 pl-2 text-[11px] leading-4 text-slate-500">
                       {record.note}
                     </p>
                   )}
@@ -174,7 +174,7 @@ export default function RecordList({
                 </div>
 
                 {record.note && record.project && record.task && (
-                  <p className="mt-1.5 line-clamp-1 border-l-2 border-slate-200 pl-2.5 text-[11px] leading-4 text-slate-500 md:ml-10">
+                  <p className="mt-2 hidden line-clamp-2 whitespace-pre-line break-words border-l-2 border-slate-200 pl-2.5 text-[11px] leading-4 text-slate-500 md:ml-10 md:block">
                     {record.note}
                   </p>
                 )}

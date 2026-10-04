@@ -129,17 +129,27 @@ export default function NoteContent({ content }: { content: string }) {
       const List = ordered ? "ol" : "ul";
       const isTaskList = !ordered && items.some((item) => /^\[([ xX])\]\s?/.test(item));
       blocks.push(
-        <List key={`list-${index}`} className={ordered ? "list-inside list-decimal" : isTaskList ? "list-none pl-0" : "list-inside list-disc"}>
+        <List
+          key={`list-${index}`}
+          style={isTaskList ? { listStyleType: "none", paddingInlineStart: 0 } : undefined}
+          className={ordered ? "list-inside list-decimal" : isTaskList ? "my-3 space-y-2 pl-0" : "list-inside list-disc"}
+        >
           {items.map((item, itemIndex) => {
             const task = item.match(/^\[([ xX])\]\s?(.*)$/);
             return (
-              <li key={itemIndex}>
+              <li key={itemIndex} className={task ? "flex items-start gap-2.5 leading-6" : undefined}>
                 {task ? (
                   <>
-                    <span aria-label={task[1].toLowerCase() === "x" ? "Completed" : "Not completed"}>
-                      {task[1].toLowerCase() === "x" ? "☑ " : "☐ "}
+                    <span
+                      role="img"
+                      aria-label={task[1].toLowerCase() === "x" ? "Completed" : "Not completed"}
+                      className={`mt-1 inline-flex size-4 shrink-0 items-center justify-center rounded border ${task[1].toLowerCase() === "x" ? "border-blue-600 bg-blue-600 text-white" : "border-slate-300 bg-white"}`}
+                    >
+                      {task[1].toLowerCase() === "x" && <span aria-hidden="true" className="text-[10px] leading-none">✓</span>}
                     </span>
-                    {renderInline(task[2], `task-${index}-${itemIndex}`)}
+                    <span className={task[1].toLowerCase() === "x" ? "text-slate-400 line-through" : "min-w-0"}>
+                      {renderInline(task[2], `task-${index}-${itemIndex}`)}
+                    </span>
                   </>
                 ) : (
                   renderInline(item, `list-${index}-${itemIndex}`)
