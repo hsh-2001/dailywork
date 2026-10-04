@@ -1,35 +1,31 @@
 "use client";
 
-import { authClient } from "@/lib/auth/client";
 import { Button } from "antd";
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+type User = { name: string | null; email: string };
+
 export default function AuthControls() {
   const router = useRouter();
-  const { data: session } = authClient.useSession();
+  const [user, setUser] = useState<User | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const userId = session?.user.id;
 
   useEffect(() => {
-    if (!userId) return;
-
-    void fetch("/api/v1/user", { method: "POST" }).then((response) => {
-      if (!response.ok) {
-        throw new Error(`User sync failed (${response.status})`);
+    void fetch("/api/auth/session").then(async (response) => {
+      if (response.ok) {
+        const result = await response.json() as { data: User | null };
+        setUser(result.data);
       }
-    }).catch((error: unknown) => {
-      console.error("Unable to sync signed-in user", error);
     });
-  }, [userId]);
+  }, []);
 
-  if (!session) return null;
-
+  if (!user) return null;
   const handleSignOut = async () => {
     setIsSigningOut(true);
     try {
-      await authClient.signOut();
+      await fetch("/api/auth/sign-out", { method: "POST" });
       router.replace("/auth/sign-in");
       router.refresh();
     } finally {
@@ -37,21 +33,8 @@ export default function AuthControls() {
     }
   };
 
-  return (
-    <div className="flex shrink-0 items-center gap-2">
-      <span className="hidden max-w-40 truncate text-xs text-slate-500 sm:block">
-        {session.user.name || session.user.email}
-      </span>
-      <Button
-        type="text"
-        size="small"
-        icon={<LogOut size={16} />}
-        onClick={handleSignOut}
-        loading={isSigningOut}
-        aria-label="Sign out"
-        title="Sign out"
-        className="text-slate-500! hover:text-slate-900!"
-      />
-    </div>
-  );
+  return <div className="flex shrink-0 items-center gap-2">
+    <span className="hidden max-w-40 truncate text-xs text-slate-500 sm:block">{user.name || user.email}</span>
+    <Button type="text" size="small" icon={<LogOut size={16} />} onClick={handleSignOut} loading={isSigningOut} aria-label="Sign out" title="Sign out" className="text-slate-500! hover:text-slate-900!" />
+  </div>;
 }

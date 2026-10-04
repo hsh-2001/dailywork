@@ -7,13 +7,10 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import { usersTable } from "@/db/tables/users";
 
 export const notesTable = pgTable("notes", {
   id: bigserial("id", { mode: "number" }).primaryKey(),
-  userId: varchar("user_id", { length: 255 })
-    .notNull()
-    .references(() => usersTable.authUserId),
+  userId: varchar("user_id", { length: 255 }),
   title: varchar("title", { length: 200 }).notNull(),
   content: text("content").notNull(),
   pinned: boolean("pinned").notNull().default(false),

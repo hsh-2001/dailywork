@@ -8,16 +8,13 @@ import {
   timestamp,
   integer,
 } from "drizzle-orm/pg-core";
-import { usersTable } from "@/db/tables/users";
 
 export const otRecordTable = pgTable("ot_records", {
   id: bigint("id", { mode: "number" })
     .primaryKey()
     .generatedByDefaultAsIdentity(),
 
-  userId: varchar("user_id", { length: 255 })
-    .notNull()
-    .references(() => usersTable.authUserId),
+  userId: varchar("user_id", { length: 255 }),
 
   workDate: date("work_date").notNull(),
 

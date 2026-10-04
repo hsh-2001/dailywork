@@ -1,6 +1,4 @@
 @import "tailwindcss";
-@import "@neondatabase/auth/ui/tailwind";
-
 html {
   background: #f8fafc;
   scroll-behavior: smooth;

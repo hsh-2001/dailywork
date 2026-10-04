@@ -1,15 +1,16 @@
-import { auth } from "@/lib/auth/server";
 import { NextResponse, type NextRequest } from "next/server";
 
-const authMiddleware = auth.middleware({ loginUrl: "/auth/sign-in" });
+const publicPaths = ["/auth/sign-in", "/auth/sign-up"];
 
-export default function proxy(request: NextRequest) {
-  // Verification must be reachable before the user has a valid session.
-  if (request.nextUrl.pathname === "/auth/email-verification") {
-    return NextResponse.next();
+export function proxy(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  const hasSessionCookie = request.cookies.has("daily_work_session");
+  if (publicPaths.includes(path) || path.startsWith("/api/auth/")) return NextResponse.next();
+  if (!hasSessionCookie && path.startsWith("/api/")) {
+    return NextResponse.json({ message: "Authentication required" }, { status: 401 });
   }
-
-  return authMiddleware(request);
+  if (!hasSessionCookie) return NextResponse.redirect(new URL("/auth/sign-in", request.url));
+  return NextResponse.next();
 }
 
 export const config = {
