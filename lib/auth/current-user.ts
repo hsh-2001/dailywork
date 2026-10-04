@@ -7,7 +7,7 @@ export async function getCurrentAuthUser() {
   const userId = await getSessionUserId();
   if (!userId) return null;
   const [user] = await db.select().from(usersTable).where(eq(usersTable.userId, userId)).limit(1);
-  if (!user) return null;
+  if (!user?.userId) return null;
   return { id: user.userId, email: user.email, name: user.name, image: user.image };
 }
 
