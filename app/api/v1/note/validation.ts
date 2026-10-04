@@ -8,9 +8,16 @@ export function parseNoteRequest(value: unknown): INoteRequest | null {
     return null;
   }
 
+  const deadline = body.deadline;
+  if (deadline !== undefined && deadline !== null &&
+    (typeof deadline !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(deadline) ||
+      Number.isNaN(Date.parse(`${deadline}T00:00:00Z`)) || new Date(`${deadline}T00:00:00Z`).toISOString().slice(0, 10) !== deadline)) {
+    return null;
+  }
+
   const title = body.title.trim();
   const content = body.content.trim();
   if (!title || title.length > 200 || !content) return null;
 
-  return { title, content };
+  return { title, content, deadline: deadline ?? null };
 }

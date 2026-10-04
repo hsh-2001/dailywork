@@ -131,13 +131,13 @@ export default function NoteContent({ content }: { content: string }) {
       blocks.push(
         <List
           key={`list-${index}`}
-          style={isTaskList ? { listStyleType: "none", paddingInlineStart: 0 } : undefined}
-          className={ordered ? "list-inside list-decimal" : isTaskList ? "my-3 space-y-2 pl-0" : "list-inside list-disc"}
+          style={ordered || isTaskList ? { listStyleType: "none", paddingInlineStart: 0 } : undefined}
+          className={ordered ? "my-3 space-y-1 pl-0" : isTaskList ? "my-3 space-y-2 pl-0" : "list-inside list-disc"}
         >
           {items.map((item, itemIndex) => {
             const task = item.match(/^\[([ xX])\]\s?(.*)$/);
             return (
-              <li key={itemIndex} className={task ? "flex items-start gap-2.5 leading-6" : undefined}>
+              <li key={itemIndex} className={ordered || task ? "flex items-start gap-2.5 leading-6" : undefined}>
                 {task ? (
                   <>
                     <span
@@ -150,6 +150,11 @@ export default function NoteContent({ content }: { content: string }) {
                     <span className={task[1].toLowerCase() === "x" ? "text-slate-400 line-through" : "min-w-0"}>
                       {renderInline(task[2], `task-${index}-${itemIndex}`)}
                     </span>
+                  </>
+                ) : ordered ? (
+                  <>
+                    <span aria-hidden="true" className="w-5 shrink-0 text-right font-medium tabular-nums text-slate-500">{itemIndex + 1}.</span>
+                    <span className="min-w-0">{renderInline(item, `list-${index}-${itemIndex}`)}</span>
                   </>
                 ) : (
                   renderInline(item, `list-${index}-${itemIndex}`)

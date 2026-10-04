@@ -1,6 +1,6 @@
 import { Button, Dropdown } from "antd";
 import type { MenuProps } from "antd";
-import { MoreHorizontal, Pin, StickyNote } from "lucide-react";
+import { CalendarClock, MoreHorizontal, Pin, StickyNote } from "lucide-react";
 import dayjs from "dayjs";
 import type { INoteResponse } from "@/shares/dtos/note/note";
 import NoteContent from "@/components/notes/NoteContent";
@@ -59,6 +59,21 @@ export default function NoteCard({
         <div className="mt-1 line-clamp-3 max-h-12 overflow-hidden text-xs leading-4 text-slate-500 [&_blockquote]:border-slate-200 [&_blockquote]:pl-2 [&_h1]:text-sm [&_h2]:text-xs [&_h3]:text-xs">
           <NoteContent content={note.content} />
         </div>
+        {note.deadline && (() => {
+          const deadline = dayjs(note.deadline);
+          const overdue = deadline.isBefore(dayjs(), "day");
+          const dueToday = deadline.isSame(dayjs(), "day");
+          const label = overdue ? "Overdue" : dueToday ? "Due today" : "Due";
+          const badgeColor = overdue
+            ? "bg-red-50 text-red-700 ring-red-200"
+            : dueToday
+              ? "bg-amber-50 text-amber-700 ring-amber-200"
+              : "bg-blue-50 text-blue-700 ring-blue-200";
+          return <span className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold leading-4 ring-1 ring-inset ${badgeColor}`}>
+            <CalendarClock size={11} aria-hidden="true" />
+            <time dateTime={note.deadline}>{label} · {deadline.format("MMM D, YYYY")}</time>
+          </span>;
+        })()}
       </div>
       <time className="hidden shrink-0 text-xs text-slate-400 md:block" dateTime={note.updatedAt}>
         {dayjs(note.updatedAt).format("MMM D, YYYY")}

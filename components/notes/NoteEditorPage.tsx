@@ -3,14 +3,17 @@
 import NoteRichEditor from "@/components/notes/NoteRichEditor";
 import { useCreateNote, useNote, useUpdateNote } from "@/hooks/note.hook";
 import type { INoteRequest } from "@/shares/dtos/note/note";
-import { Alert, Button, Form, Input, Skeleton } from "antd";
-import { ArrowLeft } from "lucide-react";
+import { Alert, Button, DatePicker, Form, Input, Skeleton } from "antd";
+import { ArrowLeft, CalendarClock } from "lucide-react";
+import dayjs, { type Dayjs } from "dayjs";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+type NoteEditorValues = Omit<INoteRequest, "deadline"> & { deadline?: Dayjs | null };
+
 export default function NoteEditorPage({ noteId }: { noteId: number | null }) {
   const router = useRouter();
-  const [form] = Form.useForm<INoteRequest>();
+  const [form] = Form.useForm<NoteEditorValues>();
   const noteQuery = useNote(noteId ?? 0);
   const createNote = useCreateNote();
   const updateNote = useUpdateNote();
@@ -19,11 +22,11 @@ export default function NoteEditorPage({ noteId }: { noteId: number | null }) {
   const error = createNote.isError || updateNote.isError;
 
   useEffect(() => {
-    if (note) form.setFieldsValue({ title: note.title, content: note.content });
+    if (note) form.setFieldsValue({ title: note.title, content: note.content, deadline: note.deadline ? dayjs(note.deadline) : null });
   }, [form, note]);
 
-  const handleSave = async (values: INoteRequest) => {
-    const data = { title: values.title.trim(), content: values.content.trim() };
+  const handleSave = async (values: NoteEditorValues) => {
+    const data: INoteRequest = { title: values.title.trim(), content: values.content.trim(), deadline: values.deadline?.format("YYYY-MM-DD") ?? null };
     try {
       if (noteId === null) await createNote.mutateAsync(data);
       else await updateNote.mutateAsync({ id: noteId, data });
@@ -63,13 +66,13 @@ export default function NoteEditorPage({ noteId }: { noteId: number | null }) {
 
         <section className="rounded-xl border border-slate-200 bg-white px-4 py-4 sm:px-7 sm:py-6">
           {error && <Alert className="mb-4" type="error" showIcon message="Unable to save this note. Your draft is still here; try again." />}
-          <Form<INoteRequest>
+          <Form<NoteEditorValues>
             id="note-editor-form"
             form={form}
             layout="vertical"
             onFinish={handleSave}
             requiredMark={false}
-            initialValues={{ title: "", content: "" }}
+            initialValues={{ title: "", content: "", deadline: null }}
           >
             <Form.Item
               name="title"
@@ -84,6 +87,15 @@ export default function NoteEditorPage({ noteId }: { noteId: number | null }) {
                 aria-label="Note title"
                 placeholder="Untitled"
                 className="!h-auto !rounded-none !border-0 !px-0 !py-1 !text-2xl !font-semibold !shadow-none placeholder:!text-slate-300 focus:!shadow-none sm:!text-3xl"
+              />
+            </Form.Item>
+            <Form.Item name="deadline" className="!mb-4">
+              <DatePicker
+                allowClear
+                format="MMM D, YYYY"
+                placeholder="Set a deadline"
+                suffixIcon={<CalendarClock size={15} />}
+                className="!w-full sm:!w-64"
               />
             </Form.Item>
             <Form.Item
