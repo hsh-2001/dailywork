@@ -1,3 +1,6 @@
+export type BookingStatus = "PENDING" | "BOOKED" | "CANCELLED";
+export type SubmitStatus = "NOT_SUBMITTED" | "SUBMITTED" | "APPROVED" | "REJECTED";
+
 export interface IRecordResponse {
   id: number;
   workDate: string;
@@ -7,6 +10,6 @@ export interface IRecordResponse {
   project: string | null;
   task: string | null;
   note: string | null;
-  bookingStatus: "PENDING" | "BOOKED" | "CANCELLED";
-  submitStatus: "NOT_SUBMITTED" | "SUBMITTED" | "APPROVED" | "REJECTED";
+  bookingStatus: BookingStatus;
+  submitStatus: SubmitStatus;
 }

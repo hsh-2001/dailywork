@@ -9,7 +9,7 @@ import {
   ApiResponse,
   Pagination,
 } from "../../../../shares/types/apiResponse";
-import { and, count, desc, eq, gte, ilike, lte } from "drizzle-orm";
+import { and, count, desc, eq, gte, ilike, inArray, lte } from "drizzle-orm";
 import { getPagination } from "../../utils/pagination";
 import { NextRequest } from "next/server";
 
@@ -100,6 +100,7 @@ export async function POST(req: NextRequest) {
         400,
       );
     }
+
     if (!["PENDING", "BOOKED", "CANCELLED"].includes(bookingStatus) ||
       !["NOT_SUBMITTED", "SUBMITTED", "APPROVED", "REJECTED"].includes(submitStatus)) {
       return ApiResponse.failed("Invalid booking or submit status", "INVALID_INPUT", 400);
@@ -151,5 +152,57 @@ export async function POST(req: NextRequest) {
     console.error("Error creating record:", error);
 
     return ApiResponse.failed("Failed to create record", "DB_ERROR", 500);
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const user = await getCurrentAuthUser();
+    if (!user) return ApiResponse.failed("Authentication required", "UNAUTHORIZED", 401);
+
+    const body = await req.json();
+    if (typeof body !== "object" || body === null || Array.isArray(body)) {
+      return ApiResponse.failed("A record status update object is required", "INVALID_INPUT", 400);
+    }
+    const { ids, bookingStatus, submitStatus } = body;
+    if (
+      !Array.isArray(ids) ||
+      ids.length === 0 ||
+      ids.length > 100 ||
+      ids.some((id: unknown) => typeof id !== "number" || !Number.isInteger(id) || id <= 0) ||
+      new Set(ids).size !== ids.length
+    ) {
+      return ApiResponse.failed("Record IDs must be a unique list of 1 to 100 positive integers", "INVALID_INPUT", 400);
+    }
+    if (bookingStatus === undefined && submitStatus === undefined) {
+      return ApiResponse.failed("At least one status must be provided", "INVALID_INPUT", 400);
+    }
+    if (
+      (bookingStatus !== undefined && !["PENDING", "BOOKED", "CANCELLED"].includes(bookingStatus)) ||
+      (submitStatus !== undefined && !["NOT_SUBMITTED", "SUBMITTED", "APPROVED", "REJECTED"].includes(submitStatus))
+    ) {
+      return ApiResponse.failed("Invalid booking or submit status", "INVALID_INPUT", 400);
+    }
+
+    const statuses: {
+      bookingStatus?: "PENDING" | "BOOKED" | "CANCELLED";
+      submitStatus?: "NOT_SUBMITTED" | "SUBMITTED" | "APPROVED" | "REJECTED";
+    } = {};
+    if (bookingStatus !== undefined) statuses.bookingStatus = bookingStatus;
+    if (submitStatus !== undefined) statuses.submitStatus = submitStatus;
+
+    const records = await db
+      .update(otRecordTable)
+      .set(statuses)
+      .where(and(eq(otRecordTable.userId, user.id), inArray(otRecordTable.id, ids)))
+      .returning({ id: otRecordTable.id });
+
+    return ApiResponse.success(
+      { updatedCount: records.length },
+      "Record statuses updated successfully",
+    );
+  } catch (error) {
+    console.error("Error updating record statuses:", error);
+    return ApiResponse.failed("Failed to update record statuses", "DB_ERROR", 500);
   }
 }

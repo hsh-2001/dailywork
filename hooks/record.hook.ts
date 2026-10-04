@@ -3,6 +3,7 @@
 import recordService from "@/services/record.service";
 import { ICreateRecordRequest } from "@/shares/dtos/record/createRequest";
 import type { RecordFilters } from "@/shares/dtos/record/recordFilters";
+import type { UpdateRecordStatusesRequest } from "@/shares/dtos/record/updateRecordStatusesRequest";
 import { PaginationRequest } from "@/shares/types/paginationRquest";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -28,6 +29,17 @@ export const useUpdateRecord = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: ICreateRecordRequest }) =>
       recordService.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ot-records"] });
+    },
+  });
+};
+
+export const useUpdateRecordStatuses = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (request: UpdateRecordStatusesRequest) =>
+      recordService.updateStatuses(request),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ot-records"] });
     },

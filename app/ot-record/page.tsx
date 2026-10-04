@@ -3,11 +3,13 @@ import { useState } from "react";
 import {
   useDeleteRecord,
   useRecords,
+  useUpdateRecordStatuses,
 } from "@/hooks/record.hook";
-import { Alert, Button, DatePicker, Select } from "antd";
+import { Alert, Button, Checkbox, DatePicker, message, Select } from "antd";
 import RecordList from "@/components/RecordList";
-import { ClipboardList, Filter, Plus, RotateCcw } from "lucide-react";
+import { Check, ChevronDown, ClipboardList, Filter, Plus, RotateCcw } from "lucide-react";
 import type { IRecordResponse } from "@/shares/dtos/record/recordResponse";
+import type { BookingStatus, SubmitStatus } from "@/shares/dtos/record/recordResponse";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useProjects } from "@/hooks/project.hook";
@@ -22,19 +24,32 @@ export default function OTRecordPage() {
   const [bookingStatus, setBookingStatus] = useState<string>();
   const [submitStatus, setSubmitStatus] = useState<string>();
   const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null] | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [bulkBookingStatus, setBulkBookingStatus] = useState<BookingStatus>();
+  const [bulkSubmitStatus, setBulkSubmitStatus] = useState<SubmitStatus>();
   const { data, isLoading, isError, refetch } = useRecords({ ...pagination, ...filters });
   const projectsQuery = useProjects();
 
   const { mutate: deleteRecord } = useDeleteRecord();
+  const { mutate: updateStatuses, isPending: isUpdatingStatuses } = useUpdateRecordStatuses();
+
+  const clearSelection = () => {
+    setSelectedIds([]);
+    setBulkBookingStatus(undefined);
+    setBulkSubmitStatus(undefined);
+  };
 
   const handlePaginationChange = (pagination: {
     page: number;
     pageSize: number;
   }) => {
+    clearSelection();
     setPagination(pagination);
   };
 
   const applyFilters = () => {
+    clearSelection();
     setFilters({
       dateFrom: dateRange?.[0]?.format("YYYY-MM-DD"),
       dateTo: dateRange?.[1]?.format("YYYY-MM-DD"),
@@ -46,6 +61,7 @@ export default function OTRecordPage() {
   };
 
   const clearFilters = () => {
+    clearSelection();
     setDateRange(null);
     setProject(undefined);
     setBookingStatus(undefined);
@@ -59,7 +75,47 @@ export default function OTRecordPage() {
     router.push(`/ot-record/add?${query.toString()}`);
   };
 
+  const selectCurrentPage = (checked: boolean) => {
+    if (!checked) {
+      clearSelection();
+      return;
+    }
+    setSelectedIds((data?.data ?? []).map((record: IRecordResponse) => record.id));
+  };
+
+  const handleSelectionChange = (ids: number[]) => {
+    setSelectedIds(ids);
+    if (ids.length === 0) {
+      setBulkBookingStatus(undefined);
+      setBulkSubmitStatus(undefined);
+    }
+  };
+
+  const applyBulkStatuses = () => {
+    if (selectedIds.length === 0 || (!bulkBookingStatus && !bulkSubmitStatus)) return;
+
+    updateStatuses(
+      {
+        ids: selectedIds,
+        ...(bulkBookingStatus ? { bookingStatus: bulkBookingStatus } : {}),
+        ...(bulkSubmitStatus ? { submitStatus: bulkSubmitStatus } : {}),
+      },
+      {
+        onSuccess: () => {
+          clearSelection();
+          message.success("Selected work log statuses updated");
+        },
+        onError: () => {
+          message.error("Couldn't update work log statuses. Please try again.");
+        },
+      },
+    );
+  };
+
   const total = data?.pagination?.total ?? 0;
+  const currentPageRecords = data?.data ?? [];
+  const allCurrentPageSelected =
+    currentPageRecords.length > 0 && selectedIds.length === currentPageRecords.length;
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -113,11 +169,32 @@ export default function OTRecordPage() {
             </div>
 
             <div className="border-b border-slate-100 bg-slate-50/50 px-3.5 py-3 sm:px-5">
-              <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-slate-700">
-                <Filter size={14} className="text-slate-500" aria-hidden="true" />
-                Filter work logs
-              </div>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto_auto] lg:items-center">
+              <button
+                type="button"
+                aria-expanded={isFilterOpen}
+                aria-controls="work-log-filters"
+                aria-label={`${isFilterOpen ? "Hide" : "Show"} work log filters`}
+                onClick={() => setIsFilterOpen((isOpen) => !isOpen)}
+                className="mb-2 flex w-full items-center justify-between text-left text-xs font-semibold text-slate-700"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Filter size={14} className="text-slate-500" aria-hidden="true" />
+                  Filter work logs
+                </span>
+                <span className="flex items-center gap-1 text-[11px] font-medium text-slate-500">
+                  {isFilterOpen ? "Hide" : "Show"}
+                  <ChevronDown
+                    size={14}
+                    aria-hidden="true"
+                    className={`transition-transform ${isFilterOpen ? "rotate-180" : ""}`}
+                  />
+                </span>
+              </button>
+              <div
+                id="work-log-filters"
+                hidden={!isFilterOpen}
+                className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto_auto] lg:items-center"
+              >
                 <DatePicker
                   allowClear
                   value={dateRange?.[0] ?? null}
@@ -172,8 +249,70 @@ export default function OTRecordPage() {
               </div>
             </div>
 
+            {currentPageRecords.length > 0 && (
+              <div className="flex flex-col gap-2 border-b border-slate-100 px-3.5 py-3 sm:px-5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Checkbox
+                    checked={allCurrentPageSelected}
+                    indeterminate={selectedIds.length > 0 && !allCurrentPageSelected}
+                    onChange={(event) => selectCurrentPage(event.target.checked)}
+                    disabled={isUpdatingStatuses}
+                    aria-label="Select all work logs on this page"
+                  >
+                    Select page
+                  </Checkbox>
+                  {selectedIds.length > 0 && (
+                    <span className="text-xs text-slate-500">
+                      {selectedIds.length} selected
+                    </span>
+                  )}
+                </div>
+                {selectedIds.length > 0 && (
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto]">
+                    <Select
+                      allowClear
+                      placeholder="Keep booking status"
+                      value={bulkBookingStatus}
+                      disabled={isUpdatingStatuses}
+                      onChange={(value: BookingStatus | undefined) => setBulkBookingStatus(value)}
+                      options={[
+                        { value: "PENDING", label: "Pending booking" },
+                        { value: "BOOKED", label: "Booked" },
+                        { value: "CANCELLED", label: "Booking cancelled" },
+                      ]}
+                    />
+                    <Select
+                      allowClear
+                      placeholder="Keep submit status"
+                      value={bulkSubmitStatus}
+                      disabled={isUpdatingStatuses}
+                      onChange={(value: SubmitStatus | undefined) => setBulkSubmitStatus(value)}
+                      options={[
+                        { value: "NOT_SUBMITTED", label: "Not submitted" },
+                        { value: "SUBMITTED", label: "Submitted" },
+                        { value: "APPROVED", label: "Approved" },
+                        { value: "REJECTED", label: "Rejected" },
+                      ]}
+                    />
+                    <Button
+                      type="primary"
+                      icon={<Check size={14} />}
+                      onClick={applyBulkStatuses}
+                      disabled={!bulkBookingStatus && !bulkSubmitStatus}
+                      loading={isUpdatingStatuses}
+                    >
+                      Update {selectedIds.length} selected
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+
             <RecordList
               data={data?.data ?? []}
+              selectedIds={selectedIds}
+              selectionDisabled={isUpdatingStatuses}
+              onSelectionChange={handleSelectionChange}
               pagination={pagination}
               isLoading={isLoading}
               total={total}

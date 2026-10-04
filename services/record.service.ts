@@ -2,6 +2,7 @@ import { PaginationRequest } from "@/shares/types/paginationRquest";
 import api from "./api";
 import { ICreateRecordRequest } from "@/shares/dtos/record/createRequest";
 import type { RecordFilters } from "@/shares/dtos/record/recordFilters";
+import type { UpdateRecordStatusesRequest } from "@/shares/dtos/record/updateRecordStatusesRequest";
 
 const getRecords = async (request: PaginationRequest & RecordFilters) => {
   const response = await api.get("/record", {
@@ -34,11 +35,17 @@ const update = async (id: number, request: ICreateRecordRequest) => {
   return response.data;
 };
 
+const updateStatuses = async (request: UpdateRecordStatusesRequest) => {
+  const response = await api.patch("/record", request);
+  return response.data;
+};
+
 const recordService = {
   getRecords,
   create,
   deleteRecord,
   update,
+  updateStatuses,
 };
 
 export default recordService;

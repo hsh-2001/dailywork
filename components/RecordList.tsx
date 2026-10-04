@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button, Grid, Pagination, Skeleton } from "antd";
+import { Button, Checkbox, Grid, Pagination, Skeleton } from "antd";
 import { ArrowRight, CalendarDays, Clock3, Pencil, Trash2 } from "lucide-react";
 import type { IRecordResponse } from "@/shares/dtos/record/recordResponse";
 import { formatTime } from "@/utils/datetime";
@@ -8,6 +8,9 @@ interface RecordListProps {
   data: IRecordResponse[];
   isLoading: boolean;
   total: number;
+  selectedIds: number[];
+  selectionDisabled: boolean;
+  onSelectionChange: (ids: number[]) => void;
   pagination: {
     page: number;
     pageSize: number;
@@ -64,6 +67,9 @@ export default function RecordList({
   data,
   total,
   isLoading,
+  selectedIds,
+  selectionDisabled,
+  onSelectionChange,
   pagination,
   onPaginationChange,
   onEdit,
@@ -76,6 +82,11 @@ export default function RecordList({
     ? (pagination.page - 1) * pagination.pageSize + 1
     : 0;
   const lastItem = hasRecords ? firstItem + data.length - 1 : 0;
+  const toggleRecordSelection = (id: number, checked: boolean) => {
+    onSelectionChange(
+      checked ? [...selectedIds, id] : selectedIds.filter((selectedId) => selectedId !== id),
+    );
+  };
 
   return (
     <>
@@ -92,7 +103,15 @@ export default function RecordList({
 
           <ul className="divide-y divide-slate-100">
             {data.map((record) => (
-              <li key={record.id} className="group px-3.5 py-2.5 transition-colors hover:bg-slate-50/70 sm:px-5 md:py-3">
+              <li key={record.id} className="group flex items-start gap-2 px-3.5 py-2.5 transition-colors hover:bg-slate-50/70 sm:gap-3 sm:px-5 md:py-3">
+                <Checkbox
+                  aria-label={`Select work log from ${record.workDate}`}
+                  checked={selectedIds.includes(record.id)}
+                  onChange={(event) => toggleRecordSelection(record.id, event.target.checked)}
+                  disabled={selectionDisabled}
+                  className="mt-2"
+                />
+                <div className="min-w-0 flex-1">
                 <div className="md:hidden">
                   <div className="flex min-h-9 items-center justify-between gap-2">
                     <p className="min-w-0 truncate text-[13px] font-semibold text-slate-900">
@@ -198,6 +217,7 @@ export default function RecordList({
                     {record.note}
                   </p>
                 )}
+                </div>
               </li>
             ))}
           </ul>
