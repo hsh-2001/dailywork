@@ -11,16 +11,18 @@ body {
 }
 
 .page-transition {
-  animation: page-enter 280ms cubic-bezier(0.22, 0.68, 0, 1) backwards;
+  animation: page-enter 180ms ease-out both;
 }
 
 @keyframes page-enter {
   from {
-    transform: translate3d(4vw, 0, 0);
+    opacity: 0;
+    transform: translateY(5px);
   }
 
   to {
-    transform: translate3d(0, 0, 0);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
