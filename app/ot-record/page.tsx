@@ -5,9 +5,10 @@ import {
   useRecords,
   useUpdateRecordStatuses,
 } from "@/hooks/record.hook";
-import { Alert, Button, Checkbox, DatePicker, message, Select } from "antd";
+import { Alert, Button, Checkbox, DatePicker, Grid, message, Select } from "antd";
 import RecordList from "@/components/RecordList";
 import { Check, ChevronDown, ClipboardList, Filter, Plus, RotateCcw } from "lucide-react";
+import MobileDatePicker from "@/components/MobileDatePicker";
 import type { IRecordResponse } from "@/shares/dtos/record/recordResponse";
 import type { BookingStatus, SubmitStatus } from "@/shares/dtos/record/recordResponse";
 import Link from "next/link";
@@ -28,6 +29,8 @@ export default function OTRecordPage() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [bulkBookingStatus, setBulkBookingStatus] = useState<BookingStatus>();
   const [bulkSubmitStatus, setBulkSubmitStatus] = useState<SubmitStatus>();
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
   const { data, isLoading, isError, refetch } = useRecords({ ...pagination, ...filters });
   const projectsQuery = useProjects();
 
@@ -195,22 +198,44 @@ export default function OTRecordPage() {
                 hidden={!isFilterOpen}
                 className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto_auto] lg:items-center"
               >
-                <DatePicker
-                  allowClear
-                  value={dateRange?.[0] ?? null}
-                  onChange={(value) => setDateRange([value, dateRange?.[1] ?? null])}
-                  disabledDate={(current) => Boolean(dateRange?.[1] && current.isAfter(dateRange[1], "day"))}
-                  placeholder="From date"
-                  className="!w-full"
-                />
-                <DatePicker
-                  allowClear
-                  value={dateRange?.[1] ?? null}
-                  onChange={(value) => setDateRange([dateRange?.[0] ?? null, value])}
-                  disabledDate={(current) => Boolean(dateRange?.[0] && current.isBefore(dateRange[0], "day"))}
-                  placeholder="To date"
-                  className="!w-full"
-                />
+                {isMobile ? (
+                  <MobileDatePicker
+                    allowClear
+                    title="From date"
+                    placeholder="From date"
+                    value={dateRange?.[0] ?? null}
+                    max={dateRange?.[1] ? new Date(dateRange[1].year(), dateRange[1].month(), dateRange[1].date()) : undefined}
+                    onChange={(value) => setDateRange([value, dateRange?.[1] ?? null])}
+                  />
+                ) : (
+                  <DatePicker
+                    allowClear
+                    value={dateRange?.[0] ?? null}
+                    onChange={(value) => setDateRange([value, dateRange?.[1] ?? null])}
+                    disabledDate={(current) => Boolean(dateRange?.[1] && current.isAfter(dateRange[1], "day"))}
+                    placeholder="From date"
+                    className="!w-full"
+                  />
+                )}
+                {isMobile ? (
+                  <MobileDatePicker
+                    allowClear
+                    title="To date"
+                    placeholder="To date"
+                    value={dateRange?.[1] ?? null}
+                    min={dateRange?.[0] ? new Date(dateRange[0].year(), dateRange[0].month(), dateRange[0].date()) : undefined}
+                    onChange={(value) => setDateRange([dateRange?.[0] ?? null, value])}
+                  />
+                ) : (
+                  <DatePicker
+                    allowClear
+                    value={dateRange?.[1] ?? null}
+                    onChange={(value) => setDateRange([dateRange?.[0] ?? null, value])}
+                    disabledDate={(current) => Boolean(dateRange?.[0] && current.isBefore(dateRange[0], "day"))}
+                    placeholder="To date"
+                    className="!w-full"
+                  />
+                )}
                 <Select
                   allowClear
                   showSearch

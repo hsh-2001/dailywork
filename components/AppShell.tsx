@@ -43,7 +43,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         ((activeElement instanceof HTMLInputElement ||
           activeElement instanceof HTMLTextAreaElement ||
           activeElement instanceof HTMLSelectElement) &&
-          !activeElement.disabled) ||
+          !activeElement.disabled &&
+          !(activeElement instanceof HTMLInputElement &&
+            (activeElement.readOnly ||
+              ["checkbox", "radio", "button", "submit", "reset", "image", "file", "hidden"].includes(activeElement.type)))) ||
         (activeElement instanceof HTMLElement &&
           (activeElement.isContentEditable ||
             activeElement.getAttribute("role") === "textbox"));
