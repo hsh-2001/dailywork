@@ -13,6 +13,8 @@ export interface OTRecordFormValues {
   project?: string;
   task?: string;
   note?: string;
+  bookingStatus: "PENDING" | "BOOKED" | "CANCELLED";
+  submitStatus: "NOT_SUBMITTED" | "SUBMITTED" | "APPROVED" | "REJECTED";
 }
 
 interface OTRecordFormProps {
@@ -46,6 +48,7 @@ export default function OTRecordForm({
     <Form
       form={form}
       layout="vertical"
+      initialValues={{ bookingStatus: "PENDING", submitStatus: "NOT_SUBMITTED" }}
       requiredMark
       size={size}
       autoComplete="off"
@@ -122,6 +125,24 @@ export default function OTRecordForm({
           enterKeyHint="done"
         />
       </Form.Item>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+        <Form.Item name="bookingStatus" label="Booking status" rules={[{ required: true }]}>
+          <Select options={[
+            { value: "PENDING", label: "Pending" },
+            { value: "BOOKED", label: "Booked" },
+            { value: "CANCELLED", label: "Cancelled" },
+          ]} />
+        </Form.Item>
+        <Form.Item name="submitStatus" label="Submit status" rules={[{ required: true }]}>
+          <Select options={[
+            { value: "NOT_SUBMITTED", label: "Not submitted" },
+            { value: "SUBMITTED", label: "Submitted" },
+            { value: "APPROVED", label: "Approved" },
+            { value: "REJECTED", label: "Rejected" },
+          ]} />
+        </Form.Item>
+      </div>
     </Form>
   );
 }

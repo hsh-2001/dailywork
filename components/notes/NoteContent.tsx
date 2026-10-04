@@ -51,7 +51,15 @@ function isBlockStart(line: string) {
   return /^#{1,3}\s|^>\s?|^```|^[-*+]\s|^\d+\.\s/.test(line);
 }
 
-export default function NoteContent({ content }: { content: string }) {
+export default function NoteContent({
+  content,
+  onTaskToggle,
+  tasksDisabled = false,
+}: {
+  content: string;
+  onTaskToggle?: (lineIndex: number, completed: boolean) => void;
+  tasksDisabled?: boolean;
+}) {
   const lines = content.split(/\r?\n/);
   const blocks: ReactNode[] = [];
   let index = 0;
@@ -120,10 +128,12 @@ export default function NoteContent({ content }: { content: string }) {
     if (listMatch) {
       const ordered = /^\d+\./.test(listMatch[1]);
       const items: string[] = [];
+      const itemLineIndexes: number[] = [];
       while (index < lines.length) {
         const match = lines[index].match(/^([-*+]\s|\d+\.\s)(.*)$/);
         if (!match || /^\d+\./.test(match[1]) !== ordered) break;
         items.push(match[2]);
+        itemLineIndexes.push(index);
         index += 1;
       }
       const List = ordered ? "ol" : "ul";
@@ -136,18 +146,32 @@ export default function NoteContent({ content }: { content: string }) {
         >
           {items.map((item, itemIndex) => {
             const task = item.match(/^\[([ xX])\]\s?(.*)$/);
+            const taskCompleted = task?.[1].toLowerCase() === "x";
             return (
               <li key={itemIndex} className={ordered || task ? "flex items-start gap-2.5 leading-6" : undefined}>
                 {task ? (
                   <>
-                    <span
-                      role="img"
-                      aria-label={task[1].toLowerCase() === "x" ? "Completed" : "Not completed"}
-                      className={`mt-1 inline-flex size-4 shrink-0 items-center justify-center rounded border ${task[1].toLowerCase() === "x" ? "border-blue-600 bg-blue-600 text-white" : "border-slate-300 bg-white"}`}
-                    >
-                      {task[1].toLowerCase() === "x" && <span aria-hidden="true" className="text-[10px] leading-none">✓</span>}
-                    </span>
-                    <span className={task[1].toLowerCase() === "x" ? "text-slate-400 line-through" : "min-w-0"}>
+                    {onTaskToggle ? (
+                      <button
+                        type="button"
+                        aria-label={`${taskCompleted ? "Mark incomplete" : "Mark complete"}: ${task[2]}`}
+                        aria-pressed={taskCompleted}
+                        disabled={tasksDisabled}
+                        onClick={() => onTaskToggle(itemLineIndexes[itemIndex], !taskCompleted)}
+                        className={`mt-1 inline-flex size-4 shrink-0 items-center justify-center rounded border transition-colors disabled:opacity-50 ${taskCompleted ? "border-blue-600 bg-blue-600 text-white" : "border-slate-300 bg-white hover:border-blue-500"}`}
+                      >
+                        {taskCompleted && <span aria-hidden="true" className="text-[10px] leading-none">✓</span>}
+                      </button>
+                    ) : (
+                      <span
+                        role="img"
+                        aria-label={taskCompleted ? "Completed" : "Not completed"}
+                        className={`mt-1 inline-flex size-4 shrink-0 items-center justify-center rounded border ${taskCompleted ? "border-blue-600 bg-blue-600 text-white" : "border-slate-300 bg-white"}`}
+                      >
+                        {taskCompleted && <span aria-hidden="true" className="text-[10px] leading-none">✓</span>}
+                      </span>
+                    )}
+                    <span className={taskCompleted ? "text-slate-400 line-through" : "min-w-0"}>
                       {renderInline(task[2], `task-${index}-${itemIndex}`)}
                     </span>
                   </>

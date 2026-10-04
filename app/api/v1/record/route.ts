@@ -9,7 +9,7 @@ import {
   ApiResponse,
   Pagination,
 } from "../../../../shares/types/apiResponse";
-import { count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, gte, ilike, lte } from "drizzle-orm";
 import { getPagination } from "../../utils/pagination";
 import { NextRequest } from "next/server";
 
@@ -19,11 +19,37 @@ export async function GET(req: NextRequest) {
     if (!user) return ApiResponse.failed("Authentication required", "UNAUTHORIZED", 401);
 
     const { page, pageSize, offset } = getPagination(req);
+    const params = req.nextUrl.searchParams;
+    const dateFrom = params.get("dateFrom") || "";
+    const dateTo = params.get("dateTo") || "";
+    const project = params.get("project")?.trim() ?? "";
+    const bookingStatus = params.get("bookingStatus") ?? "";
+    const submitStatus = params.get("submitStatus") ?? "";
+
+    if ((dateFrom && !/^\d{4}-\d{2}-\d{2}$/.test(dateFrom)) ||
+      (dateTo && !/^\d{4}-\d{2}-\d{2}$/.test(dateTo)) ||
+      (dateFrom && Number.isNaN(Date.parse(`${dateFrom}T00:00:00Z`))) ||
+      (dateTo && Number.isNaN(Date.parse(`${dateTo}T00:00:00Z`))) ||
+      (dateFrom && dateTo && dateFrom > dateTo)) {
+      return ApiResponse.failed("Invalid work date range", "INVALID_INPUT", 400);
+    }
+    if ((bookingStatus && !["PENDING", "BOOKED", "CANCELLED"].includes(bookingStatus)) ||
+      (submitStatus && !["NOT_SUBMITTED", "SUBMITTED", "APPROVED", "REJECTED"].includes(submitStatus))) {
+      return ApiResponse.failed("Invalid work log status filter", "INVALID_INPUT", 400);
+    }
+
+    const filters = [eq(otRecordTable.userId, user.id)];
+    if (dateFrom) filters.push(gte(otRecordTable.workDate, dateFrom));
+    if (dateTo) filters.push(lte(otRecordTable.workDate, dateTo));
+    if (project) filters.push(ilike(otRecordTable.project, `%${project}%`));
+    if (bookingStatus) filters.push(eq(otRecordTable.bookingStatus, bookingStatus));
+    if (submitStatus) filters.push(eq(otRecordTable.submitStatus, submitStatus));
+    const where = and(...filters);
 
     const records = await db
       .select()
       .from(otRecordTable)
-      .where(eq(otRecordTable.userId, user.id))
+      .where(where)
       .orderBy(desc(otRecordTable.workDate))
       .limit(pageSize)
       .offset(offset);
@@ -33,7 +59,7 @@ export async function GET(req: NextRequest) {
         total: count(),
       })
       .from(otRecordTable)
-      .where(eq(otRecordTable.userId, user.id));
+      .where(where);
 
     const totalPages = Math.ceil(total / pageSize);
 
@@ -64,6 +90,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     const { workDate, startTime, endTime, project, task, note } = body;
+    const bookingStatus = body.bookingStatus ?? "PENDING";
+    const submitStatus = body.submitStatus ?? "NOT_SUBMITTED";
 
     if (!workDate || !startTime || !endTime) {
       return ApiResponse.failed(
@@ -71,6 +99,10 @@ export async function POST(req: NextRequest) {
         "INVALID_INPUT",
         400,
       );
+    }
+    if (!["PENDING", "BOOKED", "CANCELLED"].includes(bookingStatus) ||
+      !["NOT_SUBMITTED", "SUBMITTED", "APPROVED", "REJECTED"].includes(submitStatus)) {
+      return ApiResponse.failed("Invalid booking or submit status", "INVALID_INPUT", 400);
     }
 
     const start = new Date(startTime);
@@ -109,6 +141,8 @@ export async function POST(req: NextRequest) {
         project: project ?? null,
         task: task ?? null,
         note: note ?? null,
+        bookingStatus,
+        submitStatus,
       })
       .returning();
 

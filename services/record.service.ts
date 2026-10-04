@@ -1,12 +1,18 @@
 import { PaginationRequest } from "@/shares/types/paginationRquest";
 import api from "./api";
 import { ICreateRecordRequest } from "@/shares/dtos/record/createRequest";
+import type { RecordFilters } from "@/shares/dtos/record/recordFilters";
 
-const getRecords = async (request: PaginationRequest) => {
+const getRecords = async (request: PaginationRequest & RecordFilters) => {
   const response = await api.get("/record", {
     params: {
       page: request.page,
       pageSize: request.pageSize,
+      dateFrom: request.dateFrom,
+      dateTo: request.dateTo,
+      project: request.project,
+      bookingStatus: request.bookingStatus,
+      submitStatus: request.submitStatus,
     },
   });
 

@@ -45,6 +45,8 @@ function AddRecordPageContent() {
         project: record.project ?? undefined,
         task: record.task ?? undefined,
         note: record.note ?? undefined,
+        bookingStatus: record.bookingStatus ?? "PENDING",
+        submitStatus: record.submitStatus ?? "NOT_SUBMITTED",
       });
     }
   }, [form, record]);
@@ -60,6 +62,8 @@ function AddRecordPageContent() {
         project: values.project,
         task: values.task,
         note: values.note,
+        bookingStatus: values.bookingStatus,
+        submitStatus: values.submitStatus,
       };
 
       if (record) {

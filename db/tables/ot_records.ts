@@ -29,6 +29,8 @@ export const otRecordTable = pgTable("ot_records", {
   task: varchar("task", { length: 255 }),
 
   note: text("note"),
+  bookingStatus: varchar("booking_status", { length: 30 }).notNull().default("PENDING"),
+  submitStatus: varchar("submit_status", { length: 30 }).notNull().default("NOT_SUBMITTED"),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => [index("ot_records_user_id_idx").on(table.userId)]);

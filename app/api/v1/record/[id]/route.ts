@@ -13,6 +13,8 @@ export async function PUT(req: NextRequest) {
     const id = req.nextUrl.pathname.split("/").pop();
     const body = await req.json();
     const { workDate, startTime, endTime, project, task, note } = body;
+    const bookingStatus = body.bookingStatus ?? "PENDING";
+    const submitStatus = body.submitStatus ?? "NOT_SUBMITTED";
 
     if (!id || !workDate || !startTime || !endTime) {
       return ApiResponse.failed(
@@ -20,6 +22,10 @@ export async function PUT(req: NextRequest) {
         "INVALID_INPUT",
         400,
       );
+    }
+    if (!["PENDING", "BOOKED", "CANCELLED"].includes(bookingStatus) ||
+      !["NOT_SUBMITTED", "SUBMITTED", "APPROVED", "REJECTED"].includes(submitStatus)) {
+      return ApiResponse.failed("Invalid booking or submit status", "INVALID_INPUT", 400);
     }
 
     const start = new Date(startTime);
@@ -55,6 +61,8 @@ export async function PUT(req: NextRequest) {
         project: project ?? null,
         task: task ?? null,
         note: note ?? null,
+        bookingStatus,
+        submitStatus,
       })
       .where(
         and(

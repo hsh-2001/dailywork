@@ -50,7 +50,7 @@ export default function NoteEditorPage({ noteId }: { noteId: number | null }) {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <div className="mx-auto w-full max-w-4xl px-3 py-3 sm:px-5 sm:py-4">
+      <div className="mx-auto w-full max-w-4xl p-2 sm:px-5 sm:py-4">
         <header className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-20 -mx-3 mb-3 flex min-h-10 items-center justify-between gap-3 border-b border-slate-200/80 bg-slate-50/95 px-3 py-2 backdrop-blur sm:-mx-5 sm:px-5 lg:top-16">
           <Button type="text" icon={<ArrowLeft size={16} />} onClick={() => router.push("/notes")} className="!pl-0 !text-slate-500 hover:!text-slate-900">
             Notes
@@ -64,7 +64,7 @@ export default function NoteEditorPage({ noteId }: { noteId: number | null }) {
           </div>
         </header>
 
-        <section className="rounded-xl border border-slate-200 bg-white px-4 py-4 sm:px-7 sm:py-6">
+        <section className="rounded-xl border border-slate-200 bg-white p-2 sm:px-7 sm:py-6">
           {error && <Alert className="mb-4" type="error" showIcon message="Unable to save this note. Your draft is still here; try again." />}
           <Form<NoteEditorValues>
             id="note-editor-form"

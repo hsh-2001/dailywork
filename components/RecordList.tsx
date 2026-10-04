@@ -24,6 +24,24 @@ const formatTotal = (value: number | null) => {
   return `${Math.floor(value / 60)}h ${value % 60}m`;
 };
 
+function StatusBadges({ bookingStatus, submitStatus }: Pick<IRecordResponse, "bookingStatus" | "submitStatus">) {
+  const booking = {
+    PENDING: ["Pending booking", "bg-amber-50 text-amber-700 ring-amber-200"],
+    BOOKED: ["Booked", "bg-emerald-50 text-emerald-700 ring-emerald-200"],
+    CANCELLED: ["Booking cancelled", "bg-slate-100 text-slate-600 ring-slate-200"],
+  }[bookingStatus];
+  const submission = {
+    NOT_SUBMITTED: ["Not submitted", "bg-slate-100 text-slate-600 ring-slate-200"],
+    SUBMITTED: ["Submitted", "bg-blue-50 text-blue-700 ring-blue-200"],
+    APPROVED: ["Approved", "bg-emerald-50 text-emerald-700 ring-emerald-200"],
+    REJECTED: ["Rejected", "bg-red-50 text-red-700 ring-red-200"],
+  }[submitStatus];
+
+  return <div className="mt-1 flex flex-wrap gap-1">
+    {[booking, submission].map(([label, color]) => <span key={label} className={`rounded-full px-1.5 py-0.5 text-[9px] font-medium leading-3 ring-1 ring-inset ${color}`}>{label}</span>)}
+  </div>;
+}
+
 function LoadingRecords() {
   return (
     <div aria-label="Loading work logs" className="divide-y divide-slate-100">
@@ -113,6 +131,7 @@ export default function RecordList({
                       {formatTime(record.startTime)}–{formatTime(record.endTime)}
                     </p>
                   </div>
+                  <StatusBadges bookingStatus={record.bookingStatus} submitStatus={record.submitStatus} />
                   {record.note && (
                     <p className="mt-1 line-clamp-2 whitespace-pre-line break-words border-l-2 border-slate-200 pl-2 text-[11px] leading-4 text-slate-500">
                       {record.note}
@@ -144,6 +163,7 @@ export default function RecordList({
                         ? record.task
                         : record.note || (record.project ? "No task details" : "Add project or task details")}
                     </p>
+                    <StatusBadges bookingStatus={record.bookingStatus} submitStatus={record.submitStatus} />
                   </div>
 
                   <div className="flex items-center justify-between border-t border-slate-100 pt-2 md:justify-end md:border-0 md:pt-0">

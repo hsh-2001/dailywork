@@ -1,7 +1,7 @@
 "use client";
 
 import NoteContent from "@/components/notes/NoteContent";
-import { useNote, useSetNotePinned } from "@/hooks/note.hook";
+import { useNote, useSetNotePinned, useUpdateNote } from "@/hooks/note.hook";
 import { Alert, Button, Skeleton } from "antd";
 import { ArrowLeft, Pin, Pencil, CalendarClock } from "lucide-react";
 import dayjs from "dayjs";
@@ -11,7 +11,24 @@ export default function NoteDetailPage({ noteId }: { noteId: number }) {
   const router = useRouter();
   const noteQuery = useNote(noteId);
   const setPinned = useSetNotePinned();
+  const updateNote = useUpdateNote();
   const note = noteQuery.data?.data;
+
+  const handleTaskToggle = async (lineIndex: number, completed: boolean) => {
+    if (!note) return;
+    const lines = note.content.split(/\r?\n/);
+    const line = lines[lineIndex];
+    if (line === undefined) return;
+    lines[lineIndex] = line.replace(/^(\s*[-*+]\s+)\[([ xX])\]/, `$1[${completed ? "x" : " "}]`);
+    try {
+      await updateNote.mutateAsync({
+        id: note.id,
+        data: { title: note.title, content: lines.join("\n"), deadline: note.deadline },
+      });
+    } catch {
+      // The mutation error is shown below, and the persisted note remains unchanged.
+    }
+  };
 
   if (noteQuery.isLoading) {
     return <main className="mx-auto max-w-3xl px-4 py-5"><Skeleton active title paragraph={{ rows: 7 }} /></main>;
@@ -49,6 +66,7 @@ export default function NoteDetailPage({ noteId }: { noteId: number }) {
         </div>
 
         {setPinned.isError && <Alert className="mb-3" type="error" showIcon message="Unable to update pin. Please try again." />}
+        {updateNote.isError && <Alert className="mb-3" type="error" showIcon message="Unable to update checklist item. Please try again." />}
 
         <article className="rounded-xl border border-slate-200/80 bg-white px-5 py-6 shadow-[0_8px_24px_rgba(15,23,42,0.035)] sm:px-8 sm:py-7">
           <header className="mb-6 border-b border-slate-100 pb-4">
@@ -61,7 +79,7 @@ export default function NoteDetailPage({ noteId }: { noteId: number }) {
             </p>}
           </header>
           <div className="min-h-40 break-words text-[15px] leading-7 text-slate-700 [&_a]:text-blue-700 [&_a]:underline [&_blockquote]:my-4 [&_blockquote]:border-l-2 [&_blockquote]:border-slate-300 [&_blockquote]:pl-4 [&_code]:rounded [&_code]:bg-slate-100 [&_code]:px-1 [&_code]:font-mono [&_h1]:my-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-slate-900 [&_h2]:my-3 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-slate-900 [&_h3]:my-3 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-slate-900 [&_ol]:my-3 [&_ol]:list-inside [&_ol]:list-decimal [&_pre]:my-3 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-slate-100 [&_pre]:p-4 [&_ul]:my-3 [&_ul]:list-inside [&_ul]:list-disc">
-            <NoteContent content={note.content} />
+            <NoteContent content={note.content} onTaskToggle={handleTaskToggle} tasksDisabled={updateNote.isPending} />
           </div>
         </article>
       </div>

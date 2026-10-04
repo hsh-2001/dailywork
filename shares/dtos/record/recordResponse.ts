@@ -7,4 +7,6 @@ export interface IRecordResponse {
   project: string | null;
   task: string | null;
   note: string | null;
+  bookingStatus: "PENDING" | "BOOKED" | "CANCELLED";
+  submitStatus: "NOT_SUBMITTED" | "SUBMITTED" | "APPROVED" | "REJECTED";
 }

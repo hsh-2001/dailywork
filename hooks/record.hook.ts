@@ -2,12 +2,13 @@
 
 import recordService from "@/services/record.service";
 import { ICreateRecordRequest } from "@/shares/dtos/record/createRequest";
+import type { RecordFilters } from "@/shares/dtos/record/recordFilters";
 import { PaginationRequest } from "@/shares/types/paginationRquest";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export const useRecords = (request: PaginationRequest) => {
+export const useRecords = (request: PaginationRequest & RecordFilters) => {
   return useQuery({
-    queryKey: ["ot-records", request.page, request.pageSize],
+    queryKey: ["ot-records", request],
     queryFn: () => recordService.getRecords(request),
   });
 };
