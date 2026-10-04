@@ -14,7 +14,7 @@ export async function PATCH(request: Request) {
     if (Object.hasOwn(body, "name")) {
       const name = typeof body.name === "string" ? body.name.trim() : "";
       if (!name || name.length > 255) return NextResponse.json({ message: "Name must be between 1 and 255 characters." }, { status: 400 });
-      await db.update(usersTable).set({ name, modifiedAt: new Date() }).where(eq(usersTable.authUserId, user.id));
+      await db.update(usersTable).set({ name, modifiedAt: new Date() }).where(eq(usersTable.userId, user.id));
       return NextResponse.json({ data: { name } });
     }
 
@@ -23,7 +23,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ message: "New password must be between 8 and 1024 characters." }, { status: 400 });
     }
     const [record] = await db.select({ id: usersTable.id, password: usersTable.password })
-      .from(usersTable).where(eq(usersTable.authUserId, user.id)).limit(1);
+      .from(usersTable).where(eq(usersTable.userId, user.id)).limit(1);
     if (!record) return NextResponse.json({ message: "Account not found." }, { status: 404 });
     if (record.password) {
       if (typeof body.currentPassword !== "string" || !(await verifyPassword(body.currentPassword, record.password))) {

@@ -21,12 +21,12 @@ export async function POST(request: Request) {
     if (existing) return NextResponse.json({ message: "An account with this email already exists." }, { status: 409 });
     const userId = randomUUID();
     const [user] = await db.insert(usersTable).values({
-      authUserId: userId,
+      userId,
       username: email,
       email,
       name,
       password: await hashPassword(password),
-    }).returning({ id: usersTable.id, authUserId: usersTable.authUserId, email: usersTable.email, name: usersTable.name });
+    }).returning({ id: usersTable.id, userId: usersTable.userId, email: usersTable.email, name: usersTable.name });
     await setSession(userId);
     return NextResponse.json({ data: user }, { status: 201 });
   } catch (error) {

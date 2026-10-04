@@ -1,9 +1,6 @@
 import db from "@/db/db";
 import { otRecordTable } from "@/db/tables/ot_records";
-import {
-  getCurrentAuthUser,
-  syncAuthUserRecord,
-} from "@/lib/auth/current-user";
+import { getCurrentAuthUser } from "@/lib/auth/current-user";
 import {
   ApiPageResponse,
   ApiResponse,
@@ -136,8 +133,6 @@ export async function POST(req: NextRequest) {
     const totalMinutes = Math.floor(
       (end.getTime() - start.getTime()) / (1000 * 60),
     );
-
-    await syncAuthUserRecord(user);
 
     const existingRecord = await db
       .select({ id: otRecordTable.id })

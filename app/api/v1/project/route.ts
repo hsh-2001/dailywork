@@ -1,9 +1,6 @@
 import db from "@/db/db";
 import { projectTable } from "@/db/tables/projects";
-import {
-  getCurrentAuthUser,
-  syncAuthUserRecord,
-} from "@/lib/auth/current-user";
+import { getCurrentAuthUser } from "@/lib/auth/current-user";
 import { ApiResponse } from "@/shares/types/apiResponse";
 import { asc, eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
@@ -58,8 +55,6 @@ export async function POST(req: NextRequest) {
         400,
       );
     }
-
-    await syncAuthUserRecord(user);
 
     const [project] = await db
       .insert(projectTable)

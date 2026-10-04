@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import db from "@/db/db";
@@ -13,11 +14,11 @@ export async function POST(request: Request) {
     if (!user?.password || !(await verifyPassword(body.password, user.password))) {
       return NextResponse.json({ message: "Email or password is incorrect." }, { status: 401 });
     }
-    const authUserId = user.authUserId ?? user.id.toString();
-    if (!user.authUserId) {
-      await db.update(usersTable).set({ authUserId, modifiedAt: new Date() }).where(eq(usersTable.id, user.id));
+    const userId = user.userId ?? randomUUID();
+    if (!user.userId) {
+      await db.update(usersTable).set({ userId, modifiedAt: new Date() }).where(eq(usersTable.id, user.id));
     }
-    await setSession(authUserId);
+    await setSession(userId);
     return NextResponse.json({ data: { id: user.id, email: user.email, name: user.name } });
   } catch (error) {
     console.error("Unable to sign in", error);
