@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { useEffect, useMemo, useState } from "react";
+import { isAxiosError } from "axios";
 
 function AddRecordPageContent() {
   const router = useRouter();
@@ -74,6 +75,13 @@ function AddRecordPageContent() {
       router.push("/ot-record");
     } catch (error) {
       if (error && typeof error === "object" && "errorFields" in error) return;
+      if (
+        isAxiosError<{ errorCode?: string; message?: string }>(error) &&
+        error.response?.data.errorCode === "DUPLICATE_WORK_DATE"
+      ) {
+        setSubmitError(error.response.data.message ?? "A work log already exists for this date.");
+        return;
+      }
       setSubmitError("Couldn't save this record. Please try again.");
     }
   };

@@ -2,8 +2,13 @@ import db from "@/db/db";
 import { otRecordTable } from "@/db/tables/ot_records";
 import { getCurrentAuthUser } from "@/lib/auth/current-user";
 import { ApiResponse } from "@/shares/types/apiResponse";
-import { and, eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { NextRequest } from "next/server";
+import {
+  duplicateWorkDateResponse,
+  isDuplicateWorkDateError,
+  isValidWorkDate,
+} from "../record-errors";
 
 export async function PUT(req: NextRequest) {
   try {
@@ -16,12 +21,15 @@ export async function PUT(req: NextRequest) {
     const bookingStatus = body.bookingStatus ?? "PENDING";
     const submitStatus = body.submitStatus ?? "NOT_SUBMITTED";
 
-    if (!id || !workDate || !startTime || !endTime) {
+    if (!id || !Number.isInteger(Number(id)) || Number(id) <= 0 || !workDate || !startTime || !endTime) {
       return ApiResponse.failed(
         "Record ID, work date, start time and end time are required",
         "INVALID_INPUT",
         400,
       );
+    }
+    if (!isValidWorkDate(workDate)) {
+      return ApiResponse.failed("Invalid work date", "INVALID_DATE", 400);
     }
     if (!["PENDING", "BOOKED", "CANCELLED"].includes(bookingStatus) ||
       !["NOT_SUBMITTED", "SUBMITTED", "APPROVED", "REJECTED"].includes(submitStatus)) {
@@ -51,6 +59,17 @@ export async function PUT(req: NextRequest) {
       (end.getTime() - start.getTime()) / (1000 * 60),
     );
 
+    const existingRecord = await db
+      .select({ id: otRecordTable.id })
+      .from(otRecordTable)
+      .where(and(
+        eq(otRecordTable.userId, user.id),
+        eq(otRecordTable.workDate, workDate),
+        ne(otRecordTable.id, Number(id)),
+      ))
+      .limit(1);
+    if (existingRecord.length > 0) return duplicateWorkDateResponse();
+
     const result = await db
       .update(otRecordTable)
       .set({
@@ -78,6 +97,7 @@ export async function PUT(req: NextRequest) {
 
     return ApiResponse.success(result[0], "Record updated successfully");
   } catch (error) {
+    if (isDuplicateWorkDateError(error)) return duplicateWorkDateResponse();
     console.error("Error updating record:", error);
 
     return ApiResponse.failed("Failed to update record", "DB_ERROR", 500);

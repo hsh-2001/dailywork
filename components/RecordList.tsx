@@ -109,14 +109,23 @@ export default function RecordList({
                   checked={selectedIds.includes(record.id)}
                   onChange={(event) => toggleRecordSelection(record.id, event.target.checked)}
                   disabled={selectionDisabled}
-                  className="mt-2"
+                  className="!hidden md:!block md:self-center"
                 />
                 <div className="min-w-0 flex-1">
                 <div className="md:hidden">
                   <div className="flex min-h-9 items-center justify-between gap-2">
-                    <p className="min-w-0 truncate text-[13px] font-semibold text-slate-900">
-                      {record.workDate}
-                    </p>
+                    <div className="flex min-w-0 items-center gap-2">
+                      <Checkbox
+                        aria-label={`Select work log from ${record.workDate}`}
+                        checked={selectedIds.includes(record.id)}
+                        onChange={(event) => toggleRecordSelection(record.id, event.target.checked)}
+                        disabled={selectionDisabled}
+                        className="shrink-0 md:!hidden"
+                      />
+                      <p className="min-w-0 truncate text-[13px] font-semibold text-slate-900">
+                        {record.workDate}
+                      </p>
+                    </div>
                     <div className="flex shrink-0 items-center gap-1">
                       <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-blue-800">
                         {formatTotal(record.totalMinutes)}

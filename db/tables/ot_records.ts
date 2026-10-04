@@ -3,6 +3,7 @@ import {
   bigint,
   date,
   index,
+  uniqueIndex,
   varchar,
   text,
   timestamp,
@@ -33,4 +34,7 @@ export const otRecordTable = pgTable("ot_records", {
   submitStatus: varchar("submit_status", { length: 30 }).notNull().default("NOT_SUBMITTED"),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
-}, (table) => [index("ot_records_user_id_idx").on(table.userId)]);
+}, (table) => [
+  index("ot_records_user_id_idx").on(table.userId),
+  uniqueIndex("ot_records_user_work_date_unique").on(table.userId, table.workDate),
+]);

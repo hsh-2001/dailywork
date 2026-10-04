@@ -12,6 +12,11 @@ import {
 import { and, count, desc, eq, gte, ilike, inArray, lte } from "drizzle-orm";
 import { getPagination } from "../../utils/pagination";
 import { NextRequest } from "next/server";
+import {
+  duplicateWorkDateResponse,
+  isDuplicateWorkDateError,
+  isValidWorkDate,
+} from "./record-errors";
 
 export async function GET(req: NextRequest) {
   try {
@@ -100,6 +105,9 @@ export async function POST(req: NextRequest) {
         400,
       );
     }
+    if (!isValidWorkDate(workDate)) {
+      return ApiResponse.failed("Invalid work date", "INVALID_DATE", 400);
+    }
 
     if (!["PENDING", "BOOKED", "CANCELLED"].includes(bookingStatus) ||
       !["NOT_SUBMITTED", "SUBMITTED", "APPROVED", "REJECTED"].includes(submitStatus)) {
@@ -131,6 +139,13 @@ export async function POST(req: NextRequest) {
 
     await syncAuthUserRecord(user);
 
+    const existingRecord = await db
+      .select({ id: otRecordTable.id })
+      .from(otRecordTable)
+      .where(and(eq(otRecordTable.userId, user.id), eq(otRecordTable.workDate, workDate)))
+      .limit(1);
+    if (existingRecord.length > 0) return duplicateWorkDateResponse();
+
     const result = await db
       .insert(otRecordTable)
       .values({
@@ -149,6 +164,7 @@ export async function POST(req: NextRequest) {
 
     return ApiResponse.success(result[0], "Record created successfully");
   } catch (error) {
+    if (isDuplicateWorkDateError(error)) return duplicateWorkDateResponse();
     console.error("Error creating record:", error);
 
     return ApiResponse.failed("Failed to create record", "DB_ERROR", 500);

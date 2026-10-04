@@ -25,7 +25,7 @@ export default function OTRecordPage() {
   const [bookingStatus, setBookingStatus] = useState<string>();
   const [submitStatus, setSubmitStatus] = useState<string>();
   const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null] | null>(null);
-  const [isFilterOpen, setIsFilterOpen] = useState(true);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [bulkBookingStatus, setBulkBookingStatus] = useState<BookingStatus>();
   const [bulkSubmitStatus, setBulkSubmitStatus] = useState<SubmitStatus>();
