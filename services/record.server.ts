@@ -2,12 +2,10 @@ import "server-only";
 
 import db from "@/db/db";
 import { otRecordTable } from "@/db/tables/ot_records";
-import { getCurrentAuthUser } from "@/lib/auth/current-user";
 import type { IRecordPageResponse } from "@/shares/dtos/record/recordResponse";
 import type { RecordFilters } from "@/shares/dtos/record/recordFilters";
 import type { PaginationRequest } from "@/shares/types/paginationRquest";
 import { and, count, desc, eq, gte, ilike, lte } from "drizzle-orm";
-import { unstable_rethrow } from "next/navigation";
 import {
   getCachedOTRecordPage,
   getOTRecordCacheVersion,
@@ -94,18 +92,4 @@ export async function getUserRecordPage(
   }
 
   return result;
-}
-
-export async function getInitialUserRecordPage(
-  pageSize: number,
-): Promise<IRecordPageResponse | undefined> {
-  try {
-    const user = await getCurrentAuthUser();
-    if (!user) return undefined;
-    return await getUserRecordPage(user.id, { page: 1, pageSize });
-  } catch (error) {
-    unstable_rethrow(error);
-    console.error("Unable to load initial work logs", error);
-    return undefined;
-  }
 }
