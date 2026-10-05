@@ -2,6 +2,7 @@ import db from "@/db/db";
 import { otRecordTable } from "@/db/tables/ot_records";
 import { getCurrentAuthUser } from "@/lib/auth/current-user";
 import { getUserRecordPage } from "@/services/record.server";
+import { notifyRecordChange } from "@/services/record-notification.server";
 import {
   ApiPageResponse,
   ApiResponse,
@@ -73,9 +74,9 @@ export async function POST(req: NextRequest) {
     const bookingStatus = body.bookingStatus ?? "PENDING";
     const submitStatus = body.submitStatus ?? "NOT_SUBMITTED";
 
-    if (!workDate || !startTime || !endTime) {
+    if (!workDate || !startTime) {
       return ApiResponse.failed(
-        "Work date, start time and end time are required",
+        "Work date and start time are required",
         "INVALID_INPUT",
         400,
       );
@@ -90,9 +91,9 @@ export async function POST(req: NextRequest) {
     }
 
     const start = new Date(startTime);
-    const end = new Date(endTime);
+    const end = endTime ? new Date(endTime) : null;
 
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    if (isNaN(start.getTime()) || (end && isNaN(end.getTime()))) {
       return ApiResponse.failed(
         "Invalid start time or end time",
         "INVALID_DATE",
@@ -100,7 +101,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (end <= start) {
+    if (end && end <= start) {
       return ApiResponse.failed(
         "End time must be after start time",
         "INVALID_TIME_RANGE",
@@ -108,9 +109,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const totalMinutes = Math.floor(
-      (end.getTime() - start.getTime()) / (1000 * 60),
-    );
+    const totalMinutes = end
+      ? Math.floor((end.getTime() - start.getTime()) / (1000 * 60))
+      : null;
 
     const existingRecord = await db
       .select({ id: otRecordTable.id })
@@ -125,7 +126,7 @@ export async function POST(req: NextRequest) {
         userId: user.id,
         workDate: workDate,
         startTime: new Date(startTime),
-        endTime: new Date(endTime),
+        endTime: end,
         totalMinutes: totalMinutes,
         project: project ?? null,
         task: task ?? null,
@@ -134,6 +135,8 @@ export async function POST(req: NextRequest) {
         submitStatus,
       })
       .returning();
+
+    notifyRecordChange(result[0], "created");
 
     return ApiResponse.success(result[0], "Record created successfully");
   } catch (error) {

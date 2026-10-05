@@ -42,7 +42,7 @@ function AddRecordPageContent() {
         ...record,
         workDate: dayjs.tz(record.workDate, APP_TZ),
         startTime: dayjs(record.startTime).tz(APP_TZ),
-        endTime: dayjs(record.endTime).tz(APP_TZ),
+        endTime: record.endTime ? dayjs(record.endTime).tz(APP_TZ) : undefined,
         project: record.project ?? undefined,
         task: record.task ?? undefined,
         note: record.note ?? undefined,
@@ -59,7 +59,7 @@ function AddRecordPageContent() {
       const payload: ICreateRecordRequest = {
         workDate: toDateString(values.workDate),
         startTime: values.startTime.toISOString(),
-        endTime: values.endTime.toISOString(),
+        endTime: values.endTime?.toISOString() ?? null,
         project: values.project,
         task: values.task,
         note: values.note,
@@ -81,6 +81,17 @@ function AddRecordPageContent() {
       ) {
         setSubmitError(error.response.data.message ?? "A work log already exists for this date.");
         return;
+      }
+      if (isAxiosError<{ errorCode?: string; message?: string }>(error)) {
+        const { errorCode, message } = error.response?.data ?? {};
+        if (errorCode === "DB_ERROR") {
+          setSubmitError("Couldn't save the work log. Check that the latest database migration has been applied, then try again.");
+          return;
+        }
+        if (message) {
+          setSubmitError(message);
+          return;
+        }
       }
       setSubmitError("Couldn't save this record. Please try again.");
     }

@@ -21,7 +21,7 @@ export const otRecordTable = pgTable("ot_records", {
 
   startTime: timestamp("start_time").notNull(),
 
-  endTime: timestamp("end_time").notNull(),
+  endTime: timestamp("end_time"),
 
   totalMinutes: integer("total_minutes"),
 

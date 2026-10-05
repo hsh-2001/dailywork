@@ -2,6 +2,7 @@ import db from "@/db/db";
 import { otRecordTable } from "@/db/tables/ot_records";
 import { getCurrentAuthUser } from "@/lib/auth/current-user";
 import { ApiResponse } from "@/shares/types/apiResponse";
+import { notifyRecordChange } from "@/services/record-notification.server";
 import { and, eq, ne } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import {
@@ -21,9 +22,9 @@ export async function PUT(req: NextRequest) {
     const bookingStatus = body.bookingStatus ?? "PENDING";
     const submitStatus = body.submitStatus ?? "NOT_SUBMITTED";
 
-    if (!id || !Number.isInteger(Number(id)) || Number(id) <= 0 || !workDate || !startTime || !endTime) {
+    if (!id || !Number.isInteger(Number(id)) || Number(id) <= 0 || !workDate || !startTime) {
       return ApiResponse.failed(
-        "Record ID, work date, start time and end time are required",
+        "Record ID, work date and start time are required",
         "INVALID_INPUT",
         400,
       );
@@ -37,9 +38,9 @@ export async function PUT(req: NextRequest) {
     }
 
     const start = new Date(startTime);
-    const end = new Date(endTime);
+    const end = endTime ? new Date(endTime) : null;
 
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    if (isNaN(start.getTime()) || (end && isNaN(end.getTime()))) {
       return ApiResponse.failed(
         "Invalid start time or end time",
         "INVALID_DATE",
@@ -47,7 +48,7 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    if (end <= start) {
+    if (end && end <= start) {
       return ApiResponse.failed(
         "End time must be after start time",
         "INVALID_TIME_RANGE",
@@ -55,9 +56,9 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const totalMinutes = Math.floor(
-      (end.getTime() - start.getTime()) / (1000 * 60),
-    );
+    const totalMinutes = end
+      ? Math.floor((end.getTime() - start.getTime()) / (1000 * 60))
+      : null;
 
     const existingRecord = await db
       .select({ id: otRecordTable.id })
@@ -75,7 +76,7 @@ export async function PUT(req: NextRequest) {
       .set({
         workDate: workDate,
         startTime: new Date(startTime),
-        endTime: new Date(endTime),
+        endTime: end,
         totalMinutes: totalMinutes,
         project: project ?? null,
         task: task ?? null,
@@ -94,6 +95,8 @@ export async function PUT(req: NextRequest) {
     if (result.length === 0) {
       return ApiResponse.failed("Record not found", "NOT_FOUND", 404);
     }
+
+    notifyRecordChange(result[0], "updated");
 
     return ApiResponse.success(result[0], "Record updated successfully");
   } catch (error) {

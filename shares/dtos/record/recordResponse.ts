@@ -7,7 +7,7 @@ export interface IRecordResponse {
   id: number;
   workDate: string;
   startTime: string;
-  endTime: string;
+  endTime: string | null;
   totalMinutes: number | null;
   project: string | null;
   task: string | null;

@@ -28,26 +28,24 @@ export async function getUserRecordPage(
   }
 
   const where = and(...filters);
-  const [records, [{ total }]] = await Promise.all([
-    db
-      .select()
-      .from(otRecordTable)
-      .where(where)
-      .orderBy(desc(otRecordTable.workDate))
-      .limit(pageSize)
-      .offset((page - 1) * pageSize),
-    db
-      .select({ total: count() })
-      .from(otRecordTable)
-      .where(where),
-  ]);
+  const records = await db
+    .select()
+    .from(otRecordTable)
+    .where(where)
+    .orderBy(desc(otRecordTable.workDate))
+    .limit(pageSize)
+    .offset((page - 1) * pageSize);
+  const [{ total }] = await db
+    .select({ total: count() })
+    .from(otRecordTable)
+    .where(where);
 
   return {
     data: records.map((record) => ({
       id: record.id,
       workDate: record.workDate,
       startTime: record.startTime.toISOString(),
-      endTime: record.endTime.toISOString(),
+      endTime: record.endTime?.toISOString() ?? null,
       totalMinutes: record.totalMinutes,
       project: record.project,
       task: record.task,

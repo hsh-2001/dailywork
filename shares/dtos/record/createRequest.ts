@@ -1,7 +1,7 @@
 export interface ICreateRecordRequest {
   workDate: string;
   startTime: string;
-  endTime: string;
+  endTime?: string | null;
   project?: string;
   task?: string;
   note?: string;

@@ -156,7 +156,7 @@ export default function RecordList({
                     </p>
                     <p className="flex shrink-0 items-center gap-1 whitespace-nowrap tabular-nums text-slate-500">
                       <Clock3 size={12} aria-hidden="true" />
-                      {formatTime(record.startTime)}–{formatTime(record.endTime)}
+                      {formatTime(record.startTime)}–{record.endTime ? formatTime(record.endTime) : "In progress"}
                     </p>
                   </div>
                   <StatusBadges bookingStatus={record.bookingStatus} submitStatus={record.submitStatus} />
@@ -179,7 +179,7 @@ export default function RecordList({
 
                   <div className="flex items-center gap-2 text-[13px] text-slate-600 md:pl-0">
                     <Clock3 size={14} className="shrink-0 text-slate-400" aria-hidden="true" />
-                    <span className="tabular-nums">{formatTime(record.startTime)} – {formatTime(record.endTime)}</span>
+                    <span className="tabular-nums">{formatTime(record.startTime)} – {record.endTime ? formatTime(record.endTime) : "In progress"}</span>
                   </div>
 
                   <div className="min-w-0 md:pr-2">

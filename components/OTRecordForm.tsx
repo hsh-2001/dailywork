@@ -9,7 +9,7 @@ import MobileTimePicker from "./MobileTimePicker";
 export interface OTRecordFormValues {
   workDate: Dayjs;
   startTime: Dayjs;
-  endTime: Dayjs;
+  endTime?: Dayjs;
   project?: string;
   task?: string;
   note?: string;
@@ -84,7 +84,6 @@ export default function OTRecordForm({
           label="End Time"
           dependencies={["startTime"]}
           rules={[
-            { required: true, message: "Select end time" },
             ({ getFieldValue }) => ({
               validator(_, value) {
                 const start = getFieldValue("startTime");
@@ -98,9 +97,9 @@ export default function OTRecordForm({
           ]}
         >
           {isMobile ? (
-            <MobileTimePicker title="End time" placeholder="End" />
+            <MobileTimePicker title="End time (optional)" placeholder="End" />
           ) : (
-            <TimePicker className="w-full" format="HH:mm" />
+            <TimePicker className="w-full" format="HH:mm" placeholder="Optional" />
           )}
         </Form.Item>
       </div>
