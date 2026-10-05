@@ -75,9 +75,9 @@ export async function POST(req: NextRequest) {
     const bookingStatus = body.bookingStatus ?? "PENDING";
     const submitStatus = body.submitStatus ?? "NOT_SUBMITTED";
 
-    if (!workDate || !startTime) {
+    if (!workDate || !startTime || !endTime) {
       return ApiResponse.failed(
-        "Work date and start time are required",
+        "Work date, start time and end time are required to save a work log",
         "INVALID_INPUT",
         400,
       );

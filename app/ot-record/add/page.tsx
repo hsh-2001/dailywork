@@ -1,11 +1,17 @@
 "use client";
 
 import OTRecordForm, { OTRecordFormValues } from "@/components/OTRecordForm";
-import { useCreateRecord, useUpdateRecord } from "@/hooks/record.hook";
+import {
+  useCreateRecord,
+  useCreateRecordDraft,
+  useFinishRecordDraft,
+  useRecordDraft,
+  useUpdateRecord,
+} from "@/hooks/record.hook";
 import { useProjects } from "@/hooks/project.hook";
 import { ICreateRecordRequest } from "@/shares/dtos/record/createRequest";
 import { IRecordResponse } from "@/shares/dtos/record/recordResponse";
-import { APP_TZ, toDateString } from "@/utils/datetime";
+import { APP_TZ, toDateString, toGmt7Timestamp } from "@/utils/datetime";
 import { ArrowLeft, Save } from "lucide-react";
 import { Alert, Button, Form, Spin } from "antd";
 import dayjs from "dayjs";
@@ -19,6 +25,7 @@ function AddRecordPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const recordParam = searchParams.get("record");
+  const draftId = searchParams.get("draft");
   const record = useMemo<IRecordResponse | null>(() => {
     if (!recordParam) return null;
     try {
@@ -30,11 +37,20 @@ function AddRecordPageContent() {
   }, [recordParam]);
   const [form] = Form.useForm<OTRecordFormValues>();
   const createMutation = useCreateRecord();
+  const createDraftMutation = useCreateRecordDraft();
+  const finishDraftMutation = useFinishRecordDraft();
   const updateMutation = useUpdateRecord();
+  const draftQuery = useRecordDraft(draftId ?? undefined);
   const projectsQuery = useProjects();
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const isEditing = Boolean(record);
-  const isPending = createMutation.isPending || updateMutation.isPending;
+  const isFinishingDraft = Boolean(draftId);
+  const isEditing = Boolean(record) || isFinishingDraft;
+  const isPending =
+    createMutation.isPending ||
+    createDraftMutation.isPending ||
+    finishDraftMutation.isPending ||
+    updateMutation.isPending;
+  const endTime = Form.useWatch("endTime", form);
 
   useEffect(() => {
     if (record) {
@@ -52,14 +68,42 @@ function AddRecordPageContent() {
     }
   }, [form, record]);
 
+  useEffect(() => {
+    const draft = draftQuery.data;
+    if (!draft) return;
+    form.setFieldsValue({
+      workDate: dayjs.tz(draft.workDate, APP_TZ),
+      startTime: dayjs(draft.startTime).tz(APP_TZ),
+      project: draft.project ?? undefined,
+      task: draft.task ?? undefined,
+      note: draft.note ?? undefined,
+      bookingStatus: draft.bookingStatus,
+      submitStatus: draft.submitStatus,
+    });
+  }, [draftQuery.data, form]);
+
   const handleSubmit = async () => {
     setSubmitError(null);
     try {
       const values = await form.validateFields();
+      const startTime = toGmt7Timestamp(values.workDate, values.startTime);
+      const selectedEndTime = values.endTime;
+      let endTime = selectedEndTime
+        ? toGmt7Timestamp(values.workDate, selectedEndTime)
+        : null;
+      if (
+        endTime &&
+        selectedEndTime &&
+        (selectedEndTime.hour() < values.startTime.hour() ||
+          (selectedEndTime.hour() === values.startTime.hour() &&
+            selectedEndTime.minute() < values.startTime.minute()))
+      ) {
+        endTime = dayjs(endTime).add(1, "day").toISOString();
+      }
       const payload: ICreateRecordRequest = {
         workDate: toDateString(values.workDate),
-        startTime: values.startTime.toISOString(),
-        endTime: values.endTime?.toISOString() ?? null,
+        startTime,
+        endTime,
         project: values.project,
         task: values.task,
         note: values.note,
@@ -67,8 +111,17 @@ function AddRecordPageContent() {
         submitStatus: values.submitStatus,
       };
 
-      if (record) {
+      if (isFinishingDraft && !values.endTime) {
+        setSubmitError("Select an end time to finish this OT draft.");
+        return;
+      }
+
+      if (draftId) {
+        await finishDraftMutation.mutateAsync({ id: draftId, data: payload });
+      } else if (record) {
         await updateMutation.mutateAsync({ id: record.id, data: payload });
+      } else if (!values.endTime) {
+        await createDraftMutation.mutateAsync(payload);
       } else {
         await createMutation.mutateAsync(payload);
       }
@@ -110,10 +163,12 @@ function AddRecordPageContent() {
         <header className="mb-4">
           <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-700">Work logs</p>
           <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">
-            {isEditing ? "Edit work log" : "Add work log"}
+            {isFinishingDraft ? "Finish OT draft" : isEditing ? "Edit work log" : "Add work log"}
           </h1>
           <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">
-            Enter your work hours and add any useful details.
+            {isFinishingDraft
+              ? "Add the end time to save this draft as a work log."
+              : "Enter your work hours and add any useful details."}
           </p>
         </header>
 
@@ -132,8 +187,8 @@ function AddRecordPageContent() {
               }
             />
           )}
-          {!recordParam || record ? (
-            <Spin spinning={isPending}>
+          {(!recordParam || record) && (!draftId || draftQuery.data) ? (
+            <Spin spinning={isPending || (isFinishingDraft && draftQuery.isLoading)}>
               <OTRecordForm
                 form={form}
                 projects={projectsQuery.data?.data ?? []}
@@ -145,12 +200,22 @@ function AddRecordPageContent() {
                   Cancel
                 </Button>
                 <Button type="primary" icon={<Save size={16} />} loading={isPending} onClick={handleSubmit}>
-                  {isEditing ? "Save changes" : "Save record"}
+                  {isFinishingDraft
+                    ? "Finish OT"
+                    : record
+                      ? "Save changes"
+                      : endTime
+                        ? "Save record"
+                        : "Start OT draft"}
                 </Button>
               </div>
             </Spin>
           ) : (
-            <Alert type="error" showIcon message="This record link is invalid." />
+            <Alert
+              type="error"
+              showIcon
+              message={draftId && draftQuery.isLoading ? "Loading OT draft..." : "This work log or draft link is invalid."}
+            />
           )}
         </section>
       </div>

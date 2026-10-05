@@ -38,6 +38,36 @@ function pageKey(userId: string, version: string, query: string) {
   return `ot-records:${hashKeyPart(userId)}:${version}:${hashKeyPart(query)}`;
 }
 
+function draftsKey(userId: string) {
+  return `ot-record-drafts:${hashKeyPart(userId)}`;
+}
+
+function requireRedisClient() {
+  const redis = getRedisClient();
+  if (!redis) throw new Error("REDIS_URL is not configured");
+  return redis;
+}
+
+export async function getOTRecordDrafts(userId: string) {
+  return requireRedisClient().hgetall(draftsKey(userId));
+}
+
+export async function getOTRecordDraft(userId: string, draftId: string) {
+  return requireRedisClient().hget(draftsKey(userId), draftId);
+}
+
+export async function saveOTRecordDraft(
+  userId: string,
+  draftId: string,
+  draft: string,
+) {
+  await requireRedisClient().hset(draftsKey(userId), draftId, draft);
+}
+
+export async function deleteOTRecordDraft(userId: string, draftId: string) {
+  await requireRedisClient().hdel(draftsKey(userId), draftId);
+}
+
 export async function getOTRecordCacheVersion(userId: string) {
   const redis = getRedisClient();
   if (!redis) return "0";

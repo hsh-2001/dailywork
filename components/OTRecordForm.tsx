@@ -87,11 +87,15 @@ export default function OTRecordForm({
             ({ getFieldValue }) => ({
               validator(_, value) {
                 const start = getFieldValue("startTime");
-                // Overnight shifts: remove this check if end time can be before start time
-                if (!value || !start || value.isAfter(start)) {
+                if (
+                  !value ||
+                  !start ||
+                  value.hour() !== start.hour() ||
+                  value.minute() !== start.minute()
+                ) {
                   return Promise.resolve();
                 }
-                return Promise.reject(new Error("Must be after start"));
+                return Promise.reject(new Error("End time must differ from start time"));
               },
             }),
           ]}

@@ -30,6 +30,52 @@ export const useCreateRecord = () => {
   });
 };
 
+export const useRecordDrafts = () => {
+  return useQuery({
+    queryKey: ["ot-record-drafts"],
+    queryFn: () => recordService.getDrafts(),
+  });
+};
+
+export const useRecordDraft = (id?: string) => {
+  return useQuery({
+    queryKey: ["ot-record-drafts", id],
+    queryFn: () => {
+      if (!id) throw new Error("A draft ID is required");
+      return recordService.getDraft(id);
+    },
+    enabled: Boolean(id),
+  });
+};
+
+export const useCreateRecordDraft = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: ICreateRecordRequest) => recordService.createDraft(data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["ot-record-drafts"] }),
+  });
+};
+
+export const useDeleteRecordDraft = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => recordService.deleteDraft(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["ot-record-drafts"] }),
+  });
+};
+
+export const useFinishRecordDraft = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: ICreateRecordRequest }) =>
+      recordService.finishDraft(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ot-record-drafts"] });
+      queryClient.invalidateQueries({ queryKey: ["ot-records"] });
+    },
+  });
+};
+
 export const useUpdateRecord = () => {
   const queryClient = useQueryClient();
   return useMutation({

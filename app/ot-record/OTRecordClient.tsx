@@ -1,7 +1,9 @@
 "use client";
 import { useState } from "react";
 import {
+  useDeleteRecordDraft,
   useDeleteRecord,
+  useRecordDrafts,
   useRecords,
   useUpdateRecordStatuses,
 } from "@/hooks/record.hook";
@@ -13,11 +15,13 @@ import type {
   IRecordResponse,
 } from "@/shares/dtos/record/recordResponse";
 import type { BookingStatus, SubmitStatus } from "@/shares/dtos/record/recordResponse";
+import type { IRecordDraft } from "@/shares/dtos/record/recordDraft";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useProjects } from "@/hooks/project.hook";
 import type { RecordFilters } from "@/shares/dtos/record/recordFilters";
 import type { Dayjs } from "dayjs";
+import { formatTime } from "@/utils/datetime";
 
 export default function OTRecordClient() {
   const router = useRouter();
@@ -34,9 +38,11 @@ export default function OTRecordClient() {
   const screens = Grid.useBreakpoint();
   const isMobile = screens.md === false;
   const { data, isLoading, isError, refetch } = useRecords({ ...pagination, ...filters });
+  const draftsQuery = useRecordDrafts();
   const projectsQuery = useProjects();
 
   const { mutate: deleteRecord } = useDeleteRecord();
+  const { mutate: deleteDraft } = useDeleteRecordDraft();
   const { mutate: updateStatuses, isPending: isUpdatingStatuses } = useUpdateRecordStatuses();
 
   const clearSelection = () => {
@@ -146,6 +152,64 @@ export default function OTRecordClient() {
             />
           </Link>
         </header>
+
+        {draftsQuery.isError && (
+          <Alert
+            className="mb-4"
+            type="error"
+            showIcon
+            title="Couldn't load in-progress OT drafts"
+            description="Check your Redis connection and try again."
+            action={
+              <Button size="small" danger onClick={() => draftsQuery.refetch()}>
+                Try again
+              </Button>
+            }
+          />
+        )}
+
+        {(draftsQuery.data?.length ?? 0) > 0 && (
+          <section aria-labelledby="ot-drafts-title" className="mb-4 overflow-hidden rounded-xl border border-amber-200 bg-white">
+            <div className="flex items-center justify-between border-b border-amber-100 bg-amber-50/60 px-4 py-3 sm:px-5">
+              <div>
+                <h2 id="ot-drafts-title" className="text-sm font-semibold text-slate-900">In-progress OT drafts</h2>
+                <p className="mt-0.5 text-xs text-slate-500">Finish these to save them to your work logs.</p>
+              </div>
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">
+                {draftsQuery.data?.length}
+              </span>
+            </div>
+            <ul className="divide-y divide-slate-100">
+              {draftsQuery.data?.map((draft: IRecordDraft) => (
+                <li key={draft.id} className="flex flex-wrap items-center gap-3 px-4 py-3 sm:px-5">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-slate-900">{draft.workDate}</p>
+                    <p className="mt-0.5 truncate text-xs text-slate-600">
+                      {formatTime(draft.startTime)} · {[draft.project, draft.task].filter(Boolean).join(" · ") || "No project or task"}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Button
+                      size="small"
+                      danger
+                      onClick={() => {
+                        if (!window.confirm("Delete this unfinished OT draft?")) return;
+                        deleteDraft(draft.id, {
+                          onError: () => message.error("Couldn't delete OT draft. Please try again."),
+                        });
+                      }}
+                    >
+                      Discard
+                    </Button>
+                    <Link href={`/ot-record/add?draft=${encodeURIComponent(draft.id)}`}>
+                      <Button size="small" type="primary">Finish</Button>
+                    </Link>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {isError ? (
           <Alert
