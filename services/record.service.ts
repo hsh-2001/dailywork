@@ -3,8 +3,11 @@ import api from "./api";
 import { ICreateRecordRequest } from "@/shares/dtos/record/createRequest";
 import type { RecordFilters } from "@/shares/dtos/record/recordFilters";
 import type { UpdateRecordStatusesRequest } from "@/shares/dtos/record/updateRecordStatusesRequest";
+import type { IRecordPageResponse } from "@/shares/dtos/record/recordResponse";
 
-const getRecords = async (request: PaginationRequest & RecordFilters) => {
+const getRecords = async (
+  request: PaginationRequest & RecordFilters,
+): Promise<IRecordPageResponse> => {
   const response = await api.get("/record", {
     params: {
       page: request.page,

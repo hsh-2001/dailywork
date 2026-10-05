@@ -1,3 +1,5 @@
+import type { Pagination } from "@/shares/types/apiResponse";
+
 export type BookingStatus = "PENDING" | "BOOKED" | "CANCELLED";
 export type SubmitStatus = "NOT_SUBMITTED" | "SUBMITTED" | "APPROVED" | "REJECTED";
 
@@ -12,4 +14,9 @@ export interface IRecordResponse {
   note: string | null;
   bookingStatus: BookingStatus;
   submitStatus: SubmitStatus;
+}
+
+export interface IRecordPageResponse {
+  data: IRecordResponse[];
+  pagination: Pagination;
 }

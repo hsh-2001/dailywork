@@ -1,12 +1,12 @@
 import db from "@/db/db";
 import { otRecordTable } from "@/db/tables/ot_records";
 import { getCurrentAuthUser } from "@/lib/auth/current-user";
+import { getUserRecordPage } from "@/services/record.server";
 import {
   ApiPageResponse,
   ApiResponse,
-  Pagination,
 } from "../../../../shares/types/apiResponse";
-import { and, count, desc, eq, gte, ilike, inArray, lte } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { getPagination } from "../../utils/pagination";
 import { NextRequest } from "next/server";
 import {
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
     const user = await getCurrentAuthUser();
     if (!user) return ApiResponse.failed("Authentication required", "UNAUTHORIZED", 401);
 
-    const { page, pageSize, offset } = getPagination(req);
+    const { page, pageSize } = getPagination(req);
     const params = req.nextUrl.searchParams;
     const dateFrom = params.get("dateFrom") || "";
     const dateTo = params.get("dateTo") || "";
@@ -40,41 +40,19 @@ export async function GET(req: NextRequest) {
       return ApiResponse.failed("Invalid work log status filter", "INVALID_INPUT", 400);
     }
 
-    const filters = [eq(otRecordTable.userId, user.id)];
-    if (dateFrom) filters.push(gte(otRecordTable.workDate, dateFrom));
-    if (dateTo) filters.push(lte(otRecordTable.workDate, dateTo));
-    if (project) filters.push(ilike(otRecordTable.project, `%${project}%`));
-    if (bookingStatus) filters.push(eq(otRecordTable.bookingStatus, bookingStatus));
-    if (submitStatus) filters.push(eq(otRecordTable.submitStatus, submitStatus));
-    const where = and(...filters);
-
-    const records = await db
-      .select()
-      .from(otRecordTable)
-      .where(where)
-      .orderBy(desc(otRecordTable.workDate))
-      .limit(pageSize)
-      .offset(offset);
-
-    const [{ total }] = await db
-      .select({
-        total: count(),
-      })
-      .from(otRecordTable)
-      .where(where);
-
-    const totalPages = Math.ceil(total / pageSize);
-
-    const pagination: Pagination = {
+    const recordPage = await getUserRecordPage(user.id, {
       page,
       pageSize,
-      total,
-      totalPages,
-    };
+      dateFrom: dateFrom || undefined,
+      dateTo: dateTo || undefined,
+      project,
+      bookingStatus,
+      submitStatus,
+    });
 
     return ApiPageResponse.success(
-      records,
-      pagination,
+      recordPage.data,
+      recordPage.pagination,
       "Records retrieved successfully",
     );
   } catch (error) {
