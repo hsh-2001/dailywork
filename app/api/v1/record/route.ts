@@ -3,6 +3,7 @@ import { otRecordTable } from "@/db/tables/ot_records";
 import { getCurrentAuthUser } from "@/lib/auth/current-user";
 import { getUserRecordPage } from "@/services/record.server";
 import { notifyRecordChange } from "@/services/record-notification.server";
+import { invalidateOTRecordCache } from "@/services/ot-record-cache.server";
 import {
   ApiPageResponse,
   ApiResponse,
@@ -136,6 +137,7 @@ export async function POST(req: NextRequest) {
       })
       .returning();
 
+    await invalidateOTRecordCache(user.id);
     notifyRecordChange(result[0], "created");
 
     return ApiResponse.success(result[0], "Record created successfully");
@@ -188,6 +190,8 @@ export async function PATCH(req: NextRequest) {
       .set(statuses)
       .where(and(eq(otRecordTable.userId, user.id), inArray(otRecordTable.id, ids)))
       .returning({ id: otRecordTable.id });
+
+    if (records.length > 0) await invalidateOTRecordCache(user.id);
 
     return ApiResponse.success(
       { updatedCount: records.length },
