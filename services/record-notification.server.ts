@@ -56,7 +56,8 @@ export function notifyRecordChange(
     }
 
     try {
-      const response = await fetch("https://api-center.shkh1601.workers.dev/telegram/send", {
+      const API_CENTER = process.env.API_CENTER;
+      const response = await fetch(`${API_CENTER}/telegram/send`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
