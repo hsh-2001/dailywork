@@ -1,37 +1,22 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# daily-work
 
-## Getting Started
+## Deploy to Cloudflare Workers
 
-First, run the development server:
+This project uses the OpenNext Cloudflare adapter to run the Next.js app on Workers.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. Install dependencies with `pnpm install`.
+2. For local Worker preview, keep `NEXTJS_ENV=development` in `.dev.vars`. Local secrets and application variables belong in `.env` (already gitignored).
+3. Set production secrets before the first deploy:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+   ```bash
+   pnpm wrangler secret put DATABASE_URL
+   pnpm wrangler secret put JWT_SECRET
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   Add `TELEGRAM_CHAT_ID`, `TELEGRAM_API_TOKEN`, and `REDIS_URL` as Worker secrets if those integrations are used.
+4. Build and run the Worker locally with `pnpm preview`.
+5. Deploy with `pnpm deploy`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The Worker name and runtime settings are in `wrangler.jsonc`; update `name` if deploying under a different Worker name. Add a custom domain in the Cloudflare dashboard or configure a `workers_dev`/route entry in that file.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# dailywork
+Cloudflare's OpenNext adapter supports the app's Neon PostgreSQL connection through the serverless driver. The optional Redis cache uses `ioredis`; validate that integration in Worker preview and use a Workers-compatible Redis client/service if it cannot connect from the Worker runtime.
