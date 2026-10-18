@@ -9,6 +9,8 @@ export interface IRecordResponse {
   startTime: string;
   endTime: string | null;
   totalMinutes: number | null;
+  breakStartTime: string | null;
+  breakEndTime: string | null;
   project: string | null;
   task: string | null;
   note: string | null;

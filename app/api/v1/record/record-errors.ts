@@ -42,3 +42,31 @@ export const isValidWorkDate = (value: unknown): value is string => {
   const timestamp = Date.parse(`${value}T00:00:00Z`);
   return !Number.isNaN(timestamp) && new Date(timestamp).toISOString().slice(0, 10) === value;
 };
+
+export const parseBreakInterval = (
+  breakStartValue: unknown,
+  breakEndValue: unknown,
+  start: Date,
+  end: Date | null,
+) => {
+  if ((breakStartValue == null || breakStartValue === "") && (breakEndValue == null || breakEndValue === "")) {
+    return { breakStart: null, breakEnd: null, breakMinutes: 0, error: null };
+  }
+  if (typeof breakStartValue !== "string" || typeof breakEndValue !== "string") {
+    return { breakStart: null, breakEnd: null, breakMinutes: 0, error: "Enter both break start and break end times" };
+  }
+  const breakStart = new Date(breakStartValue);
+  const breakEnd = new Date(breakEndValue);
+  if (Number.isNaN(breakStart.getTime()) || Number.isNaN(breakEnd.getTime())) {
+    return { breakStart: null, breakEnd: null, breakMinutes: 0, error: "Enter valid break start and end times" };
+  }
+  if (breakStart < start || breakEnd <= breakStart || (end && breakEnd > end)) {
+    return { breakStart: null, breakEnd: null, breakMinutes: 0, error: "Break time must fall within the work period" };
+  }
+  return {
+    breakStart,
+    breakEnd,
+    breakMinutes: Math.floor((breakEnd.getTime() - breakStart.getTime()) / 60_000),
+    error: null,
+  };
+};

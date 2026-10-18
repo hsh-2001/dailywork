@@ -17,6 +17,7 @@ import {
   isValidWorkDate,
   isDuplicateWorkDateError,
   duplicateWorkDateResponse,
+  parseBreakInterval,
 } from "../../../record-errors";
 
 const bookingStatuses: BookingStatus[] = ["PENDING", "BOOKED", "CANCELLED"];
@@ -47,6 +48,8 @@ export async function POST(req: NextRequest) {
     const workDate = typeof values.workDate === "string" ? values.workDate : draft.workDate;
     const startTime = typeof values.startTime === "string" ? values.startTime : draft.startTime;
     const endTime = values.endTime;
+    const breakStartTime = values.breakStartTime ?? draft.breakStartTime ?? null;
+    const breakEndTime = values.breakEndTime ?? draft.breakEndTime ?? null;
     const bookingStatus = values.bookingStatus ?? draft.bookingStatus;
     const submitStatus = values.submitStatus ?? draft.submitStatus;
 
@@ -70,6 +73,9 @@ export async function POST(req: NextRequest) {
     if (end <= start) {
       return ApiResponse.failed("End time must be after start time", "INVALID_TIME_RANGE", 400);
     }
+    const elapsedMinutes = Math.floor((end.getTime() - start.getTime()) / 60_000);
+    const breakInterval = parseBreakInterval(breakStartTime, breakEndTime, start, end);
+    if (breakInterval.error) return ApiResponse.failed(breakInterval.error, "INVALID_TIME_RANGE", 400);
 
     const duplicate = await db
       .select({ id: otRecordTable.id })
@@ -102,7 +108,9 @@ export async function POST(req: NextRequest) {
         workDate,
         startTime: start,
         endTime: end,
-        totalMinutes: Math.floor((end.getTime() - start.getTime()) / 60_000),
+        totalMinutes: elapsedMinutes - breakInterval.breakMinutes,
+        breakStartTime: breakInterval.breakStart,
+        breakEndTime: breakInterval.breakEnd,
         project: values.project === undefined
           ? draft.project
           : typeof values.project === "string" ? values.project : null,

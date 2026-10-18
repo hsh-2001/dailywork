@@ -59,6 +59,8 @@ function AddRecordPageContent() {
         workDate: dayjs.tz(record.workDate, APP_TZ),
         startTime: dayjs(record.startTime).tz(APP_TZ),
         endTime: record.endTime ? dayjs(record.endTime).tz(APP_TZ) : undefined,
+        breakStartTime: record.breakStartTime ? dayjs(record.breakStartTime).tz(APP_TZ) : undefined,
+        breakEndTime: record.breakEndTime ? dayjs(record.breakEndTime).tz(APP_TZ) : undefined,
         project: record.project ?? undefined,
         task: record.task ?? undefined,
         note: record.note ?? undefined,
@@ -74,6 +76,8 @@ function AddRecordPageContent() {
     form.setFieldsValue({
       workDate: dayjs.tz(draft.workDate, APP_TZ),
       startTime: dayjs(draft.startTime).tz(APP_TZ),
+      breakStartTime: draft.breakStartTime ? dayjs(draft.breakStartTime).tz(APP_TZ) : undefined,
+      breakEndTime: draft.breakEndTime ? dayjs(draft.breakEndTime).tz(APP_TZ) : undefined,
       project: draft.project ?? undefined,
       task: draft.task ?? undefined,
       note: draft.note ?? undefined,
@@ -91,6 +95,12 @@ function AddRecordPageContent() {
       let endTime = selectedEndTime
         ? toGmt7Timestamp(values.workDate, selectedEndTime)
         : null;
+      let breakStartTime = values.breakStartTime
+        ? toGmt7Timestamp(values.workDate, values.breakStartTime)
+        : null;
+      let breakEndTime = values.breakEndTime
+        ? toGmt7Timestamp(values.workDate, values.breakEndTime)
+        : null;
       if (
         endTime &&
         selectedEndTime &&
@@ -100,10 +110,24 @@ function AddRecordPageContent() {
       ) {
         endTime = dayjs(endTime).add(1, "day").toISOString();
       }
+      if (breakStartTime && values.breakStartTime &&
+        (values.breakStartTime.hour() < values.startTime.hour() ||
+          (values.breakStartTime.hour() === values.startTime.hour() && values.breakStartTime.minute() < values.startTime.minute()))) {
+        breakStartTime = dayjs(breakStartTime).add(1, "day").toISOString();
+      }
+      if (breakEndTime && values.breakEndTime && values.breakStartTime &&
+        (values.breakEndTime.hour() < values.breakStartTime.hour() ||
+          (values.breakEndTime.hour() === values.breakStartTime.hour() && values.breakEndTime.minute() <= values.breakStartTime.minute()))) {
+        breakEndTime = dayjs(breakEndTime).add(1, "day").toISOString();
+      } else if (breakEndTime && breakStartTime && dayjs(breakEndTime).isBefore(dayjs(breakStartTime))) {
+        breakEndTime = dayjs(breakEndTime).add(1, "day").toISOString();
+      }
       const payload: ICreateRecordRequest = {
         workDate: toDateString(values.workDate),
         startTime,
         endTime,
+        breakStartTime,
+        breakEndTime,
         project: values.project,
         task: values.task,
         note: values.note,

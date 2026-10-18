@@ -11,7 +11,7 @@ import type { BookingStatus, SubmitStatus } from "@/shares/dtos/record/recordRes
 import { and, eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { randomUUID } from "node:crypto";
-import { isValidWorkDate } from "../record-errors";
+import { isValidWorkDate, parseBreakInterval } from "../record-errors";
 
 const bookingStatuses: BookingStatus[] = ["PENDING", "BOOKED", "CANCELLED"];
 const submitStatuses: SubmitStatus[] = ["NOT_SUBMITTED", "SUBMITTED", "APPROVED", "REJECTED"];
@@ -44,6 +44,8 @@ export async function POST(req: NextRequest) {
 
     const draftInput = body as Record<string, unknown>;
     const { workDate, startTime } = draftInput;
+    const breakStartTime = draftInput.breakStartTime ?? null;
+    const breakEndTime = draftInput.breakEndTime ?? null;
     const bookingStatus = draftInput.bookingStatus ?? "PENDING";
     const submitStatus = draftInput.submitStatus ?? "NOT_SUBMITTED";
     if (
@@ -54,6 +56,8 @@ export async function POST(req: NextRequest) {
     ) {
       return ApiResponse.failed("A valid work date and start time are required", "INVALID_INPUT", 400);
     }
+    const breakInterval = parseBreakInterval(breakStartTime, breakEndTime, new Date(startTime), null);
+    if (breakInterval.error) return ApiResponse.failed(breakInterval.error, "INVALID_TIME_RANGE", 400);
     if (
       typeof bookingStatus !== "string" ||
       !bookingStatuses.includes(bookingStatus as BookingStatus) ||
@@ -82,6 +86,8 @@ export async function POST(req: NextRequest) {
       id: randomUUID(),
       workDate,
       startTime: new Date(startTime).toISOString(),
+      breakStartTime: breakInterval.breakStart?.toISOString() ?? null,
+      breakEndTime: breakInterval.breakEnd?.toISOString() ?? null,
       project: typeof draftInput.project === "string" ? draftInput.project : null,
       task: typeof draftInput.task === "string" ? draftInput.task : null,
       note: typeof draftInput.note === "string" ? draftInput.note : null,

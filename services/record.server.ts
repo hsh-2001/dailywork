@@ -69,6 +69,8 @@ export async function getUserRecordPage(
       startTime: record.startTime.toISOString(),
       endTime: record.endTime?.toISOString() ?? null,
       totalMinutes: record.totalMinutes,
+      breakStartTime: record.breakStartTime?.toISOString() ?? null,
+      breakEndTime: record.breakEndTime?.toISOString() ?? null,
       project: record.project,
       task: record.task,
       note: record.note,

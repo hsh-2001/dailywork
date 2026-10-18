@@ -10,6 +10,8 @@ export interface OTRecordFormValues {
   workDate: Dayjs;
   startTime: Dayjs;
   endTime?: Dayjs;
+  breakStartTime?: Dayjs;
+  breakEndTime?: Dayjs;
   project?: string;
   task?: string;
   note?: string;
@@ -102,6 +104,58 @@ export default function OTRecordForm({
         >
           {isMobile ? (
             <MobileTimePicker title="End time (optional)" placeholder="End" />
+          ) : (
+            <TimePicker className="w-full" format="HH:mm" placeholder="Optional" />
+          )}
+        </Form.Item>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        <Form.Item name="breakStartTime" label="Break Start">
+          {isMobile ? (
+            <MobileTimePicker title="Break start" placeholder="Optional" />
+          ) : (
+            <TimePicker className="w-full" format="HH:mm" placeholder="Optional" />
+          )}
+        </Form.Item>
+        <Form.Item
+          name="breakEndTime"
+          label="Break End"
+          dependencies={["startTime", "endTime", "breakStartTime"]}
+          rules={[({ getFieldValue }) => ({
+            validator(_, value) {
+              const breakStart = getFieldValue("breakStartTime");
+              const start = getFieldValue("startTime");
+              const end = getFieldValue("endTime");
+              if (!breakStart && !value) return Promise.resolve();
+              if (!breakStart || !value) {
+                return Promise.reject(new Error("Enter both break start and break end times"));
+              }
+              if (!start) return Promise.resolve();
+
+              const minutes = (time: Dayjs) => time.hour() * 60 + time.minute();
+              const workStart = minutes(start);
+              const breakStartMinute = minutes(breakStart) < workStart
+                ? minutes(breakStart) + 1440
+                : minutes(breakStart);
+              const breakEndMinute = minutes(value) <= minutes(breakStart)
+                ? minutes(value) + 1440
+                : minutes(value);
+              if (breakStartMinute < workStart || breakEndMinute <= breakStartMinute) {
+                return Promise.reject(new Error("Break time must be after work starts"));
+              }
+              if (end) {
+                const workEnd = minutes(end) <= workStart ? minutes(end) + 1440 : minutes(end);
+                if (breakEndMinute > workEnd) {
+                  return Promise.reject(new Error("Break time must finish before work ends"));
+                }
+              }
+              return Promise.resolve();
+            },
+          })]}
+        >
+          {isMobile ? (
+            <MobileTimePicker title="Break end" placeholder="Optional" />
           ) : (
             <TimePicker className="w-full" format="HH:mm" placeholder="Optional" />
           )}

@@ -25,6 +25,10 @@ export const otRecordTable = pgTable("ot_records", {
 
   totalMinutes: integer("total_minutes"),
 
+  breakStartTime: timestamp("break_start_time"),
+
+  breakEndTime: timestamp("break_end_time"),
+
   project: varchar("project", { length: 100 }),
 
   task: varchar("task", { length: 255 }),

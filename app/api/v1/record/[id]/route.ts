@@ -10,6 +10,7 @@ import {
   duplicateWorkDateResponse,
   isDuplicateWorkDateError,
   isValidWorkDate,
+  parseBreakInterval,
 } from "../record-errors";
 
 export async function PUT(req: NextRequest) {
@@ -20,6 +21,8 @@ export async function PUT(req: NextRequest) {
     const id = req.nextUrl.pathname.split("/").pop();
     const body = await req.json();
     const { workDate, startTime, endTime, project, task, note } = body;
+    const breakStartTime = body.breakStartTime ?? null;
+    const breakEndTime = body.breakEndTime ?? null;
     const bookingStatus = body.bookingStatus ?? "PENDING";
     const submitStatus = body.submitStatus ?? "NOT_SUBMITTED";
 
@@ -57,9 +60,12 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const totalMinutes = end
+    const elapsedMinutes = end
       ? Math.floor((end.getTime() - start.getTime()) / (1000 * 60))
       : null;
+    const breakInterval = parseBreakInterval(breakStartTime, breakEndTime, start, end);
+    if (breakInterval.error) return ApiResponse.failed(breakInterval.error, "INVALID_TIME_RANGE", 400);
+    const totalMinutes = elapsedMinutes === null ? null : elapsedMinutes - breakInterval.breakMinutes;
 
     const existingRecord = await db
       .select({ id: otRecordTable.id })
@@ -79,6 +85,8 @@ export async function PUT(req: NextRequest) {
         startTime: new Date(startTime),
         endTime: end,
         totalMinutes: totalMinutes,
+        breakStartTime: breakInterval.breakStart,
+        breakEndTime: breakInterval.breakEnd,
         project: project ?? null,
         task: task ?? null,
         note: note ?? null,
