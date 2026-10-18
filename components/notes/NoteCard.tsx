@@ -1,6 +1,6 @@
 import { Button, Dropdown } from "antd";
 import type { MenuProps } from "antd";
-import { CalendarClock, MoreHorizontal, Pin, StickyNote } from "lucide-react";
+import { CalendarClock, Check, Circle, MoreHorizontal, Pin, StickyNote } from "lucide-react";
 import dayjs from "dayjs";
 import type { INoteResponse } from "@/shares/dtos/note/note";
 import NoteContent from "@/components/notes/NoteContent";
@@ -10,6 +10,7 @@ interface NoteCardProps {
   onOpen: (note: INoteResponse) => void;
   onEdit: (note: INoteResponse) => void;
   onTogglePin: (note: INoteResponse) => void;
+  onToggleStatus: (note: INoteResponse) => void;
   onDelete: (note: INoteResponse) => void;
   isPinning: boolean;
 }
@@ -19,11 +20,13 @@ export default function NoteCard({
   onOpen,
   onEdit,
   onTogglePin,
+  onToggleStatus,
   onDelete,
   isPinning,
 }: NoteCardProps) {
   const items: MenuProps["items"] = [
     { key: "edit", label: "Edit note" },
+    { key: "status", label: note.status === "COMPLETED" ? "Mark active" : "Mark completed", icon: note.status === "COMPLETED" ? <Circle size={14} /> : <Check size={14} /> },
     { key: "pin", label: note.pinned ? "Unpin note" : "Pin note" },
     { type: "divider" },
     { key: "delete", label: "Delete note", danger: true },
@@ -32,6 +35,7 @@ export default function NoteCard({
   const handleAction: MenuProps["onClick"] = ({ key }) => {
     if (key === "edit") onEdit(note);
     if (key === "pin") onTogglePin(note);
+    if (key === "status") onToggleStatus(note);
     if (key === "delete") onDelete(note);
   };
 
@@ -46,7 +50,7 @@ export default function NoteCard({
           onOpen(note);
         }
       }}
-      className="group flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200/80 bg-white px-3 py-2.5 transition hover:border-blue-200 hover:bg-blue-50/30 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-blue-500 sm:px-4"
+      className="group flex min-h-36 cursor-pointer items-start gap-3 rounded-xl border border-slate-200/80 bg-white px-3.5 py-3 transition hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50/30 hover:shadow-md focus-visible:outline-2 focus-visible:outline-blue-500 sm:px-4 sm:py-4"
     >
       <div className="hidden size-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-400 ring-1 ring-slate-200/70 sm:flex">
         <StickyNote size={16} />
@@ -56,12 +60,13 @@ export default function NoteCard({
           <h2 className="truncate text-sm font-semibold text-slate-900 group-hover:text-blue-800 sm:text-[15px]">{note.title}</h2>
           {note.pinned && <Pin size={13} className="shrink-0 fill-blue-600 text-blue-600" aria-label="Pinned" role="img" />}
         </div>
-        <div className="mt-1 line-clamp-3 max-h-12 overflow-hidden text-xs leading-4 text-slate-500 [&_blockquote]:border-slate-200 [&_blockquote]:pl-2 [&_h1]:text-sm [&_h2]:text-xs [&_h3]:text-xs">
+        <div className="mt-1.5 line-clamp-3 max-h-12 overflow-hidden text-xs leading-4 text-slate-500 [&_blockquote]:border-slate-200 [&_blockquote]:pl-2 [&_h1]:text-sm [&_h2]:text-xs [&_h3]:text-xs">
           <NoteContent content={note.content} />
         </div>
+        {note.status === "COMPLETED" && <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold leading-4 text-emerald-700 ring-1 ring-inset ring-emerald-200"><Check size={11} aria-hidden="true" />Completed</span>}
         {note.deadline && (() => {
           const deadline = dayjs(note.deadline);
-          const overdue = deadline.isBefore(dayjs(), "day");
+          const overdue = note.status !== "COMPLETED" && deadline.isBefore(dayjs(), "day");
           const dueToday = deadline.isSame(dayjs(), "day");
           const label = overdue ? "Overdue" : dueToday ? "Due today" : "Due";
           const badgeColor = overdue

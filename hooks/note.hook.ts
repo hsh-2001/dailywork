@@ -45,6 +45,15 @@ export const useSetNotePinned = () => {
   });
 };
 
+export const useSetNoteStatus = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (variables: { id: number; status: "ACTIVE" | "COMPLETED" }) =>
+      noteService.setStatus(variables),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: NOTES_QUERY_KEY }),
+  });
+};
+
 export const useDeleteNote = () => {
   const queryClient = useQueryClient();
   return useMutation({

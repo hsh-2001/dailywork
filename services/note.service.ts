@@ -26,11 +26,16 @@ const setPinned = async ({ id, pinned }: { id: number; pinned: boolean }) => {
   return response.data;
 };
 
+const setStatus = async ({ id, status }: { id: number; status: "ACTIVE" | "COMPLETED" }) => {
+  const response = await api.patch(`/note/${id}/status`, { status });
+  return response.data;
+};
+
 const deleteNote = async (id: number) => {
   const response = await api.delete(`/note/${id}`);
   return response.data;
 };
 
-const noteService = { getNotes, getNote, createNote, updateNote, setPinned, deleteNote };
+const noteService = { getNotes, getNote, createNote, updateNote, setPinned, setStatus, deleteNote };
 
 export default noteService;

@@ -272,7 +272,7 @@ export default function ProjectsPage() {
         confirmLoading={isSaving}
         cancelButtonProps={{ disabled: isSaving }}
         closable={!isSaving}
-        maskClosable={!isSaving}
+        mask={{ closable: !isSaving }}
         destroyOnHidden
       >
         {submitError && (

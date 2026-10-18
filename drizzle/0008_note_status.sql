@@ -1,0 +1,2 @@
+ALTER TABLE "notes"
+  ADD COLUMN IF NOT EXISTS "status" varchar(20) NOT NULL DEFAULT 'ACTIVE';

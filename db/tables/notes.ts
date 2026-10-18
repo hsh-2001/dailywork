@@ -15,6 +15,7 @@ export const notesTable = pgTable("notes", {
   title: varchar("title", { length: 200 }).notNull(),
   content: text("content").notNull(),
   deadline: date("deadline", { mode: "string" }),
+  status: varchar("status", { length: 20 }).notNull().default("ACTIVE"),
   pinned: boolean("pinned").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

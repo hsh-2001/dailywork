@@ -26,7 +26,7 @@ export default function DeleteNoteDialog({
       footer={null}
       destroyOnHidden
       closable={!isDeleting}
-      maskClosable={!isDeleting}
+      mask={{ closable: !isDeleting }}
     >
       <p className="text-sm text-slate-600">This action cannot be undone.</p>
       {note && <p className="mt-2 truncate text-sm font-medium text-slate-800">{note.title}</p>}
