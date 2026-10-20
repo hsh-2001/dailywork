@@ -61,6 +61,29 @@ export async function getUserRecordPage(
     .select({ total: count(), totalMinutes: sum(otRecordTable.totalMinutes) })
     .from(otRecordTable)
     .where(where);
+  const datedDurations = await db
+    .select({
+      workDate: otRecordTable.workDate,
+      totalMinutes: otRecordTable.totalMinutes,
+      breakStartTime: otRecordTable.breakStartTime,
+      breakEndTime: otRecordTable.breakEndTime,
+    })
+    .from(otRecordTable)
+    .where(where)
+    .orderBy(desc(otRecordTable.workDate));
+  const weekdayMinutes = Array.from({ length: 7 }, () => 0);
+  const weekdayBreakMinutes = Array.from({ length: 7 }, () => 0);
+  for (const record of datedDurations) {
+    const date = new Date(`${record.workDate}T00:00:00Z`);
+    const mondayIndex = (date.getUTCDay() + 6) % 7;
+    if (record.totalMinutes !== null) weekdayMinutes[mondayIndex] += record.totalMinutes;
+    if (record.breakStartTime && record.breakEndTime) {
+      weekdayBreakMinutes[mondayIndex] += Math.max(
+        0,
+        Math.floor((record.breakEndTime.getTime() - record.breakStartTime.getTime()) / 60_000),
+      );
+    }
+  }
 
   const result: IRecordPageResponse = {
     data: records.map((record) => ({
@@ -83,7 +106,15 @@ export async function getUserRecordPage(
       total,
       totalPages: Math.ceil(total / pageSize),
     },
-    summary: { totalMinutes: totalMinutes === null ? 0 : Number(totalMinutes) },
+    summary: {
+      totalMinutes: totalMinutes === null ? 0 : Number(totalMinutes),
+      weekdays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        .map((day, index) => ({
+          day,
+          totalMinutes: weekdayMinutes[index],
+          breakMinutes: weekdayBreakMinutes[index],
+        })),
+    },
   };
 
   if (cacheVersion !== undefined) {

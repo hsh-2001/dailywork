@@ -47,7 +47,10 @@ export class ApiPageResponse<T> {
   errorCode: string;
   data: T;
   pagination: Pagination;
-  summary?: { totalMinutes: number };
+  summary?: {
+    totalMinutes: number;
+    weekdays: { day: string; totalMinutes: number; breakMinutes: number }[];
+  };
 
   constructor(
     status: number,
@@ -55,7 +58,10 @@ export class ApiPageResponse<T> {
     errorCode: string,
     data: T,
     pagination: Pagination,
-    summary?: { totalMinutes: number },
+    summary?: {
+      totalMinutes: number;
+      weekdays: { day: string; totalMinutes: number; breakMinutes: number }[];
+    },
   ) {
     this.status = status;
     this.message = message;
@@ -67,7 +73,10 @@ export class ApiPageResponse<T> {
   public static success<T>(
     data: T,
     pagination: Pagination,
-    summary?: { totalMinutes: number },
+    summary?: {
+      totalMinutes: number;
+      weekdays: { day: string; totalMinutes: number; breakMinutes: number }[];
+    },
     message: string = "Success",
   ): NextResponse<ApiPageResponse<T>> {
     const response = new ApiPageResponse(
