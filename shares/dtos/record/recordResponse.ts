@@ -21,4 +21,5 @@ export interface IRecordResponse {
 export interface IRecordPageResponse {
   data: IRecordResponse[];
   pagination: Pagination;
+  summary: { totalMinutes: number };
 }

@@ -56,6 +56,7 @@ export async function GET(req: NextRequest) {
     return ApiPageResponse.success(
       recordPage.data,
       recordPage.pagination,
+      recordPage.summary,
       "Records retrieved successfully",
     );
   } catch (error) {

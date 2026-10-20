@@ -47,6 +47,7 @@ export class ApiPageResponse<T> {
   errorCode: string;
   data: T;
   pagination: Pagination;
+  summary?: { totalMinutes: number };
 
   constructor(
     status: number,
@@ -54,6 +55,7 @@ export class ApiPageResponse<T> {
     errorCode: string,
     data: T,
     pagination: Pagination,
+    summary?: { totalMinutes: number },
   ) {
     this.status = status;
     this.message = message;
@@ -65,6 +67,7 @@ export class ApiPageResponse<T> {
   public static success<T>(
     data: T,
     pagination: Pagination,
+    summary?: { totalMinutes: number },
     message: string = "Success",
   ): NextResponse<ApiPageResponse<T>> {
     const response = new ApiPageResponse(
@@ -74,6 +77,7 @@ export class ApiPageResponse<T> {
       data,
       pagination,
     );
+    response.summary = summary;
 
     return NextResponse.json(response, {
       status: 200,

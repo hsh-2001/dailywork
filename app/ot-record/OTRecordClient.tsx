@@ -124,6 +124,8 @@ export default function OTRecordClient() {
   };
 
   const total = data?.pagination?.total ?? 0;
+  const totalMinutes = data?.summary?.totalMinutes ?? 0;
+  const totalHoursLabel = `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}m`;
   const currentPageRecords = data?.data ?? [];
   const allCurrentPageSelected =
     currentPageRecords.length > 0 && selectedIds.length === currentPageRecords.length;
@@ -235,6 +237,11 @@ export default function OTRecordClient() {
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium tabular-nums text-slate-600">
                 {total} {total === 1 ? "entry" : "entries"}
               </span>
+            </div>
+
+            <div className="flex items-center justify-between border-b border-blue-100 bg-blue-50/60 px-3.5 py-2.5 sm:px-5">
+              <span className="text-xs font-medium text-slate-600">Total hours{Object.keys(filters).length > 0 ? " (filtered)" : ""}</span>
+              <span className="text-sm font-bold tabular-nums text-blue-800">{totalHoursLabel}</span>
             </div>
 
             <div className="border-b border-slate-100 bg-slate-50/50 px-3.5 py-3 sm:px-5">

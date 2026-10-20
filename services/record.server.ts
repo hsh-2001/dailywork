@@ -5,7 +5,7 @@ import { otRecordTable } from "@/db/tables/ot_records";
 import type { IRecordPageResponse } from "@/shares/dtos/record/recordResponse";
 import type { RecordFilters } from "@/shares/dtos/record/recordFilters";
 import type { PaginationRequest } from "@/shares/types/paginationRquest";
-import { and, count, desc, eq, gte, ilike, lte } from "drizzle-orm";
+import { and, count, desc, eq, gte, ilike, lte, sum } from "drizzle-orm";
 import {
   getCachedOTRecordPage,
   getOTRecordCacheVersion,
@@ -57,8 +57,8 @@ export async function getUserRecordPage(
     .orderBy(desc(otRecordTable.workDate))
     .limit(pageSize)
     .offset((page - 1) * pageSize);
-  const [{ total }] = await db
-    .select({ total: count() })
+  const [{ total, totalMinutes }] = await db
+    .select({ total: count(), totalMinutes: sum(otRecordTable.totalMinutes) })
     .from(otRecordTable)
     .where(where);
 
@@ -83,6 +83,7 @@ export async function getUserRecordPage(
       total,
       totalPages: Math.ceil(total / pageSize),
     },
+    summary: { totalMinutes: totalMinutes === null ? 0 : Number(totalMinutes) },
   };
 
   if (cacheVersion !== undefined) {
