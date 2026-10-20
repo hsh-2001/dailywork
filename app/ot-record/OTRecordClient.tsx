@@ -7,9 +7,9 @@ import {
   useRecords,
   useUpdateRecordStatuses,
 } from "@/hooks/record.hook";
-import { Alert, Button, Checkbox, DatePicker, Grid, message, Select } from "antd";
+import { Alert, Button, Checkbox, DatePicker, Grid, message, Modal, Select } from "antd";
 import RecordList from "@/components/RecordList";
-import { Check, ChevronDown, ClipboardList, Coffee, Filter, Plus, RotateCcw } from "lucide-react";
+import { Check, ChevronDown, ClipboardList, Clock3, Coffee, Filter, Plus, RotateCcw } from "lucide-react";
 import MobileDatePicker from "@/components/MobileDatePicker";
 import type {
   IRecordResponse,
@@ -23,6 +23,9 @@ import type { RecordFilters } from "@/shares/dtos/record/recordFilters";
 import type { Dayjs } from "dayjs";
 import { formatTime } from "@/utils/datetime";
 
+const formatTotal = (minutes: number | null) =>
+  minutes == null ? "—" : `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+
 export default function OTRecordClient() {
   const router = useRouter();
   const [pagination, setPagination] = useState({ page: 1, pageSize: 10 });
@@ -33,12 +36,17 @@ export default function OTRecordClient() {
   const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null] | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isWeekdaySummaryOpen, setIsWeekdaySummaryOpen] = useState(false);
+  const [selectedWeekday, setSelectedWeekday] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [bulkBookingStatus, setBulkBookingStatus] = useState<BookingStatus>();
   const [bulkSubmitStatus, setBulkSubmitStatus] = useState<SubmitStatus>();
   const screens = Grid.useBreakpoint();
   const isMobile = screens.md === false;
   const { data, isLoading, isError, refetch } = useRecords({ ...pagination, ...filters });
+  const weekdayRecordsQuery = useRecords(
+    { page: 1, pageSize: 100, ...filters },
+    selectedWeekday !== null,
+  );
   const activeFilterCount = [
     filters.dateFrom || filters.dateTo,
     filters.project,
@@ -136,6 +144,12 @@ export default function OTRecordClient() {
   const currentPageRecords = data?.data ?? [];
   const allCurrentPageSelected =
     currentPageRecords.length > 0 && selectedIds.length === currentPageRecords.length;
+  const selectedWeekdayRecords = (weekdayRecordsQuery.data?.data ?? []).filter((record) => {
+    if (!selectedWeekday) return false;
+    const weekday = new Date(`${record.workDate}T00:00:00Z`).getUTCDay();
+    const weekdayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][weekday];
+    return weekdayName === selectedWeekday;
+  });
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -377,7 +391,13 @@ export default function OTRecordClient() {
                 </button>
                 <ul id="weekday-hours-summary" hidden={!isWeekdaySummaryOpen} className="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-4 lg:grid-cols-7">
                   {data?.summary?.weekdays?.map((day) => (
-                    <li key={day.day} className="rounded-md border border-slate-200 bg-white px-2 py-1.5">
+                    <li key={day.day}>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedWeekday(day.day)}
+                        aria-label={`Show ${day.day} work log details`}
+                        className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-left transition hover:border-blue-300 hover:bg-blue-50/40 focus-visible:outline-2 focus-visible:outline-blue-500"
+                      >
                       <div className="flex items-center justify-between gap-1">
                         <span className="text-[11px] font-medium text-slate-600">{day.day.slice(0, 3)}</span>
                         <span className="text-xs font-semibold tabular-nums text-blue-800">
@@ -393,6 +413,7 @@ export default function OTRecordClient() {
                             : "—"}
                         </span>
                       </div>
+                      </button>
                     </li>
                   ))}
                 </ul>
@@ -481,6 +502,54 @@ export default function OTRecordClient() {
           </section>
         )}
       </div>
+      <Modal
+        title={selectedWeekday ? `${selectedWeekday} work logs` : "Work logs"}
+        open={selectedWeekday !== null}
+        onCancel={() => setSelectedWeekday(null)}
+        footer={null}
+        destroyOnHidden
+      >
+        {weekdayRecordsQuery.isFetching ? (
+          <p className="py-6 text-center text-sm text-slate-500">Loading work log details…</p>
+        ) : weekdayRecordsQuery.isError ? (
+          <div className="py-4">
+            <Alert type="error" showIcon message="Unable to load work log details." />
+            <Button className="mt-3" onClick={() => weekdayRecordsQuery.refetch()}>Try again</Button>
+          </div>
+        ) : selectedWeekdayRecords.length ? (
+          <ul className="max-h-[60vh] divide-y divide-slate-100 overflow-y-auto">
+            {selectedWeekdayRecords.map((record) => (
+              <li key={record.id} className="py-3 first:pt-0 last:pb-0">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-900">{record.workDate}</p>
+                    <p className="mt-1 flex items-center gap-1 text-xs tabular-nums text-slate-600">
+                      <Clock3 size={13} aria-hidden="true" />
+                      {formatTime(record.startTime)} – {record.endTime ? formatTime(record.endTime) : "In progress"}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-md bg-blue-50 px-2 py-1 text-xs font-semibold tabular-nums text-blue-800">
+                    {formatTotal(record.totalMinutes)}
+                  </span>
+                </div>
+                <p className="mt-2 text-xs text-slate-700">{[record.project, record.task].filter(Boolean).join(" · ") || "No project or task"}</p>
+                {(record.breakStartTime || record.breakEndTime) && (
+                  <p className="mt-1 text-xs text-slate-500">
+                    Break: {record.breakStartTime ? formatTime(record.breakStartTime) : "—"} – {record.breakEndTime ? formatTime(record.breakEndTime) : "—"}
+                  </p>
+                )}
+                {record.note && <p className="mt-1 whitespace-pre-line text-xs text-slate-500">{record.note}</p>}
+                <p className="mt-2 text-[10px] text-slate-500">{record.bookingStatus.replaceAll("_", " ")} · {record.submitStatus.replaceAll("_", " ")}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="py-6 text-center text-sm text-slate-500">No {selectedWeekday?.toLowerCase()} work logs match the current filters.</p>
+        )}
+        {(weekdayRecordsQuery.data?.pagination.total ?? 0) > 100 && (
+          <p className="mt-3 text-xs text-slate-500">Showing the first 100 matching work logs.</p>
+        )}
+      </Modal>
     </main>
   );
 }
