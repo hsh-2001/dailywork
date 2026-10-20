@@ -75,7 +75,7 @@ export default function DashboardClient() {
               icon={<Plus size={16} />}
               aria-label="Add work log"
               title="Add work log"
-              className="!h-8 !w-8 !px-0"
+              className="h-8! w-8! px-0!"
             />
           </Link>
         </header>

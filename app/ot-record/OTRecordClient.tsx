@@ -39,6 +39,12 @@ export default function OTRecordClient() {
   const screens = Grid.useBreakpoint();
   const isMobile = screens.md === false;
   const { data, isLoading, isError, refetch } = useRecords({ ...pagination, ...filters });
+  const activeFilterCount = [
+    filters.dateFrom || filters.dateTo,
+    filters.project,
+    filters.bookingStatus,
+    filters.submitStatus,
+  ].filter(Boolean).length;
   const draftsQuery = useRecordDrafts();
   const projectsQuery = useProjects();
 
@@ -252,6 +258,11 @@ export default function OTRecordClient() {
                 <span className="flex items-center gap-1.5">
                   <Filter size={14} className="text-slate-500" aria-hidden="true" />
                   Filter work logs
+                  {activeFilterCount > 0 && (
+                    <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-blue-800" aria-label={`${activeFilterCount} active filters`}>
+                      {activeFilterCount} active
+                    </span>
+                  )}
                 </span>
                 <span className="flex items-center gap-1 text-[11px] font-medium text-slate-500">
                   {isFilterOpen ? "Hide" : "Show"}
@@ -344,7 +355,7 @@ export default function OTRecordClient() {
             </div>
 
             <div className="flex items-center justify-between border-b border-blue-100 bg-blue-50/60 px-3.5 py-2.5 sm:px-5">
-              <span className="text-xs font-medium text-slate-600">Total hours{Object.keys(filters).length > 0 ? " (filtered)" : ""}</span>
+              <span className="text-xs font-medium text-slate-600">Total hours{activeFilterCount > 0 ? " (filtered)" : ""}</span>
               <span className="text-sm font-bold tabular-nums text-blue-800">{totalHoursLabel}</span>
             </div>
             {(data?.summary?.weekdays?.length ?? 0) > 0 && (
@@ -357,7 +368,7 @@ export default function OTRecordClient() {
                   className="flex w-full items-center justify-between text-left text-xs font-semibold text-slate-700"
                 >
                   <span>
-                    <span className="block">Hours by weekday{Object.keys(filters).length > 0 ? " (filtered)" : ""}</span>
+                    <span className="block">Hours by weekday{activeFilterCount > 0 ? " (filtered)" : ""}</span>
                   </span>
                   <span className="flex items-center gap-1 font-medium text-slate-500">
                     {isWeekdaySummaryOpen ? "Hide" : "Show"}
