@@ -176,15 +176,15 @@ function AddRecordPageContent() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <div className="mx-auto w-full max-w-3xl px-4 py-5 sm:px-6 sm:py-7">
+      <div className="mx-auto w-full max-w-3xl px-4 py-3 sm:px-6 sm:py-5">
         <Link
           href="/ot-record"
-          className="mb-3 inline-flex min-h-8 items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-blue-700 focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+          className="mb-2 inline-flex min-h-8 items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-blue-700 focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
         >
           <ArrowLeft size={16} aria-hidden="true" /> Work logs
         </Link>
 
-        <header className="mb-4">
+        <header className="mb-3">
           <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-700">Work logs</p>
           <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">
             {isFinishingDraft ? "Finish OT draft" : isEditing ? "Edit work log" : "Add work log"}
@@ -196,11 +196,11 @@ function AddRecordPageContent() {
           </p>
         </header>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-5">
-          {submitError && <Alert className="mb-5" type="error" showIcon message={submitError} />}
+        <section className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4">
+          {submitError && <Alert className="mb-3" type="error" showIcon message={submitError} />}
           {projectsQuery.isError && (
             <Alert
-              className="mb-5"
+              className="mb-3"
               type="warning"
               showIcon
               message="Couldn't load projects"
@@ -219,7 +219,7 @@ function AddRecordPageContent() {
                 projectsLoading={projectsQuery.isLoading}
                 currentProject={record?.project}
               />
-              <div className="mt-5 flex flex-col-reverse gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
+              <div className="mt-3 flex flex-col-reverse gap-2 border-t border-slate-100 pt-3 sm:flex-row sm:justify-end">
                 <Button onClick={() => router.push("/ot-record")}>
                   Cancel
                 </Button>

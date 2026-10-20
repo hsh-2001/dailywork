@@ -9,7 +9,7 @@ import {
 } from "@/hooks/record.hook";
 import { Alert, Button, Checkbox, DatePicker, Grid, message, Modal, Select } from "antd";
 import RecordList from "@/components/RecordList";
-import { Check, ChevronDown, ClipboardList, Clock3, Coffee, Filter, Plus, RotateCcw } from "lucide-react";
+import { CalendarDays, Check, ChevronDown, ClipboardList, Coffee, Filter, Plus, RotateCcw } from "lucide-react";
 import MobileDatePicker from "@/components/MobileDatePicker";
 import type {
   IRecordResponse,
@@ -25,6 +25,22 @@ import { formatTime } from "@/utils/datetime";
 
 const formatTotal = (minutes: number | null) =>
   minutes == null ? "—" : `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+
+const bookingStatusStyle: Record<BookingStatus, string> = {
+  PENDING: "bg-amber-50 text-amber-800 ring-amber-200",
+  BOOKED: "bg-emerald-50 text-emerald-800 ring-emerald-200",
+  CANCELLED: "bg-slate-100 text-slate-700 ring-slate-200",
+};
+
+const submitStatusStyle: Record<SubmitStatus, string> = {
+  NOT_SUBMITTED: "bg-slate-100 text-slate-700 ring-slate-200",
+  SUBMITTED: "bg-blue-50 text-blue-800 ring-blue-200",
+  APPROVED: "bg-emerald-50 text-emerald-800 ring-emerald-200",
+  REJECTED: "bg-rose-50 text-rose-800 ring-rose-200",
+};
+
+const statusLabel = (status: string) =>
+  status.replaceAll("_", " ").toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
 
 export default function OTRecordClient() {
   const router = useRouter();
@@ -171,7 +187,7 @@ export default function OTRecordClient() {
               size="small"
               aria-label="Add work log"
               title="Add work log"
-              className="!h-8 !w-8 !px-0"
+              className="h-8! w-8! px-0!"
             />
           </Link>
         </header>
@@ -308,7 +324,8 @@ export default function OTRecordClient() {
                     onChange={(value) => setDateRange([value, dateRange?.[1] ?? null])}
                     disabledDate={(current) => Boolean(dateRange?.[1] && current.isAfter(dateRange[1], "day"))}
                     placeholder="From date"
-                    className="!w-full"
+                    suffixIcon={<CalendarDays size={15} />}
+                    className="w-full!"
                   />
                 )}
                 {isMobile ? (
@@ -327,7 +344,8 @@ export default function OTRecordClient() {
                     onChange={(value) => setDateRange([dateRange?.[0] ?? null, value])}
                     disabledDate={(current) => Boolean(dateRange?.[0] && current.isBefore(dateRange[0], "day"))}
                     placeholder="To date"
-                    className="!w-full"
+                    suffixIcon={<CalendarDays size={15} />}
+                    className="w-full!"
                   />
                 )}
                 <Select
@@ -503,43 +521,58 @@ export default function OTRecordClient() {
         )}
       </div>
       <Modal
-        title={selectedWeekday ? `${selectedWeekday} work logs` : "Work logs"}
+        title={
+          <div>
+            <h2 className="text-base font-semibold text-slate-900">{selectedWeekday} work logs</h2>
+            <p className="mt-0.5 text-xs font-normal text-slate-500">Daily entries matching your current filters</p>
+          </div>
+        }
         open={selectedWeekday !== null}
         onCancel={() => setSelectedWeekday(null)}
         footer={null}
         destroyOnHidden
+        width={620}
       >
         {weekdayRecordsQuery.isFetching ? (
-          <p className="py-6 text-center text-sm text-slate-500">Loading work log details…</p>
+          <div className="py-10 text-center">
+            <p className="text-sm font-medium text-slate-700">Loading work log details…</p>
+            <p className="mt-1 text-xs text-slate-500">Gathering entries for {selectedWeekday}.</p>
+          </div>
         ) : weekdayRecordsQuery.isError ? (
           <div className="py-4">
             <Alert type="error" showIcon message="Unable to load work log details." />
             <Button className="mt-3" onClick={() => weekdayRecordsQuery.refetch()}>Try again</Button>
           </div>
         ) : selectedWeekdayRecords.length ? (
-          <ul className="max-h-[60vh] divide-y divide-slate-100 overflow-y-auto">
+          <ul className="max-h-[60vh] space-y-1.5 overflow-y-auto pr-1">
             {selectedWeekdayRecords.map((record) => (
-              <li key={record.id} className="py-3 first:pt-0 last:pb-0">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-900">{record.workDate}</p>
-                    <p className="mt-1 flex items-center gap-1 text-xs tabular-nums text-slate-600">
-                      <Clock3 size={13} aria-hidden="true" />
-                      {formatTime(record.startTime)} – {record.endTime ? formatTime(record.endTime) : "In progress"}
-                    </p>
-                  </div>
-                  <span className="shrink-0 rounded-md bg-blue-50 px-2 py-1 text-xs font-semibold tabular-nums text-blue-800">
+              <li key={record.id} className="rounded-lg border border-slate-200 bg-white px-3 py-2.5">
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                  <p className="text-xs font-semibold text-slate-900">{record.workDate}</p>
+                  <span className="rounded-md bg-blue-50 px-2 py-0.5 text-xs font-bold tabular-nums text-blue-800">
                     {formatTotal(record.totalMinutes)}
                   </span>
+                  <p className="w-full text-[11px] tabular-nums text-slate-600">
+                    {formatTime(record.startTime)} – {record.endTime ? formatTime(record.endTime) : "In progress"}
+                  </p>
                 </div>
-                <p className="mt-2 text-xs text-slate-700">{[record.project, record.task].filter(Boolean).join(" · ") || "No project or task"}</p>
+                <p className="mt-1.5 text-xs font-medium text-slate-800">
+                  {[record.project, record.task].filter(Boolean).join(" · ") || "No project or task"}
+                </p>
                 {(record.breakStartTime || record.breakEndTime) && (
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-[11px] text-slate-500">
                     Break: {record.breakStartTime ? formatTime(record.breakStartTime) : "—"} – {record.breakEndTime ? formatTime(record.breakEndTime) : "—"}
                   </p>
                 )}
-                {record.note && <p className="mt-1 whitespace-pre-line text-xs text-slate-500">{record.note}</p>}
-                <p className="mt-2 text-[10px] text-slate-500">{record.bookingStatus.replaceAll("_", " ")} · {record.submitStatus.replaceAll("_", " ")}</p>
+                {record.note && <p className="mt-1.5 whitespace-pre-line border-l-2 border-slate-200 pl-2 text-[11px] leading-4 text-slate-600">{record.note}</p>}
+                <div className="mt-2 flex flex-wrap gap-1">
+                  <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold ring-1 ring-inset ${bookingStatusStyle[record.bookingStatus]}`}>
+                    {statusLabel(record.bookingStatus)}
+                  </span>
+                  <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold ring-1 ring-inset ${submitStatusStyle[record.submitStatus]}`}>
+                    {statusLabel(record.submitStatus)}
+                  </span>
+                </div>
               </li>
             ))}
           </ul>
@@ -547,7 +580,7 @@ export default function OTRecordClient() {
           <p className="py-6 text-center text-sm text-slate-500">No {selectedWeekday?.toLowerCase()} work logs match the current filters.</p>
         )}
         {(weekdayRecordsQuery.data?.pagination.total ?? 0) > 100 && (
-          <p className="mt-3 text-xs text-slate-500">Showing the first 100 matching work logs.</p>
+          <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">Showing up to 100 matching work logs.</p>
         )}
       </Modal>
     </main>

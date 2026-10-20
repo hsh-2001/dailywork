@@ -3,6 +3,7 @@
 import { Form, Input, DatePicker, TimePicker, FormInstance, Grid, Select } from "antd";
 import type { Dayjs } from "dayjs";
 import type { IProjectResponse } from "@/shares/dtos/project/projectResponse";
+import { CalendarDays } from "lucide-react";
 import MobileDatePicker from "./MobileDatePicker";
 import MobileTimePicker from "./MobileTimePicker";
 
@@ -50,6 +51,7 @@ export default function OTRecordForm({
     <Form
       form={form}
       layout="vertical"
+      className="[&_.ant-form-item]:!mb-3 [&_.ant-form-item-label]:!pb-1"
       initialValues={{ bookingStatus: "PENDING", submitStatus: "NOT_SUBMITTED" }}
       requiredMark
       size={size}
@@ -64,7 +66,7 @@ export default function OTRecordForm({
         {isMobile ? (
           <MobileDatePicker title="Work date" />
         ) : (
-          <DatePicker className="w-full" />
+          <DatePicker className="w-full" suffixIcon={<CalendarDays size={16} />} />
         )}
       </Form.Item>
 
@@ -162,28 +164,30 @@ export default function OTRecordForm({
         </Form.Item>
       </div>
 
-      <Form.Item name="project" label="Project">
-        <Select
-          allowClear
-          placeholder="Select a project"
-          options={projectOptions}
-          loading={projectsLoading}
-        />
-      </Form.Item>
+      <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+        <Form.Item name="project" label="Project">
+          <Select
+            allowClear
+            placeholder="Select a project"
+            options={projectOptions}
+            loading={projectsLoading}
+          />
+        </Form.Item>
 
-      <Form.Item name="task" label="Task">
-        <Input placeholder="Enter task" enterKeyHint="next" allowClear />
-      </Form.Item>
+        <Form.Item name="task" label="Task">
+          <Input placeholder="Enter task" enterKeyHint="next" allowClear />
+        </Form.Item>
+      </div>
 
       <Form.Item name="note" label="Note">
         <Input.TextArea
-          autoSize={{ minRows: 3, maxRows: 8 }}
+          autoSize={{ minRows: 2, maxRows: 6 }}
           placeholder="Enter note"
           enterKeyHint="done"
         />
       </Form.Item>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+      <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
         <Form.Item name="bookingStatus" label="Booking status" rules={[{ required: true }]}>
           <Select options={[
             { value: "PENDING", label: "Pending" },
