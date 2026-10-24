@@ -69,6 +69,14 @@ export default function OTRecordClient() {
     filters.bookingStatus,
     filters.submitStatus,
   ].filter(Boolean).length;
+  const activeFilterLabels = [
+    filters.dateFrom || filters.dateTo
+      ? `Date: ${filters.dateFrom ?? "…"} – ${filters.dateTo ?? "…"}`
+      : null,
+    filters.project ? `Project: ${filters.project}` : null,
+    filters.bookingStatus ? `Booking: ${statusLabel(filters.bookingStatus)}` : null,
+    filters.submitStatus ? `Submit: ${statusLabel(filters.submitStatus)}` : null,
+  ].filter((label): label is string => Boolean(label));
   const draftsQuery = useRecordDrafts();
   const projectsQuery = useProjects();
 
@@ -283,7 +291,7 @@ export default function OTRecordClient() {
                 aria-controls="work-log-filters"
                 aria-label={`${isFilterOpen ? "Hide" : "Show"} work log filters`}
                 onClick={() => setIsFilterOpen((isOpen) => !isOpen)}
-                className="mb-2 flex w-full items-center justify-between text-left text-xs font-semibold text-slate-700"
+                className={`flex w-full items-center justify-between text-left text-xs font-semibold text-slate-700 ${isFilterOpen ? "mb-3" : ""}`}
               >
                 <span className="flex items-center gap-1.5">
                   <Filter size={14} className="text-slate-500" aria-hidden="true" />
@@ -303,85 +311,121 @@ export default function OTRecordClient() {
                   />
                 </span>
               </button>
+              {!isFilterOpen && activeFilterLabels.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5" aria-label="Applied filters">
+                  {activeFilterLabels.map((label) => (
+                    <span key={label} title={label} className="max-w-full truncate rounded-full border border-blue-100 bg-white px-2 py-1 text-[10px] font-medium text-blue-800">
+                      {label}
+                    </span>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="rounded px-1 py-1 text-[10px] font-semibold text-slate-500 underline decoration-slate-300 underline-offset-2 hover:text-slate-900"
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
               <div
                 id="work-log-filters"
                 hidden={!isFilterOpen}
-                className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto_auto] lg:items-center"
+                className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto_auto] lg:items-end"
               >
-                {isMobile ? (
-                  <MobileDatePicker
+                <div>
+                  <span className="mb-1 block text-[10px] font-medium text-slate-500">From date</span>
+                  {isMobile ? (
+                    <MobileDatePicker
+                      allowClear
+                      title="From date"
+                      placeholder="From date"
+                      value={dateRange?.[0] ?? null}
+                      max={dateRange?.[1] ? new Date(dateRange[1].year(), dateRange[1].month(), dateRange[1].date()) : undefined}
+                      onChange={(value) => setDateRange([value, dateRange?.[1] ?? null])}
+                    />
+                  ) : (
+                    <DatePicker
+                      allowClear
+                      aria-label="From date"
+                      value={dateRange?.[0] ?? null}
+                      onChange={(value) => setDateRange([value, dateRange?.[1] ?? null])}
+                      disabledDate={(current) => Boolean(dateRange?.[1] && current.isAfter(dateRange[1], "day"))}
+                      placeholder="From date"
+                      suffixIcon={<CalendarDays size={15} />}
+                      className="w-full!"
+                    />
+                  )}
+                </div>
+                <div>
+                  <span className="mb-1 block text-[10px] font-medium text-slate-500">To date</span>
+                  {isMobile ? (
+                    <MobileDatePicker
+                      allowClear
+                      title="To date"
+                      placeholder="To date"
+                      value={dateRange?.[1] ?? null}
+                      min={dateRange?.[0] ? new Date(dateRange[0].year(), dateRange[0].month(), dateRange[0].date()) : undefined}
+                      onChange={(value) => setDateRange([dateRange?.[0] ?? null, value])}
+                    />
+                  ) : (
+                    <DatePicker
+                      allowClear
+                      aria-label="To date"
+                      value={dateRange?.[1] ?? null}
+                      onChange={(value) => setDateRange([dateRange?.[0] ?? null, value])}
+                      disabledDate={(current) => Boolean(dateRange?.[0] && current.isBefore(dateRange[0], "day"))}
+                      placeholder="To date"
+                      suffixIcon={<CalendarDays size={15} />}
+                      className="w-full!"
+                    />
+                  )}
+                </div>
+                <div>
+                  <span className="mb-1 block text-[10px] font-medium text-slate-500">Project</span>
+                  <Select
+                    aria-label="Project"
                     allowClear
-                    title="From date"
-                    placeholder="From date"
-                    value={dateRange?.[0] ?? null}
-                    max={dateRange?.[1] ? new Date(dateRange[1].year(), dateRange[1].month(), dateRange[1].date()) : undefined}
-                    onChange={(value) => setDateRange([value, dateRange?.[1] ?? null])}
+                    showSearch
+                    optionFilterProp="label"
+                    placeholder="All projects"
+                    value={project}
+                    onChange={setProject}
+                    loading={projectsQuery.isLoading}
+                    options={(projectsQuery.data?.data ?? []).map((item: { name: string }) => ({ value: item.name, label: item.name }))}
                   />
-                ) : (
-                  <DatePicker
+                </div>
+                <div>
+                  <span className="mb-1 block text-[10px] font-medium text-slate-500">Booking status</span>
+                  <Select
+                    aria-label="Booking status"
                     allowClear
-                    value={dateRange?.[0] ?? null}
-                    onChange={(value) => setDateRange([value, dateRange?.[1] ?? null])}
-                    disabledDate={(current) => Boolean(dateRange?.[1] && current.isAfter(dateRange[1], "day"))}
-                    placeholder="From date"
-                    suffixIcon={<CalendarDays size={15} />}
-                    className="w-full!"
+                    placeholder="All booking statuses"
+                    value={bookingStatus}
+                    onChange={setBookingStatus}
+                    options={[
+                      { value: "PENDING", label: "Pending booking" },
+                      { value: "BOOKED", label: "Booked" },
+                      { value: "CANCELLED", label: "Booking cancelled" },
+                    ]}
                   />
-                )}
-                {isMobile ? (
-                  <MobileDatePicker
+                </div>
+                <div>
+                  <span className="mb-1 block text-[10px] font-medium text-slate-500">Submit status</span>
+                  <Select
+                    aria-label="Submit status"
                     allowClear
-                    title="To date"
-                    placeholder="To date"
-                    value={dateRange?.[1] ?? null}
-                    min={dateRange?.[0] ? new Date(dateRange[0].year(), dateRange[0].month(), dateRange[0].date()) : undefined}
-                    onChange={(value) => setDateRange([dateRange?.[0] ?? null, value])}
+                    placeholder="All submit statuses"
+                    value={submitStatus}
+                    onChange={setSubmitStatus}
+                    options={[
+                      { value: "NOT_SUBMITTED", label: "Not submitted" },
+                      { value: "SUBMITTED", label: "Submitted" },
+                      { value: "APPROVED", label: "Approved" },
+                      { value: "REJECTED", label: "Rejected" },
+                    ]}
                   />
-                ) : (
-                  <DatePicker
-                    allowClear
-                    value={dateRange?.[1] ?? null}
-                    onChange={(value) => setDateRange([dateRange?.[0] ?? null, value])}
-                    disabledDate={(current) => Boolean(dateRange?.[0] && current.isBefore(dateRange[0], "day"))}
-                    placeholder="To date"
-                    suffixIcon={<CalendarDays size={15} />}
-                    className="w-full!"
-                  />
-                )}
-                <Select
-                  allowClear
-                  showSearch
-                  optionFilterProp="label"
-                  placeholder="All projects"
-                  value={project}
-                  onChange={setProject}
-                  loading={projectsQuery.isLoading}
-                  options={(projectsQuery.data?.data ?? []).map((item: { name: string }) => ({ value: item.name, label: item.name }))}
-                />
-                <Select
-                  allowClear
-                  placeholder="All booking statuses"
-                  value={bookingStatus}
-                  onChange={setBookingStatus}
-                  options={[
-                    { value: "PENDING", label: "Pending booking" },
-                    { value: "BOOKED", label: "Booked" },
-                    { value: "CANCELLED", label: "Booking cancelled" },
-                  ]}
-                />
-                <Select
-                  allowClear
-                  placeholder="All submit statuses"
-                  value={submitStatus}
-                  onChange={setSubmitStatus}
-                  options={[
-                    { value: "NOT_SUBMITTED", label: "Not submitted" },
-                    { value: "SUBMITTED", label: "Submitted" },
-                    { value: "APPROVED", label: "Approved" },
-                    { value: "REJECTED", label: "Rejected" },
-                  ]}
-                />
-                <Button type="primary" onClick={applyFilters}>Apply</Button>
+                </div>
+                <Button type="primary" onClick={applyFilters}>Apply filters</Button>
                 <Button icon={<RotateCcw size={14} />} onClick={clearFilters}>Clear</Button>
               </div>
             </div>

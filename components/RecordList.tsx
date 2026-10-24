@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button, Checkbox, Grid, Pagination, Skeleton } from "antd";
-import { ArrowRight, CalendarDays, Clock3, Pencil, Trash2 } from "lucide-react";
+import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Clock3, Pencil, Trash2 } from "lucide-react";
 import type { IRecordResponse } from "@/shares/dtos/record/recordResponse";
 import { formatTime } from "@/utils/datetime";
 
@@ -82,6 +82,7 @@ export default function RecordList({
     ? (pagination.page - 1) * pagination.pageSize + 1
     : 0;
   const lastItem = hasRecords ? firstItem + data.length - 1 : 0;
+  const totalPages = Math.max(1, Math.ceil(total / pagination.pageSize));
   const toggleRecordSelection = (id: number, checked: boolean) => {
     onSelectionChange(
       checked ? [...selectedIds, id] : selectedIds.filter((selectedId) => selectedId !== id),
@@ -231,20 +232,41 @@ export default function RecordList({
             ))}
           </ul>
 
-          <div className="flex flex-col gap-3 border-t border-slate-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-            <p className="text-xs text-slate-500">
+          <div className="flex flex-col gap-2 border-t border-slate-100 px-3.5 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-3">
+            <p className="text-xs text-slate-500" aria-live="polite">
               Showing {firstItem}–{lastItem} of {total} work logs
             </p>
-            <Pagination
-              size="small"
-              current={pagination.page}
-              pageSize={pagination.pageSize}
-              total={total}
-              showSizeChanger={!isMobile}
-              simple={isMobile}
-              pageSizeOptions={PAGE_SIZE_OPTIONS}
-              onChange={(page, pageSize) => onPaginationChange({ page, pageSize })}
-            />
+            {isMobile ? (
+              <nav aria-label="Work log pages" className="flex items-center justify-between gap-3">
+                <Button
+                  aria-label="Previous page"
+                  icon={<ChevronLeft size={16} />}
+                  disabled={pagination.page <= 1}
+                  onClick={() => onPaginationChange({ ...pagination, page: pagination.page - 1 })}
+                  className="!h-9 !w-9 !min-w-9 !p-0"
+                />
+                <span className="min-w-20 text-center text-xs font-medium tabular-nums text-slate-600" aria-current="page">
+                  Page {pagination.page} of {totalPages}
+                </span>
+                <Button
+                  aria-label="Next page"
+                  icon={<ChevronRight size={16} />}
+                  disabled={pagination.page >= totalPages}
+                  onClick={() => onPaginationChange({ ...pagination, page: pagination.page + 1 })}
+                  className="!h-9 !w-9 !min-w-9 !p-0"
+                />
+              </nav>
+            ) : (
+              <Pagination
+                size="small"
+                current={pagination.page}
+                pageSize={pagination.pageSize}
+                total={total}
+                showSizeChanger
+                pageSizeOptions={PAGE_SIZE_OPTIONS}
+                onChange={(page, pageSize) => onPaginationChange({ page, pageSize })}
+              />
+            )}
           </div>
         </>
       ) : (
