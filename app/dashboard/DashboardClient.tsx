@@ -13,6 +13,7 @@ import {
   ChartNoAxesCombined,
   ClipboardList,
   FolderKanban,
+  LoaderCircle,
   Plus,
   StickyNote,
 } from "lucide-react";
@@ -45,7 +46,7 @@ const shortcuts = [
 ];
 
 export default function DashboardClient() {
-  const { data, isLoading, isError, refetch } = useRecords(
+  const { data, isLoading, isFetching, isError, refetch } = useRecords(
     {
       page: 1,
       pageSize: 5,
@@ -103,7 +104,7 @@ export default function DashboardClient() {
               <div>
                 <p className="text-xs text-slate-500">Work logs</p>
                 {isLoading ? (
-                  <Skeleton.Input active size="small" className="!mt-1" />
+                  <Skeleton.Input active size="small" className="mt-1!" />
                 ) : (
                   <p className="text-base font-semibold tabular-nums text-slate-900">
                     {recordCount}
@@ -123,7 +124,7 @@ export default function DashboardClient() {
               <div className="min-w-0">
                 <p className="text-xs text-slate-500">Latest work log</p>
                 {isLoading ? (
-                  <Skeleton.Input active size="small" className="!mt-1" />
+                  <Skeleton.Input active size="small" className="mt-1!" />
                 ) : latestRecord ? (
                   <p className="truncate text-sm font-semibold text-slate-900">
                     {latestRecord.workDate}
@@ -154,8 +155,9 @@ export default function DashboardClient() {
               </div>
               <Link
                 href="/ot-record"
-                className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-blue-700 hover:text-blue-800"
+                className="inline-flex shrink-0 items-center gap-3 text-sm font-medium text-blue-700 hover:text-blue-800"
               >
+                {isFetching && <span role="status" className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500"><LoaderCircle size={13} className="animate-spin" aria-hidden="true" />Loading</span>}
                 View all <ArrowUpRight size={15} aria-hidden="true" />
               </Link>
             </div>

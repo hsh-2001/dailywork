@@ -9,7 +9,7 @@ import {
 } from "@/hooks/record.hook";
 import { Alert, Button, Checkbox, DatePicker, Grid, message, Modal, Select } from "antd";
 import RecordList from "@/components/RecordList";
-import { CalendarDays, Check, ChevronDown, ClipboardList, Coffee, Filter, Plus, RotateCcw } from "lucide-react";
+import { CalendarDays, Check, ChevronDown, ClipboardList, Coffee, Filter, LoaderCircle, Plus, RotateCcw } from "lucide-react";
 import MobileDatePicker from "@/components/MobileDatePicker";
 import type {
   IRecordResponse,
@@ -58,7 +58,7 @@ export default function OTRecordClient() {
   const [bulkSubmitStatus, setBulkSubmitStatus] = useState<SubmitStatus>();
   const screens = Grid.useBreakpoint();
   const isMobile = screens.md === false;
-  const { data, isLoading, isError, refetch } = useRecords({ ...pagination, ...filters });
+  const { data, isLoading, isFetching, isError, refetch } = useRecords({ ...pagination, ...filters });
   const weekdayRecordsQuery = useRecords(
     { page: 1, pageSize: 100, ...filters },
     selectedWeekday !== null,
@@ -279,9 +279,17 @@ export default function OTRecordClient() {
                   All entries
                 </h2>
               </div>
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium tabular-nums text-slate-600">
-                {total} {total === 1 ? "entry" : "entries"}
-              </span>
+              <div className="flex items-center gap-2">
+                {isFetching && (
+                  <span role="status" className="inline-flex items-center gap-1 text-[10px] font-medium text-slate-500">
+                    <LoaderCircle size={13} className="animate-spin" aria-hidden="true" />
+                    Loading
+                  </span>
+                )}
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium tabular-nums text-slate-600">
+                  {total} {total === 1 ? "entry" : "entries"}
+                </span>
+              </div>
             </div>
 
             <div className="border-b border-slate-100 bg-slate-50/50 px-3.5 py-3 sm:px-5">
@@ -578,8 +586,9 @@ export default function OTRecordClient() {
         width={620}
       >
         {weekdayRecordsQuery.isFetching ? (
-          <div className="py-10 text-center">
-            <p className="text-sm font-medium text-slate-700">Loading work log details…</p>
+          <div role="status" className="flex flex-col items-center py-10 text-center">
+            <LoaderCircle size={22} className="animate-spin text-blue-600" aria-hidden="true" />
+            <p className="mt-2 text-sm font-medium text-slate-700">Loading work log details…</p>
             <p className="mt-1 text-xs text-slate-500">Gathering entries for {selectedWeekday}.</p>
           </div>
         ) : weekdayRecordsQuery.isError ? (
