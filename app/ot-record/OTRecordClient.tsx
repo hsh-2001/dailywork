@@ -7,7 +7,7 @@ import {
   useRecords,
   useUpdateRecordStatuses,
 } from "@/hooks/record.hook";
-import { Alert, Button, Checkbox, DatePicker, Grid, message, Modal, Select } from "antd";
+import { Alert, Button, Checkbox, DatePicker, Grid, message, Modal, Select, Spin } from "antd";
 import RecordList from "@/components/RecordList";
 import { CalendarDays, Check, ChevronDown, ClipboardList, Coffee, Filter, LoaderCircle, Plus, RotateCcw } from "lucide-react";
 import MobileDatePicker from "@/components/MobileDatePicker";
@@ -549,26 +549,30 @@ export default function OTRecordClient() {
               </div>
             )}
 
-            <RecordList
-              data={data?.data ?? []}
-              selectedIds={selectedIds}
-              selectionDisabled={isUpdatingStatuses}
-              onSelectionChange={handleSelectionChange}
-              pagination={pagination}
-              isLoading={isLoading}
-              total={total}
-              onPaginationChange={handlePaginationChange}
-              onEdit={(id: number) => {
-                const record = data?.data.find((item: IRecordResponse) => item.id === id);
-                if (record) handleEdit(record);
-              }}
-              onDelete={(id: number) => {
-                if (!window.confirm("Delete this record? This can't be undone.")) return;
-                deleteRecord(id, {
-                  onError: (error) => console.error("Error deleting record:", error),
-                });
-              }}
-            />
+            <div aria-busy={isFetching && !isLoading}>
+              <Spin spinning={isFetching && !isLoading} tip="Loading work logs..." delay={150}>
+                <RecordList
+                  data={data?.data ?? []}
+                  selectedIds={selectedIds}
+                  selectionDisabled={isUpdatingStatuses}
+                  onSelectionChange={handleSelectionChange}
+                  pagination={pagination}
+                  isLoading={isLoading}
+                  total={total}
+                  onPaginationChange={handlePaginationChange}
+                  onEdit={(id: number) => {
+                    const record = data?.data.find((item: IRecordResponse) => item.id === id);
+                    if (record) handleEdit(record);
+                  }}
+                  onDelete={(id: number) => {
+                    if (!window.confirm("Delete this record? This can't be undone.")) return;
+                    deleteRecord(id, {
+                      onError: (error) => console.error("Error deleting record:", error),
+                    });
+                  }}
+                />
+              </Spin>
+            </div>
           </section>
         )}
       </div>
