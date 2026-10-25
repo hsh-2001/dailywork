@@ -3909,12 +3909,12 @@
       "imports": [],
       "format": "cjs"
     },
-    ".open-next/server-functions/default/.next/server/app/api/auth/profile/route_client-reference-manifest.js": {
+    ".open-next/server-functions/default/.next/server/app/api/auth/sign-in/route_client-reference-manifest.js": {
       "bytes": 302,
       "imports": [],
       "format": "cjs"
     },
-    ".open-next/server-functions/default/.next/server/app/api/auth/sign-in/route_client-reference-manifest.js": {
+    ".open-next/server-functions/default/.next/server/app/api/auth/profile/route_client-reference-manifest.js": {
       "bytes": 302,
       "imports": [],
       "format": "cjs"
@@ -4008,14 +4008,14 @@
           "original": "/Users/hsh/Repos/daily-work/.open-next/server-functions/default/.next/server/app/api/auth/session/route_client-reference-manifest.js"
         },
         {
-          "path": ".open-next/server-functions/default/.next/server/app/api/auth/profile/route_client-reference-manifest.js",
-          "kind": "require-call",
-          "original": "/Users/hsh/Repos/daily-work/.open-next/server-functions/default/.next/server/app/api/auth/profile/route_client-reference-manifest.js"
-        },
-        {
           "path": ".open-next/server-functions/default/.next/server/app/api/auth/sign-in/route_client-reference-manifest.js",
           "kind": "require-call",
           "original": "/Users/hsh/Repos/daily-work/.open-next/server-functions/default/.next/server/app/api/auth/sign-in/route_client-reference-manifest.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/api/auth/profile/route_client-reference-manifest.js",
+          "kind": "require-call",
+          "original": "/Users/hsh/Repos/daily-work/.open-next/server-functions/default/.next/server/app/api/auth/profile/route_client-reference-manifest.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/app/api/v1/note/[id]/route_client-reference-manifest.js",
@@ -11953,10 +11953,10 @@
         ".open-next/server-functions/default/.next/server/app/api/auth/session/route_client-reference-manifest.js": {
           "bytesInOutput": 457
         },
-        ".open-next/server-functions/default/.next/server/app/api/auth/profile/route_client-reference-manifest.js": {
+        ".open-next/server-functions/default/.next/server/app/api/auth/sign-in/route_client-reference-manifest.js": {
           "bytesInOutput": 457
         },
-        ".open-next/server-functions/default/.next/server/app/api/auth/sign-in/route_client-reference-manifest.js": {
+        ".open-next/server-functions/default/.next/server/app/api/auth/profile/route_client-reference-manifest.js": {
           "bytesInOutput": 457
         },
         ".open-next/server-functions/default/.next/server/app/api/v1/note/[id]/route_client-reference-manifest.js": {
