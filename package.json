@@ -42,11 +42,5 @@
     "typescript": "^5.9.3",
     "wrangler": "^4.152.0"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "workerd"
-    ]
-  },
   "packageManager": "pnpm@11.17.0"
 }

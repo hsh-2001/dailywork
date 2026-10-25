@@ -75,7 +75,7 @@ function getOpenNextErrorLogLevel() {
   }
 }
 
-// node_modules/.pnpm/@opennextjs+cloudflare@1.20.12_next@16.3.5_@babel+core@7.29.7_supports-color@10.2.2__@t_1d3e85d49af03cdacd0d4af97ba31944/node_modules/@opennextjs/cloudflare/dist/cli/templates/images.js
+// node_modules/.pnpm/@opennextjs+cloudflare@1.20.12_next@16.3.5_@babel+core@7.29.7_supports-color@10.2.2__@t_547d96bc8f28e07fb7167f5fbb2fcece/node_modules/@opennextjs/cloudflare/dist/cli/templates/images.js
 async function handleImageRequest(requestURL, requestHeaders, env) {
   const parseResult = parseImageRequest(requestURL, requestHeaders);
   if (!parseResult.ok) {

@@ -1,6 +1,6 @@
 import { createRequire as topLevelCreateRequire } from 'module';const require = topLevelCreateRequire(import.meta.url);import bannerUrl from 'url';const __dirname = bannerUrl.fileURLToPath(new URL('.', import.meta.url));
 
-// node_modules/.pnpm/@opennextjs+cloudflare@1.20.12_next@16.3.5_@babel+core@7.29.7_supports-color@10.2.2__@t_1d3e85d49af03cdacd0d4af97ba31944/node_modules/@opennextjs/cloudflare/dist/api/cloudflare-context.js
+// node_modules/.pnpm/@opennextjs+cloudflare@1.20.12_next@16.3.5_@babel+core@7.29.7_supports-color@10.2.2__@t_547d96bc8f28e07fb7167f5fbb2fcece/node_modules/@opennextjs/cloudflare/dist/api/cloudflare-context.js
 var cloudflareContextSymbol = /* @__PURE__ */ Symbol.for("__cloudflare-context__");
 function getCloudflareContext(options = { async: false }) {
   return options.async ? getCloudflareContextAsync() : getCloudflareContextSync();
@@ -84,7 +84,7 @@ You should update your Next.js config file as shown below:
 
 `;
 
-// node_modules/.pnpm/@opennextjs+cloudflare@1.20.12_next@16.3.5_@babel+core@7.29.7_supports-color@10.2.2__@t_1d3e85d49af03cdacd0d4af97ba31944/node_modules/@opennextjs/cloudflare/dist/api/overrides/asset-resolver/index.js
+// node_modules/.pnpm/@opennextjs+cloudflare@1.20.12_next@16.3.5_@babel+core@7.29.7_supports-color@10.2.2__@t_547d96bc8f28e07fb7167f5fbb2fcece/node_modules/@opennextjs/cloudflare/dist/api/overrides/asset-resolver/index.js
 var resolver = {
   name: "cloudflare-asset-resolver",
   async maybeGetAssetResult(event) {
@@ -147,7 +147,7 @@ function isUserWorkerFirst(runWorkerFirst, pathname) {
 }
 var asset_resolver_default = resolver;
 
-// node_modules/.pnpm/@opennextjs+cloudflare@1.20.12_next@16.3.5_@babel+core@7.29.7_supports-color@10.2.2__@t_1d3e85d49af03cdacd0d4af97ba31944/node_modules/@opennextjs/cloudflare/dist/api/config.js
+// node_modules/.pnpm/@opennextjs+cloudflare@1.20.12_next@16.3.5_@babel+core@7.29.7_supports-color@10.2.2__@t_547d96bc8f28e07fb7167f5fbb2fcece/node_modules/@opennextjs/cloudflare/dist/api/config.js
 function defineCloudflareConfig(config = {}) {
   const { incrementalCache, tagCache, queue, cachePurge, enableCacheInterception = false, routePreloadingBehavior = "none" } = config;
   return {

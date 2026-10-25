@@ -1,6 +1,6 @@
 globalThis.openNextDebug = false;globalThis.openNextVersion = "4.1.11";globalThis.nextVersion = "16.3.5";
 
-// node_modules/.pnpm/@opennextjs+cloudflare@1.20.12_next@16.3.5_@babel+core@7.29.7_supports-color@10.2.2__@t_1d3e85d49af03cdacd0d4af97ba31944/node_modules/@opennextjs/cloudflare/dist/api/durable-objects/bucket-cache-purge.js
+// node_modules/.pnpm/@opennextjs+cloudflare@1.20.12_next@16.3.5_@babel+core@7.29.7_supports-color@10.2.2__@t_547d96bc8f28e07fb7167f5fbb2fcece/node_modules/@opennextjs/cloudflare/dist/api/durable-objects/bucket-cache-purge.js
 import { DurableObject } from "cloudflare:workers";
 
 // node_modules/.pnpm/@opennextjs+aws@4.1.11_next@16.3.5_@babel+core@7.29.7_supports-color@10.2.2__@types+nod_69be7ced9d0bf9fac5dd05ede89df5f1/node_modules/@opennextjs/aws/dist/utils/error.js
@@ -62,7 +62,7 @@ function getOpenNextErrorLogLevel() {
   }
 }
 
-// node_modules/.pnpm/@opennextjs+cloudflare@1.20.12_next@16.3.5_@babel+core@7.29.7_supports-color@10.2.2__@t_1d3e85d49af03cdacd0d4af97ba31944/node_modules/@opennextjs/cloudflare/dist/api/overrides/internal.js
+// node_modules/.pnpm/@opennextjs+cloudflare@1.20.12_next@16.3.5_@babel+core@7.29.7_supports-color@10.2.2__@t_547d96bc8f28e07fb7167f5fbb2fcece/node_modules/@opennextjs/cloudflare/dist/api/overrides/internal.js
 var debugCache = (name, ...args) => {
   if (process.env.NEXT_PRIVATE_DEBUG_CACHE) {
     console.log(`[${name}] `, ...args);
@@ -107,7 +107,7 @@ async function internalPurgeCacheByTags(env, tags) {
   }
 }
 
-// node_modules/.pnpm/@opennextjs+cloudflare@1.20.12_next@16.3.5_@babel+core@7.29.7_supports-color@10.2.2__@t_1d3e85d49af03cdacd0d4af97ba31944/node_modules/@opennextjs/cloudflare/dist/api/durable-objects/bucket-cache-purge.js
+// node_modules/.pnpm/@opennextjs+cloudflare@1.20.12_next@16.3.5_@babel+core@7.29.7_supports-color@10.2.2__@t_547d96bc8f28e07fb7167f5fbb2fcece/node_modules/@opennextjs/cloudflare/dist/api/durable-objects/bucket-cache-purge.js
 var DEFAULT_BUFFER_TIME_IN_SECONDS = 5;
 var MAX_NUMBER_OF_TAGS_PER_PURGE = 100;
 var BucketCachePurge = class extends DurableObject {
