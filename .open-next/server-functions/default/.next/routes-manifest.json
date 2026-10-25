@@ -55,22 +55,6 @@
       "namedRegex": "^/api/v1/project/(?<nxtPid>[^/]+?)(?:/)?$"
     },
     {
-      "page": "/api/v1/record/drafts/[id]",
-      "regex": "^/api/v1/record/drafts/([^/]+?)(?:/)?$",
-      "routeKeys": {
-        "nxtPid": "nxtPid"
-      },
-      "namedRegex": "^/api/v1/record/drafts/(?<nxtPid>[^/]+?)(?:/)?$"
-    },
-    {
-      "page": "/api/v1/record/drafts/[id]/finish",
-      "regex": "^/api/v1/record/drafts/([^/]+?)/finish(?:/)?$",
-      "routeKeys": {
-        "nxtPid": "nxtPid"
-      },
-      "namedRegex": "^/api/v1/record/drafts/(?<nxtPid>[^/]+?)/finish(?:/)?$"
-    },
-    {
       "page": "/api/v1/record/[id]",
       "regex": "^/api/v1/record/([^/]+?)(?:/)?$",
       "routeKeys": {
@@ -175,12 +159,6 @@
       "regex": "^/api/v1/record(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/v1/record(?:/)?$"
-    },
-    {
-      "page": "/api/v1/record/drafts",
-      "regex": "^/api/v1/record/drafts(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/api/v1/record/drafts(?:/)?$"
     },
     {
       "page": "/api/v1/user",
