@@ -275,9 +275,9 @@ export default function OTRecordClient() {
               <div
                 id="work-log-filters"
                 hidden={!isFilterOpen}
-                className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto_auto] lg:items-end"
+                className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,1fr))_auto] lg:items-end"
               >
-                <div>
+                <div className="min-w-0">
                   <span className="mb-1 block text-[10px] font-medium text-slate-500">From date</span>
                   {isMobile ? (
                     <MobileDatePicker
@@ -301,7 +301,7 @@ export default function OTRecordClient() {
                     />
                   )}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <span className="mb-1 block text-[10px] font-medium text-slate-500">To date</span>
                   {isMobile ? (
                     <MobileDatePicker
@@ -325,9 +325,11 @@ export default function OTRecordClient() {
                     />
                   )}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <span className="mb-1 block text-[10px] font-medium text-slate-500">Project</span>
                   <Select
+                    size={isMobile ? "large" : "middle"}
+                    className="mobile-filter-select w-full"
                     aria-label="Project"
                     allowClear
                     showSearch
@@ -339,9 +341,11 @@ export default function OTRecordClient() {
                     options={(projectsQuery.data?.data ?? []).map((item: { name: string }) => ({ value: item.name, label: item.name }))}
                   />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <span className="mb-1 block text-[10px] font-medium text-slate-500">Booking status</span>
                   <Select
+                    size={isMobile ? "large" : "middle"}
+                    className="mobile-filter-select w-full"
                     aria-label="Booking status"
                     allowClear
                     placeholder="All booking statuses"
@@ -354,9 +358,11 @@ export default function OTRecordClient() {
                     ]}
                   />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <span className="mb-1 block text-[10px] font-medium text-slate-500">Submit status</span>
                   <Select
+                    size={isMobile ? "large" : "middle"}
+                    className="mobile-filter-select w-full"
                     aria-label="Submit status"
                     allowClear
                     placeholder="All submit statuses"
@@ -370,8 +376,24 @@ export default function OTRecordClient() {
                     ]}
                   />
                 </div>
-                <Button type="primary" onClick={applyFilters}>Apply filters</Button>
-                <Button icon={<RotateCcw size={14} />} onClick={clearFilters}>Clear</Button>
+                <div className="grid grid-cols-2 gap-2 sm:col-span-2 sm:flex sm:items-end sm:justify-end lg:col-span-1">
+                  <Button
+                    size={isMobile ? "large" : "middle"}
+                    type="primary"
+                    onClick={applyFilters}
+                    className="w-full sm:w-auto"
+                  >
+                    Apply filters
+                  </Button>
+                  <Button
+                    size={isMobile ? "large" : "middle"}
+                    icon={<RotateCcw size={14} />}
+                    onClick={clearFilters}
+                    className="w-full sm:w-auto"
+                  >
+                    Clear
+                  </Button>
+                </div>
               </div>
             </div>
 
