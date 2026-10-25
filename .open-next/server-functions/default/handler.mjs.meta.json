@@ -3904,17 +3904,17 @@
       "imports": [],
       "format": "cjs"
     },
-    ".open-next/server-functions/default/.next/server/app/api/auth/sign-in/route_client-reference-manifest.js": {
-      "bytes": 302,
-      "imports": [],
-      "format": "cjs"
-    },
     ".open-next/server-functions/default/.next/server/app/api/auth/session/route_client-reference-manifest.js": {
       "bytes": 302,
       "imports": [],
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/app/api/auth/profile/route_client-reference-manifest.js": {
+      "bytes": 302,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/api/auth/sign-in/route_client-reference-manifest.js": {
       "bytes": 302,
       "imports": [],
       "format": "cjs"
@@ -3955,7 +3955,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/node_modules/.pnpm/next@16.3.5_@babel+core@7.29.7_supports-color@10.2.2__@types+node@20.19.43_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/server/load-manifest.external.js": {
-      "bytes": 146887,
+      "bytes": 146752,
       "imports": [
         {
           "path": "path",
@@ -4003,11 +4003,6 @@
           "original": "/Users/hsh/Repos/daily-work/.open-next/server-functions/default/.next/server/app/api/auth/sign-out/route_client-reference-manifest.js"
         },
         {
-          "path": ".open-next/server-functions/default/.next/server/app/api/auth/sign-in/route_client-reference-manifest.js",
-          "kind": "require-call",
-          "original": "/Users/hsh/Repos/daily-work/.open-next/server-functions/default/.next/server/app/api/auth/sign-in/route_client-reference-manifest.js"
-        },
-        {
           "path": ".open-next/server-functions/default/.next/server/app/api/auth/session/route_client-reference-manifest.js",
           "kind": "require-call",
           "original": "/Users/hsh/Repos/daily-work/.open-next/server-functions/default/.next/server/app/api/auth/session/route_client-reference-manifest.js"
@@ -4016,6 +4011,11 @@
           "path": ".open-next/server-functions/default/.next/server/app/api/auth/profile/route_client-reference-manifest.js",
           "kind": "require-call",
           "original": "/Users/hsh/Repos/daily-work/.open-next/server-functions/default/.next/server/app/api/auth/profile/route_client-reference-manifest.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/api/auth/sign-in/route_client-reference-manifest.js",
+          "kind": "require-call",
+          "original": "/Users/hsh/Repos/daily-work/.open-next/server-functions/default/.next/server/app/api/auth/sign-in/route_client-reference-manifest.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/app/api/v1/note/[id]/route_client-reference-manifest.js",
@@ -6568,7 +6568,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/chunks/ssr/app_ot-record_OTRecordClient_tsx_0xggxdf._.js": {
-      "bytes": 26697,
+      "bytes": 27233,
       "imports": [],
       "format": "cjs"
     },
@@ -11950,13 +11950,13 @@
         ".open-next/server-functions/default/.next/server/app/api/auth/sign-out/route_client-reference-manifest.js": {
           "bytesInOutput": 459
         },
-        ".open-next/server-functions/default/.next/server/app/api/auth/sign-in/route_client-reference-manifest.js": {
-          "bytesInOutput": 457
-        },
         ".open-next/server-functions/default/.next/server/app/api/auth/session/route_client-reference-manifest.js": {
           "bytesInOutput": 457
         },
         ".open-next/server-functions/default/.next/server/app/api/auth/profile/route_client-reference-manifest.js": {
+          "bytesInOutput": 457
+        },
+        ".open-next/server-functions/default/.next/server/app/api/auth/sign-in/route_client-reference-manifest.js": {
           "bytesInOutput": 457
         },
         ".open-next/server-functions/default/.next/server/app/api/v1/note/[id]/route_client-reference-manifest.js": {
@@ -11981,7 +11981,7 @@
           "bytesInOutput": 448
         },
         ".open-next/server-functions/default/node_modules/.pnpm/next@16.3.5_@babel+core@7.29.7_supports-color@10.2.2__@types+node@20.19.43_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/server/load-manifest.external.js": {
-          "bytesInOutput": 123536
+          "bytesInOutput": 123401
         },
         ".open-next/cloudflare-templates/shims/throw.js": {
           "bytesInOutput": 215
@@ -12428,7 +12428,7 @@
           "bytesInOutput": 270
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/app_ot-record_OTRecordClient_tsx_0xggxdf._.js": {
-          "bytesInOutput": 27233
+          "bytesInOutput": 27769
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/node_modules__pnpm_07gnw5p._.js": {
           "bytesInOutput": 64092
@@ -12755,7 +12755,7 @@
           "bytesInOutput": 74305
         }
       },
-      "bytes": 11449447
+      "bytes": 11449848
     }
   }
 }
