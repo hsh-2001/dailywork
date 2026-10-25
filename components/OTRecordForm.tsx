@@ -88,6 +88,7 @@ export default function OTRecordForm({
           label="End Time"
           dependencies={["startTime"]}
           rules={[
+            { required: true, message: "Select end time" },
             ({ getFieldValue }) => ({
               validator(_, value) {
                 const start = getFieldValue("startTime");
@@ -105,9 +106,9 @@ export default function OTRecordForm({
           ]}
         >
           {isMobile ? (
-            <MobileTimePicker title="End time (optional)" placeholder="End" />
+            <MobileTimePicker title="End time" placeholder="End" />
           ) : (
-            <TimePicker className="w-full" format="HH:mm" placeholder="Optional" />
+            <TimePicker className="w-full" format="HH:mm" />
           )}
         </Form.Item>
       </div>

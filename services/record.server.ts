@@ -6,11 +6,6 @@ import type { IRecordPageResponse } from "@/shares/dtos/record/recordResponse";
 import type { RecordFilters } from "@/shares/dtos/record/recordFilters";
 import type { PaginationRequest } from "@/shares/types/paginationRquest";
 import { and, count, desc, eq, gte, ilike, lte, sum } from "drizzle-orm";
-import {
-  getCachedOTRecordPage,
-  getOTRecordCacheVersion,
-  setCachedOTRecordPage,
-} from "@/services/ot-record-cache.server";
 
 export async function getUserRecordPage(
   userId: string,
@@ -28,25 +23,6 @@ export async function getUserRecordPage(
   }
   if (request.submitStatus) {
     filters.push(eq(otRecordTable.submitStatus, request.submitStatus));
-  }
-
-  const query = JSON.stringify({
-    page,
-    pageSize,
-    dateFrom: request.dateFrom ?? "",
-    dateTo: request.dateTo ?? "",
-    project: request.project?.trim() ?? "",
-    bookingStatus: request.bookingStatus ?? "",
-    submitStatus: request.submitStatus ?? "",
-  });
-
-  let cacheVersion: string | undefined;
-  try {
-    cacheVersion = await getOTRecordCacheVersion(userId);
-    const cached = await getCachedOTRecordPage<IRecordPageResponse>(userId, cacheVersion, query);
-    if (cached) return cached;
-  } catch (error) {
-    console.error("Unable to read OT record Redis cache", error);
   }
 
   const where = and(...filters);
@@ -116,14 +92,6 @@ export async function getUserRecordPage(
         })),
     },
   };
-
-  if (cacheVersion !== undefined) {
-    try {
-      await setCachedOTRecordPage(userId, cacheVersion, query, result);
-    } catch (error) {
-      console.error("Unable to write OT record Redis cache", error);
-    }
-  }
 
   return result;
 }

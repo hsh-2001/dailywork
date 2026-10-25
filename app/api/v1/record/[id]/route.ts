@@ -3,7 +3,6 @@ import { otRecordTable } from "@/db/tables/ot_records";
 import { getCurrentAuthUser } from "@/lib/auth/current-user";
 import { ApiResponse } from "@/shares/types/apiResponse";
 import { notifyRecordChange } from "@/services/record-notification.server";
-import { invalidateOTRecordCache } from "@/services/ot-record-cache.server";
 import { and, eq, ne } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import {
@@ -105,7 +104,6 @@ export async function PUT(req: NextRequest) {
       return ApiResponse.failed("Record not found", "NOT_FOUND", 404);
     }
 
-    await invalidateOTRecordCache(user.id);
     notifyRecordChange(result[0], "updated");
 
     return ApiResponse.success(result[0], "Record updated successfully");
@@ -140,8 +138,6 @@ export async function DELETE(req: NextRequest) {
     if (result.length === 0) {
       return ApiResponse.failed("Record not found", "NOT_FOUND", 404);
     }
-
-    await invalidateOTRecordCache(user.id);
 
     return ApiResponse.success(result[0], "Record deleted successfully");
   } catch (error) {
