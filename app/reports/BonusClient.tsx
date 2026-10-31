@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import { Alert, Button, DatePicker, InputNumber, Select, Skeleton, Space } from "antd";
-import { ArrowUpRight, CalendarDays, RotateCcw } from "lucide-react";
+import { ArrowUpRight, CalendarDays, Eye, EyeOff, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useRecords } from "@/hooks/record.hook";
 import { useSalarySettings } from "@/hooks/salary-settings.hook";
@@ -167,6 +167,7 @@ function getPresets() {
 }
 
 export default function BonusClient() {
+  const [amountsVisible, setAmountsVisible] = useState(false);
   const [dateFrom, setDateFrom] = useState(() => getPresets()[0].from);
   const [dateTo, setDateTo] = useState(() => getPresets()[0].to);
   const [bookingStatus, setBookingStatus] = useState("");
@@ -316,12 +317,14 @@ export default function BonusClient() {
               Estimate overtime pay from your logged hours.
             </p>
           </div>
-          <Link
-            href="/ot-record"
-            className="inline-flex h-10 w-fit shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-          >
-            Work logs <ArrowUpRight size={15} aria-hidden="true" />
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/ot-record"
+              className="inline-flex h-10 w-fit shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+            >
+              Work logs <ArrowUpRight size={15} aria-hidden="true" />
+            </Link>
+          </div>
         </header>
 
         {isError && (
@@ -388,11 +391,26 @@ export default function BonusClient() {
               <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
                 Estimated OT pay after tax
               </p>
-              {isFetching && !isLoading && (
-                <span role="status" className="text-xs text-slate-500">
-                  Updating…
-                </span>
-              )}
+              <div className="flex items-center gap-2">
+                {isFetching && !isLoading && (
+                  <span role="status" className="text-xs text-slate-500">
+                    Updating…
+                  </span>
+                )}
+                <button
+                  type="button"
+                  aria-label={amountsVisible ? "Hide amounts" : "Show amounts"}
+                  aria-pressed={amountsVisible}
+                  onClick={() => setAmountsVisible((visible) => !visible)}
+                  className="inline-flex size-8 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-600 transition hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                >
+                  {amountsVisible ? (
+                    <EyeOff size={16} aria-hidden="true" />
+                  ) : (
+                    <Eye size={16} aria-hidden="true" />
+                  )}
+                </button>
+              </div>
             </div>
             {isLoading ||
             salarySettingsQuery.isLoading ||
@@ -400,7 +418,9 @@ export default function BonusClient() {
               <Skeleton.Input active className="mt-3!" />
             ) : (
               <p className="mt-2 min-w-0 text-[clamp(1.75rem,8vw,3rem)] font-bold leading-tight tabular-nums tracking-tight text-slate-950 [overflow-wrap:anywhere]">
-                {formatMoney(netPay, currency)}
+                <AmountMask visible={amountsVisible}>
+                  {formatMoney(netPay, currency)}
+                </AmountMask>
               </p>
             )}
             <p className="mt-1.5 text-sm text-slate-500">{rangeLabel}</p>
@@ -411,7 +431,11 @@ export default function BonusClient() {
                 <dd className="max-w-[55%] text-right font-medium tabular-nums text-slate-800 [overflow-wrap:anywhere]">
                   {salarySettingsQuery.isLoading || calculationSettingsQuery.isLoading
                     ? "—"
-                    : formatMoney(totalPay, currency)}
+                    : (
+                      <AmountMask visible={amountsVisible}>
+                        {formatMoney(totalPay, currency)}
+                      </AmountMask>
+                    )}
                 </dd>
               </div>
               <div className="flex items-start justify-between gap-3">
@@ -419,7 +443,11 @@ export default function BonusClient() {
                 <dd className="max-w-[55%] text-right font-medium tabular-nums text-slate-800 [overflow-wrap:anywhere]">
                   {salarySettingsQuery.isLoading || calculationSettingsQuery.isLoading
                     ? "—"
-                    : `−${formatMoney(estimatedTax, currency)}`}
+                    : (
+                      <AmountMask visible={amountsVisible}>
+                        −{formatMoney(estimatedTax, currency)}
+                      </AmountMask>
+                    )}
                 </dd>
               </div>
             </dl>
@@ -468,7 +496,9 @@ export default function BonusClient() {
                       </span>
                     </span>
                     <span className="min-w-0 text-right text-xs font-semibold tabular-nums text-slate-900 [overflow-wrap:anywhere] sm:text-sm">
-                      {formatMoney(b.pay, currency)}
+                      <AmountMask visible={amountsVisible}>
+                        {formatMoney(b.pay, currency)}
+                      </AmountMask>
                     </span>
                     <span className="text-xs tabular-nums text-slate-500">
                       {formatDuration(b.minutes)}
@@ -494,6 +524,7 @@ export default function BonusClient() {
                     ? "—"
                     : formatMoney(hourly, currency)
                 }
+                blurred={!amountsVisible}
               />
             </dl>
           </section>
@@ -626,6 +657,7 @@ export default function BonusClient() {
                       weekendRate={weekendRate}
                       specialDayRate={specialDayRate}
                       currency={currency}
+                      amountsVisible={amountsVisible}
                     />
                   ))}
                 </ul>
@@ -695,7 +727,7 @@ export default function BonusClient() {
                       setMonthlySalaryOverride(v ?? 0);
                       setSalaryConversionBasis(null);
                     }}
-                    className="min-w-0 flex-1 [&_.ant-input-number-input]:px-1 [&_.ant-input-number-input]:text-xs"
+                    className={`min-w-0 flex-1 [&_.ant-input-number-input]:px-1 [&_.ant-input-number-input]:text-xs ${amountsVisible ? "" : "[&_.ant-input-number-input]:select-none [&_.ant-input-number-input]:!text-slate-600 [&_.ant-input-number-input]:blur-[10px] [&_.ant-input-number-input]:transition-all [&_.ant-input-number-input]:duration-200"}`}
                   />
                   <Select
                     aria-label="Salary currency"
@@ -867,16 +899,45 @@ export default function BonusClient() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({
+  label,
+  value,
+  blurred = false,
+}: {
+  label: string;
+  value: string;
+  blurred?: boolean;
+}) {
   return (
     <div>
       <dt className="text-[11px] uppercase tracking-wide text-slate-500">
         {label}
       </dt>
       <dd className="mt-0.5 min-w-0 text-[clamp(0.7rem,2.8vw,0.875rem)] font-semibold tabular-nums text-slate-900 [overflow-wrap:anywhere]">
-        {value}
+        <AmountMask visible={!blurred}>{value}</AmountMask>
       </dd>
     </div>
+  );
+}
+
+function AmountMask({
+  visible,
+  children,
+}: {
+  visible: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <span
+      aria-hidden={!visible}
+      className={
+        visible
+          ? "transition-all duration-200"
+          : "inline-block select-none rounded bg-slate-100 px-1 text-slate-600 blur-[10px] transition-all duration-200"
+      }
+    >
+      {children}
+    </span>
   );
 }
 
@@ -949,6 +1010,7 @@ function LogRow({
   weekendRate,
   specialDayRate,
   currency,
+  amountsVisible,
 }: {
   record: IRecordResponse;
   minutes: number;
@@ -958,6 +1020,7 @@ function LogRow({
   weekendRate: number;
   specialDayRate: number;
   currency: string;
+  amountsVisible: boolean;
 }) {
   const inProgress = record.totalMinutes === null;
   const dayType = getRecordDayType(record);
@@ -1007,7 +1070,9 @@ function LogRow({
         <p
           className={`min-w-0 text-xs font-semibold tabular-nums [overflow-wrap:anywhere] sm:text-sm ${inProgress ? "text-slate-400" : "text-slate-900"}`}
         >
-          {inProgress ? "—" : formatMoney(pay, currency)}
+          <AmountMask visible={amountsVisible}>
+            {inProgress ? "—" : formatMoney(pay, currency)}
+          </AmountMask>
         </p>
       </div>
     </li>
