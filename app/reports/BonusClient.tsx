@@ -429,7 +429,7 @@ export default function BonusClient() {
               !salarySettingsQuery.isLoading &&
               !calculationSettingsQuery.isLoading && (
               <p className="mt-4 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
-                Enter your monthly salary below to see an amount.
+                Enter your base salary below to see an amount.
               </p>
             )}
 
@@ -682,7 +682,7 @@ export default function BonusClient() {
 
             <FormGroup title="Salary">
               <Field
-                label="Monthly salary"
+                label="Base salary"
                 className="grid-cols-[minmax(0,1fr)_minmax(0,210px)]"
               >
                 <Space.Compact block>
