@@ -28,7 +28,10 @@ export default function NotesPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const notes = (notesQuery.data?.data ?? []) as INoteResponse[];
+  const notes = useMemo(
+    () => (notesQuery.data?.data ?? []) as INoteResponse[],
+    [notesQuery.data?.data],
+  );
   const activeCount = notes.filter((note) => note.status === "ACTIVE").length;
   const completedCount = notes.length - activeCount;
   const filteredNotes = useMemo(() => {
@@ -81,10 +84,10 @@ export default function NotesPage() {
   return (
     <main className="min-h-screen bg-slate-50">
       <div className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 sm:py-5">
-        <header className="mb-5 overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-white to-blue-50/80 p-5 shadow-sm sm:p-7">
+        <header className="mb-5 overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
           <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">Your workspace</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Your workspace</p>
               <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Notes</h1>
               <p className="mt-2 max-w-md text-sm text-slate-500">Keep plans, ideas, and checklists together. Mark finished notes complete to clear overdue reminders.</p>
             </div>
@@ -93,8 +96,8 @@ export default function NotesPage() {
           <div className="mt-6 grid grid-cols-2 gap-2 sm:max-w-md sm:grid-cols-3">
             {[
               { label: "All notes", value: notes.length, color: "text-slate-950" },
-              { label: "Active", value: activeCount, color: "text-blue-700" },
-              { label: "Completed", value: completedCount, color: "text-emerald-700" },
+              { label: "Active", value: activeCount, color: "text-slate-800" },
+              { label: "Completed", value: completedCount, color: "text-slate-600" },
             ].map((stat) => <div key={stat.label} className="rounded-xl border border-white/90 bg-white/80 px-3.5 py-2.5 shadow-sm"><p className={`text-xl font-bold tabular-nums ${stat.color}`}>{stat.value}</p><p className="mt-0.5 text-[11px] font-medium text-slate-500">{stat.label}</p></div>)}
           </div>
         </header>
@@ -103,10 +106,10 @@ export default function NotesPage() {
           <NoteSearch value={search} onChange={setSearch} />
         </div>
 
-        <nav aria-label="Filter notes by status" className="mb-4 flex gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1 shadow-sm sm:w-fit">
+        <nav aria-label="Filter notes by status" className="mb-4 flex gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1 sm:w-fit">
           {([
             ["ALL", "All notes", notes.length], ["ACTIVE", "Active", activeCount], ["COMPLETED", "Completed", completedCount],
-          ] as const).map(([status, label, count]) => <button key={status} type="button" aria-pressed={statusFilter === status} onClick={() => setStatusFilter(status)} className={`inline-flex min-h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors ${statusFilter === status ? "bg-slate-900 text-white shadow-sm" : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"}`}>
+          ] as const).map(([status, label, count]) => <button key={status} type="button" aria-pressed={statusFilter === status} onClick={() => setStatusFilter(status)} className={`inline-flex min-h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors ${statusFilter === status ? "bg-slate-800 text-white" : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"}`}>
             {label}<span className={`rounded-full px-1.5 py-0.5 text-[10px] tabular-nums ${statusFilter === status ? "bg-white/15 text-white" : "bg-slate-100 text-slate-500"}`}>{count}</span>
           </button>)}
         </nav>

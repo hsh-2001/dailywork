@@ -43,7 +43,7 @@ export default function AuthPage() {
   return (
     <main className="flex min-h-[100svh] items-center justify-center px-4 py-10">
       <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-7 shadow-sm sm:p-9">
-        <Link href="/" className="text-sm font-semibold text-blue-700">Daily Work</Link>
+        <Link href="/" className="text-sm font-semibold text-slate-800">Daily Work</Link>
         <h1 className="mt-7 text-2xl font-bold tracking-tight text-slate-900">{isSignUp ? "Create your account" : "Welcome back"}</h1>
         <p className="mt-2 text-sm text-slate-500">{isSignUp ? "Organize your work in one place." : "Sign in to continue to your workspace."}</p>
         <form className="mt-7 space-y-4" onSubmit={submit}>
@@ -52,9 +52,9 @@ export default function AuthPage() {
           <label className="block text-sm font-medium text-slate-700">Password<input name="password" type="password" required minLength={8} autoComplete={isSignUp ? "new-password" : "current-password"} className="mt-1.5 block w-full rounded-lg border border-slate-300 px-3 py-2.5 font-normal" /></label>
           {isSignUp && <label className="block text-sm font-medium text-slate-700">Confirm password<input name="confirmPassword" type="password" required minLength={8} autoComplete="new-password" className="mt-1.5 block w-full rounded-lg border border-slate-300 px-3 py-2.5 font-normal" /></label>}
           {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-          <button disabled={busy} className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60">{busy ? "Please wait…" : isSignUp ? "Create account" : "Sign in"}</button>
+          <button disabled={busy} className="w-full rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-60">{busy ? "Please wait…" : isSignUp ? "Create account" : "Sign in"}</button>
         </form>
-        <p className="mt-6 text-center text-sm text-slate-500">{isSignUp ? "Already have an account? " : "New to Daily Work? "}<Link className="font-semibold text-blue-700 hover:text-blue-800" href={isSignUp ? "/auth/sign-in" : "/auth/sign-up"}>{isSignUp ? "Sign in" : "Create an account"}</Link></p>
+        <p className="mt-6 text-center text-sm text-slate-500">{isSignUp ? "Already have an account? " : "New to Daily Work? "}<Link className="font-semibold text-slate-700 hover:text-slate-950" href={isSignUp ? "/auth/sign-in" : "/auth/sign-up"}>{isSignUp ? "Sign in" : "Create an account"}</Link></p>
       </section>
     </main>
   );

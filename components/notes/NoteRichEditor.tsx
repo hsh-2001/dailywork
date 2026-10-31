@@ -234,12 +234,45 @@ export default function NoteRichEditor({ value = "", onChange }: NoteRichEditorP
   ];
 
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-300 bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
+    <div className="overflow-hidden rounded-lg border border-slate-300 bg-white focus-within:border-slate-500 focus-within:ring-2 focus-within:ring-slate-100">
       <div className="flex flex-nowrap gap-0 overflow-x-auto border-b border-slate-200 bg-slate-50 p-1">
-        {tools.map((tool) => <Tooltip key={tool.label} title={tool.label}><Button type="text" size="small" htmlType="button" aria-label={tool.label} aria-pressed={Boolean(activeTools[tool.key])} icon={tool.icon} onMouseDown={(event) => event.preventDefault()} onClick={tool.run} className={`!h-7 !w-7 !min-w-7 shrink-0 !px-0 ${activeTools[tool.key] ? "!bg-blue-100 !text-blue-700" : "!text-slate-600"}`} /></Tooltip>)}
+        <EditorToolbar tools={tools} activeTools={activeTools} />
       </div>
       <div ref={editorRef} contentEditable suppressContentEditableWarning role="textbox" aria-multiline="true" data-placeholder="Write your note... Formatting appears as you type." onInput={() => { updateValue(); refreshActiveTools(); }} onKeyUp={refreshActiveTools} onMouseUp={refreshActiveTools} onKeyDown={continueTaskList} onBlur={updateValue} onClick={(event) => { if ((event.target as HTMLElement).matches('input[type="checkbox"]')) requestAnimationFrame(updateValue); }} onPaste={(event) => { event.preventDefault(); const text = event.clipboardData.getData("text/plain"); document.execCommand("insertText", false, text); updateValue(); }} className="min-h-36 whitespace-pre-wrap break-words px-3 py-2 text-base leading-7 text-slate-800 outline-none sm:min-h-44 [&_blockquote]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-slate-300 [&_blockquote]:pl-3 [&_h1]:my-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:my-2 [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:my-2 [&_h3]:text-lg [&_h3]:font-semibold [&_ol]:my-2 [&_ol]:list-inside [&_ol]:list-decimal [&_pre]:my-2 [&_pre]:overflow-x-auto [&_pre]:rounded [&_pre]:bg-slate-100 [&_pre]:p-3 [&_ul]:my-2 [&_ul]:list-inside [&_ul]:list-disc" />
       <style jsx>{`[data-placeholder]:empty:before { content: attr(data-placeholder); color: #94a3b8; pointer-events: none; }`}</style>
     </div>
   );
+}
+
+function EditorToolbar({
+  tools,
+  activeTools,
+}: {
+  tools: {
+    key: string;
+    label: string;
+    icon: React.ReactNode;
+    run: () => void;
+  }[];
+  activeTools: Record<string, boolean>;
+}) {
+  return tools.map((tool) => (
+    <Tooltip key={tool.label} title={tool.label}>
+      <Button
+        type="text"
+        size="small"
+        htmlType="button"
+        aria-label={tool.label}
+        aria-pressed={Boolean(activeTools[tool.key])}
+        icon={tool.icon}
+        onMouseDown={(event) => event.preventDefault()}
+        onClick={tool.run}
+        className={`!h-7 !w-7 !min-w-7 shrink-0 !px-0 ${
+          activeTools[tool.key]
+            ? "!bg-slate-200 !text-slate-900"
+            : "!text-slate-600"
+        }`}
+      />
+    </Tooltip>
+  ));
 }

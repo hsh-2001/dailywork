@@ -58,7 +58,7 @@ export default function NoteDetailPage({ noteId }: { noteId: number }) {
               onClick={() => setPinned.mutate({ id: note.id, pinned: !note.pinned })}
               aria-label={note.pinned ? "Unpin note" : "Pin note"}
               title={note.pinned ? "Unpin note" : "Pin note"}
-              className={`!min-w-0 !px-2 sm:!px-3 ${note.pinned ? "!text-blue-700" : "!text-slate-500"}`}
+              className={`!min-w-0 !px-2 sm:!px-3 ${note.pinned ? "!text-slate-700" : "!text-slate-500"}`}
             >
               <span className="hidden min-[420px]:inline">{note.pinned ? "Pinned" : "Pin"}</span>
             </Button>
@@ -87,13 +87,13 @@ export default function NoteDetailPage({ noteId }: { noteId: number }) {
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Note</p>
             <h1 className="break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">{note.title}</h1>
             <p className="mt-2 text-xs text-slate-400">Updated {dayjs(note.updatedAt).format("MMMM D, YYYY [at] h:mm A")}</p>
-            {note.status === "COMPLETED" && <p className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2.5 py-1 text-sm font-medium text-emerald-700"><Check size={15} aria-hidden="true" />Completed</p>}
-            {note.deadline && <p className={`mt-3 inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-sm font-medium ${note.status !== "COMPLETED" && dayjs(note.deadline).isBefore(dayjs(), "day") ? "bg-red-50 text-red-700" : "bg-blue-50 text-blue-700"}`}>
+            {note.status === "COMPLETED" && <p className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2.5 py-1 text-sm font-medium text-slate-700"><Check size={15} aria-hidden="true" />Completed</p>}
+            {note.deadline && <p className={`mt-3 inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-sm font-medium ${note.status !== "COMPLETED" && dayjs(note.deadline).isBefore(dayjs(), "day") ? "bg-red-50 text-red-700" : "bg-slate-100 text-slate-700"}`}>
               <CalendarClock size={15} aria-hidden="true" />
               <time dateTime={note.deadline}>{note.status !== "COMPLETED" && dayjs(note.deadline).isBefore(dayjs(), "day") ? "Overdue · " : "Due "}{dayjs(note.deadline).format("MMMM D, YYYY")}</time>
             </p>}
           </header>
-          <div className="min-h-40 break-words text-[15px] leading-7 text-slate-700 [&_a]:text-blue-700 [&_a]:underline [&_blockquote]:my-4 [&_blockquote]:border-l-2 [&_blockquote]:border-slate-300 [&_blockquote]:pl-4 [&_code]:rounded [&_code]:bg-slate-100 [&_code]:px-1 [&_code]:font-mono [&_h1]:my-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-slate-900 [&_h2]:my-3 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-slate-900 [&_h3]:my-3 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-slate-900 [&_ol]:my-3 [&_ol]:list-inside [&_ol]:list-decimal [&_pre]:my-3 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-slate-100 [&_pre]:p-4 [&_ul]:my-3 [&_ul]:list-inside [&_ul]:list-disc">
+          <div className="min-h-40 break-words text-[15px] leading-7 text-slate-700 [&_a]:text-slate-700 [&_a]:underline [&_blockquote]:my-4 [&_blockquote]:border-l-2 [&_blockquote]:border-slate-300 [&_blockquote]:pl-4 [&_code]:rounded [&_code]:bg-slate-100 [&_code]:px-1 [&_code]:font-mono [&_h1]:my-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-slate-900 [&_h2]:my-3 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-slate-900 [&_h3]:my-3 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-slate-900 [&_ol]:my-3 [&_ol]:list-inside [&_ol]:list-decimal [&_pre]:my-3 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-slate-100 [&_pre]:p-4 [&_ul]:my-3 [&_ul]:list-inside [&_ul]:list-disc">
             <NoteContent content={note.content} onTaskToggle={handleTaskToggle} tasksDisabled={updateNote.isPending} />
           </div>
         </article>

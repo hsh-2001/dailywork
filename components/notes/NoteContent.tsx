@@ -37,7 +37,7 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
           href={href}
           target={href.startsWith("http") ? "_blank" : undefined}
           rel={href.startsWith("http") ? "noreferrer" : undefined}
-          className="text-blue-700 underline underline-offset-2"
+          className="text-slate-700 underline underline-offset-2"
         >
           {link[1]}
         </a>
@@ -158,7 +158,7 @@ export default function NoteContent({
                         aria-pressed={taskCompleted}
                         disabled={tasksDisabled}
                         onClick={() => onTaskToggle(itemLineIndexes[itemIndex], !taskCompleted)}
-                        className={`mt-1 inline-flex size-4 shrink-0 items-center justify-center rounded border transition-colors disabled:opacity-50 ${taskCompleted ? "border-blue-600 bg-blue-600 text-white" : "border-slate-300 bg-white hover:border-blue-500"}`}
+                        className={`mt-1 inline-flex size-4 shrink-0 items-center justify-center rounded border transition-colors disabled:opacity-50 ${taskCompleted ? "border-slate-700 bg-slate-700 text-white" : "border-slate-300 bg-white hover:border-slate-500"}`}
                       >
                         {taskCompleted && <span aria-hidden="true" className="text-[10px] leading-none">✓</span>}
                       </button>
@@ -166,7 +166,7 @@ export default function NoteContent({
                       <span
                         role="img"
                         aria-label={taskCompleted ? "Completed" : "Not completed"}
-                        className={`mt-1 inline-flex size-4 shrink-0 items-center justify-center rounded border ${taskCompleted ? "border-blue-600 bg-blue-600 text-white" : "border-slate-300 bg-white"}`}
+                        className={`mt-1 inline-flex size-4 shrink-0 items-center justify-center rounded border ${taskCompleted ? "border-slate-700 bg-slate-700 text-white" : "border-slate-300 bg-white"}`}
                       >
                         {taskCompleted && <span aria-hidden="true" className="text-[10px] leading-none">✓</span>}
                       </span>

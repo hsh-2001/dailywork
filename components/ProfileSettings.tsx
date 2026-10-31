@@ -60,6 +60,6 @@ export default function ProfileSettings({ name, email }: { name: string; email: 
       <Input.Password aria-label="Confirm new password" placeholder="Confirm new password" autoComplete="new-password" minLength={8} maxLength={1024} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} required />
       <Button htmlType="submit" loading={savingPassword}>Update password</Button>
     </form>
-    {(message || error) && <p role={error ? "alert" : "status"} className={`text-sm sm:col-span-2 ${error ? "text-red-600" : "text-emerald-700"}`}>{error || message}</p>}
+    {(message || error) && <p role={error ? "alert" : "status"} className={`text-sm sm:col-span-2 ${error ? "text-red-600" : "text-slate-600"}`}>{error || message}</p>}
   </div>;
 }

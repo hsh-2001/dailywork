@@ -17,7 +17,7 @@ const navigation = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Work logs", href: "/ot-record", icon: ClipboardList },
   { label: "Notes", href: "/notes", icon: StickyNote },
-  { label: "Reports", href: "/reports", icon: ChartNoAxesCombined },
+  { label: "Bonus", href: "/reports", icon: ChartNoAxesCombined },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -89,7 +89,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:h-16 sm:px-6 lg:px-8">
           <Link
             href="/dashboard"
-            className="group flex min-w-0 items-center gap-2.5 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600 sm:gap-3"
+            className="group flex min-w-0 items-center gap-2.5 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-slate-500 sm:gap-3"
           >
             <Image
               src="/daily-work-icon.png"
@@ -120,9 +120,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   key={href}
                   href={href}
                   aria-current={active ? "page" : undefined}
-                  className={`relative flex h-8 items-center gap-2 rounded-lg px-2.5 text-[13px] font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 lg:px-3 ${
+                  className={`relative flex h-8 items-center gap-2 rounded-lg px-2.5 text-[13px] font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500 lg:px-3 ${
                     active
-                      ? "bg-white text-blue-700 shadow-sm ring-1 ring-slate-200/70"
+                      ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/70"
                       : "text-slate-600 hover:bg-white/80 hover:text-slate-950"
                   }`}
                 >

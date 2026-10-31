@@ -29,15 +29,15 @@ const formatTotal = (value: number | null) => {
 
 function StatusBadges({ bookingStatus, submitStatus }: Pick<IRecordResponse, "bookingStatus" | "submitStatus">) {
   const booking = {
-    PENDING: ["Pending booking", "bg-amber-50 text-amber-700 ring-amber-200"],
-    BOOKED: ["Booked", "bg-emerald-50 text-emerald-700 ring-emerald-200"],
+    PENDING: ["Pending booking", "bg-slate-50 text-slate-700 ring-slate-200"],
+    BOOKED: ["Booked", "bg-slate-100 text-slate-700 ring-slate-200"],
     CANCELLED: ["Booking cancelled", "bg-slate-100 text-slate-600 ring-slate-200"],
   }[bookingStatus];
   const submission = {
     NOT_SUBMITTED: ["Not submitted", "bg-slate-100 text-slate-600 ring-slate-200"],
-    SUBMITTED: ["Submitted", "bg-blue-50 text-blue-700 ring-blue-200"],
-    APPROVED: ["Approved", "bg-emerald-50 text-emerald-700 ring-emerald-200"],
-    REJECTED: ["Rejected", "bg-red-50 text-red-700 ring-red-200"],
+    SUBMITTED: ["Submitted", "bg-slate-50 text-slate-700 ring-slate-200"],
+    APPROVED: ["Approved", "bg-slate-100 text-slate-700 ring-slate-200"],
+    REJECTED: ["Rejected", "bg-slate-200 text-slate-800 ring-slate-300"],
   }[submitStatus];
 
   return <div className="mt-1 flex flex-wrap gap-1">
@@ -128,7 +128,7 @@ export default function RecordList({
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
-                      <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-blue-800">
+                      <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-slate-700">
                         {formatTotal(record.totalMinutes)}
                       </span>
                       <Button
@@ -138,7 +138,7 @@ export default function RecordList({
                         aria-label={`Edit work log from ${record.workDate}`}
                         onClick={() => onEdit(record.id)}
                         title="Edit work log"
-                        className="!h-8 !w-8 !min-w-8 !border-0 !bg-transparent !p-0 !text-blue-600 !shadow-none hover:!bg-transparent hover:!text-blue-800"
+                        className="!h-8 !w-8 !min-w-8 !border-0 !bg-transparent !p-0 !text-slate-500 !shadow-none hover:!bg-transparent hover:!text-slate-900"
                       />
                       <Button
                         size="small"
@@ -170,7 +170,7 @@ export default function RecordList({
 
                 <div className="hidden md:grid md:grid-cols-[1fr_1fr_1.3fr_auto] md:items-center md:gap-3">
                   <div className="flex min-w-0 items-center gap-2.5">
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
                       <CalendarDays size={15} aria-hidden="true" />
                     </span>
                     <div className="min-w-0">
@@ -196,7 +196,7 @@ export default function RecordList({
                   </div>
 
                   <div className="flex items-center justify-between border-t border-slate-100 pt-2 md:justify-end md:border-0 md:pt-0">
-                    <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-blue-800">
+                    <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-slate-700">
                       {formatTotal(record.totalMinutes)}
                     </span>
                     <div className="ml-2 flex items-center gap-1 md:ml-2">
@@ -207,7 +207,7 @@ export default function RecordList({
                         aria-label={`Edit work log from ${record.workDate}`}
                         onClick={() => onEdit(record.id)}
                         title="Edit work log"
-                        className="!h-8 !w-8 !min-w-8 !border-0 !bg-transparent !p-0 !text-blue-600 !shadow-none hover:!bg-transparent hover:!text-blue-800"
+                        className="!h-8 !w-8 !min-w-8 !border-0 !bg-transparent !p-0 !text-slate-500 !shadow-none hover:!bg-transparent hover:!text-slate-900"
                       />
                       <Button
                         size="small"
@@ -278,7 +278,7 @@ export default function RecordList({
           <p className="mx-auto mt-1 max-w-sm text-sm leading-6 text-slate-500">
             Add your first entry to keep your hours and project details together.
           </p>
-          <Link href="/ot-record/add" className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-lg bg-blue-700 px-4 text-sm font-semibold text-white transition-colors hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+          <Link href="/ot-record/add" className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-lg bg-slate-800 px-4 text-sm font-semibold text-white transition-colors hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500">
             Add work log <ArrowRight size={15} aria-hidden="true" />
           </Link>
         </div>

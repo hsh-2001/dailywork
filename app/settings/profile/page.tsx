@@ -9,11 +9,11 @@ export default async function ProfilePage() {
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
       <div className="mx-auto max-w-5xl">
-        <Link href="/settings" className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-blue-700">
+        <Link href="/settings" className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-900">
           <ArrowLeft size={14} aria-hidden="true" /> Settings
         </Link>
         <div className="mt-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-700">Your account</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">Your account</p>
           <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">Profile</h1>
           <p className="mt-0.5 max-w-2xl text-xs text-slate-500 sm:text-sm">Manage your profile details and password.</p>
         </div>

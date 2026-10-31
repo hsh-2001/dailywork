@@ -101,7 +101,7 @@ export default function ProjectsPage() {
       <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 sm:py-7">
         <header className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-700">Your workspace</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">Your workspace</p>
             <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">
               Projects
             </h1>
@@ -137,7 +137,7 @@ export default function ProjectsPage() {
               </div>
               <div className="flex items-baseline justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
                 <p className="text-[11px] font-medium text-slate-500">Active</p>
-                <p className="text-base font-semibold tabular-nums text-emerald-700">
+                <p className="text-base font-semibold tabular-nums text-slate-700">
                   {activeProjects}
                 </p>
               </div>
@@ -220,7 +220,7 @@ export default function ProjectsPage() {
                   >
                     <div className="min-w-0">
                       <div className="flex min-w-0 items-center gap-3">
-                        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
                           <FolderKanban size={17} aria-hidden="true" />
                         </span>
                         <span className="min-w-0">
@@ -231,7 +231,7 @@ export default function ProjectsPage() {
                             <span
                               className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
                                 project.status === "ACTIVE"
-                                  ? "bg-emerald-50 text-emerald-700"
+                                  ? "bg-slate-100 text-slate-700"
                                   : "bg-slate-100 text-slate-500"
                               }`}
                             >

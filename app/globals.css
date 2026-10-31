@@ -35,10 +35,13 @@ select {
 }
 
 :focus-visible {
-  outline-color: #2563eb;
+  outline-color: #64748b;
 }
 
-/* Keep Ant Design surfaces in step with the app's quieter slate-and-blue UI. */
+:root {
+  --adm-color-primary: #334155;
+}
+
 .ant-table-wrapper .ant-table-thead > tr > th {
   background: #f8fafc;
   color: #475569;
@@ -77,6 +80,6 @@ select {
 }
 
 ::selection {
-  background: #dbeafe;
-  color: #1e3a8a;
+  background: #e2e8f0;
+  color: #0f172a;
 }

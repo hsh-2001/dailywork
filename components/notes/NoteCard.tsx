@@ -50,20 +50,20 @@ export default function NoteCard({
           onOpen(note);
         }
       }}
-      className="group flex min-h-36 cursor-pointer items-start gap-3 rounded-xl border border-slate-200/80 bg-white px-3.5 py-3 transition hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50/30 hover:shadow-md focus-visible:outline-2 focus-visible:outline-blue-500 sm:px-4 sm:py-4"
+      className="group flex min-h-36 cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white px-3.5 py-3 transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-slate-500 sm:px-4 sm:py-4"
     >
       <div className="hidden size-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-400 ring-1 ring-slate-200/70 sm:flex">
         <StickyNote size={16} />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-center gap-2">
-          <h2 className="truncate text-sm font-semibold text-slate-900 group-hover:text-blue-800 sm:text-[15px]">{note.title}</h2>
-          {note.pinned && <Pin size={13} className="shrink-0 fill-blue-600 text-blue-600" aria-label="Pinned" role="img" />}
+          <h2 className="truncate text-sm font-semibold text-slate-900 sm:text-[15px]">{note.title}</h2>
+          {note.pinned && <Pin size={13} className="shrink-0 fill-slate-500 text-slate-500" aria-label="Pinned" role="img" />}
         </div>
         <div className="mt-1.5 line-clamp-3 max-h-12 overflow-hidden text-xs leading-4 text-slate-500 [&_blockquote]:border-slate-200 [&_blockquote]:pl-2 [&_h1]:text-sm [&_h2]:text-xs [&_h3]:text-xs">
           <NoteContent content={note.content} />
         </div>
-        {note.status === "COMPLETED" && <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold leading-4 text-emerald-700 ring-1 ring-inset ring-emerald-200"><Check size={11} aria-hidden="true" />Completed</span>}
+        {note.status === "COMPLETED" && <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold leading-4 text-slate-700 ring-1 ring-inset ring-slate-200"><Check size={11} aria-hidden="true" />Completed</span>}
         {note.deadline && (() => {
           const deadline = dayjs(note.deadline);
           const overdue = note.status !== "COMPLETED" && deadline.isBefore(dayjs(), "day");
@@ -72,8 +72,8 @@ export default function NoteCard({
           const badgeColor = overdue
             ? "bg-red-50 text-red-700 ring-red-200"
             : dueToday
-              ? "bg-amber-50 text-amber-700 ring-amber-200"
-              : "bg-blue-50 text-blue-700 ring-blue-200";
+              ? "bg-slate-100 text-slate-700 ring-slate-200"
+              : "bg-slate-50 text-slate-600 ring-slate-200";
           return <span className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold leading-4 ring-1 ring-inset ${badgeColor}`}>
             <CalendarClock size={11} aria-hidden="true" />
             <time dateTime={note.deadline}>{label} · {deadline.format("MMM D, YYYY")}</time>

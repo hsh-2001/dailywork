@@ -145,13 +145,13 @@ function AddRecordPageContent() {
       <div className="mx-auto w-full max-w-3xl px-4 py-3 sm:px-6 sm:py-5">
         <Link
           href="/ot-record"
-          className="mb-2 inline-flex min-h-8 items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-blue-700 focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+          className="mb-2 inline-flex min-h-8 items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-slate-900 focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
         >
           <ArrowLeft size={16} aria-hidden="true" /> Work logs
         </Link>
 
         <header className="mb-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-700">Work logs</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">Work logs</p>
           <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">
             {record ? "Edit work log" : "Add work log"}
           </h1>

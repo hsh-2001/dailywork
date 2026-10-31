@@ -38,8 +38,8 @@ const shortcuts = [
     icon: StickyNote,
   },
   {
-    title: "Reports",
-    description: "View work summaries",
+    title: "Bonus",
+    description: "Review time and estimate overtime bonus hours",
     href: "/reports",
     icon: ChartNoAxesCombined,
   },
@@ -61,7 +61,7 @@ export default function DashboardClient() {
       <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
         <header className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-700">Your workspace</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">Your workspace</p>
             <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">
               Dashboard
             </h1>
@@ -98,7 +98,7 @@ export default function DashboardClient() {
         >
           <article className="rounded-lg border border-slate-200 bg-white p-3">
             <div className="flex items-center gap-2.5">
-              <span className="flex size-8 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
                 <ClipboardList size={16} aria-hidden="true" />
               </span>
               <div>
@@ -155,7 +155,7 @@ export default function DashboardClient() {
               </div>
               <Link
                 href="/ot-record"
-                className="inline-flex shrink-0 items-center gap-3 text-sm font-medium text-blue-700 hover:text-blue-800"
+                className="inline-flex shrink-0 items-center gap-3 text-sm font-medium text-slate-700 hover:text-slate-950"
               >
                 {isFetching && <span role="status" className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500"><LoaderCircle size={13} className="animate-spin" aria-hidden="true" />Loading</span>}
                 View all <ArrowUpRight size={15} aria-hidden="true" />
@@ -204,7 +204,7 @@ export default function DashboardClient() {
                 </p>
                 <Link
                   href="/ot-record/add"
-                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-blue-700 hover:text-blue-800"
+                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-slate-700 hover:text-slate-950"
                 >
                   Add work log <ArrowRight size={15} aria-hidden="true" />
                 </Link>
@@ -226,7 +226,7 @@ export default function DashboardClient() {
                 <li key={href}>
                   <Link
                     href={href}
-                    className="group flex min-h-16 items-center gap-3 px-4 py-3 transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-blue-600 sm:px-5"
+                    className="group flex min-h-16 items-center gap-3 px-4 py-3 transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-slate-500 sm:px-5"
                   >
                     <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
                       <Icon size={18} aria-hidden="true" />
@@ -241,7 +241,7 @@ export default function DashboardClient() {
                     </span>
                     <ArrowRight
                       size={16}
-                      className="shrink-0 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-blue-700"
+                      className="shrink-0 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-slate-700"
                       aria-hidden="true"
                     />
                   </Link>
