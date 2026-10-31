@@ -5,7 +5,9 @@ import { Alert, Button, DatePicker, InputNumber, Select, Skeleton, Space } from 
 import { ArrowUpRight, CalendarDays, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useRecords } from "@/hooks/record.hook";
+import { useSalarySettings } from "@/hooks/salary-settings.hook";
 import type { IRecordResponse } from "@/shares/dtos/record/recordResponse";
+import type { SalarySettings } from "@/shares/dtos/salary-settings/salarySettings";
 import dayjs from "dayjs";
 import { APP_TZ, formatTime } from "@/utils/datetime";
 
@@ -154,15 +156,20 @@ export default function BonusClient() {
   const [dateTo, setDateTo] = useState(() => getPresets()[0].to);
   const [bookingStatus, setBookingStatus] = useState("");
   const [submitStatus, setSubmitStatus] = useState("");
-  const [monthlySalary, setMonthlySalary] = useState<number>(0);
-  const [currency, setCurrency] = useState("USD");
-  const [taxRate, setTaxRate] = useState<number>(0);
+  const [monthlySalaryOverride, setMonthlySalaryOverride] = useState<number | null>(null);
+  const [currencyOverride, setCurrencyOverride] = useState<SalarySettings["currency"] | null>(null);
+  const [taxRateOverride, setTaxRateOverride] = useState<number | null>(null);
   const [workingDays, setWorkingDays] = useState<number>(22);
   const [dailyHours, setDailyHours] = useState<number>(8);
   const [cutoff, setCutoff] = useState("16:30");
   const [weekdayBefore, setWeekdayBefore] = useState<number>(1);
   const [weekdayAfter, setWeekdayAfter] = useState<number>(1.5);
   const [weekendRate, setWeekendRate] = useState<number>(2);
+  const salarySettingsQuery = useSalarySettings();
+  const savedSalarySettings = salarySettingsQuery.data?.data;
+  const monthlySalary = monthlySalaryOverride ?? savedSalarySettings?.monthlySalary ?? 0;
+  const currency = currencyOverride ?? savedSalarySettings?.currency ?? "USD";
+  const taxRate = taxRateOverride ?? savedSalarySettings?.taxRate ?? 0;
 
   const { data, isLoading, isError, isFetching, refetch } = useRecords({
     page: 1,
@@ -295,6 +302,24 @@ export default function BonusClient() {
             }
           />
         )}
+        {salarySettingsQuery.isError && (
+          <Alert
+            className="mb-5"
+            type="error"
+            showIcon
+            message="Couldn't load your saved salary and tax defaults"
+            description="The estimate may not reflect your saved settings."
+            action={
+              <Button
+                size="small"
+                icon={<RotateCcw size={14} />}
+                onClick={() => salarySettingsQuery.refetch()}
+              >
+                Retry
+              </Button>
+            }
+          />
+        )}
 
         <div className="grid gap-5 lg:grid-cols-[360px_1fr] lg:items-start">
           <section
@@ -311,7 +336,7 @@ export default function BonusClient() {
                 </span>
               )}
             </div>
-            {isLoading ? (
+            {isLoading || salarySettingsQuery.isLoading ? (
               <Skeleton.Input active className="mt-3!" />
             ) : (
               <p className="mt-2 text-4xl font-bold tabular-nums tracking-tight text-slate-950 sm:text-5xl">
@@ -324,18 +349,18 @@ export default function BonusClient() {
               <div className="flex items-center justify-between gap-3">
                 <dt className="text-slate-500">Gross overtime pay</dt>
                 <dd className="font-medium tabular-nums text-slate-800">
-                  {formatMoney(totalPay, currency)}
+                  {salarySettingsQuery.isLoading ? "—" : formatMoney(totalPay, currency)}
                 </dd>
               </div>
               <div className="flex items-center justify-between gap-3">
                 <dt className="text-slate-500">Estimated tax ({taxRate}%)</dt>
                 <dd className="font-medium tabular-nums text-slate-800">
-                  −{formatMoney(estimatedTax, currency)}
+                  {salarySettingsQuery.isLoading ? "—" : `−${formatMoney(estimatedTax, currency)}`}
                 </dd>
               </div>
             </dl>
 
-            {monthlySalary <= 0 && !isLoading && (
+            {monthlySalary <= 0 && !isLoading && !salarySettingsQuery.isLoading && (
               <p className="mt-4 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
                 Enter your monthly salary below to see an amount.
               </p>
@@ -397,7 +422,10 @@ export default function BonusClient() {
                 label="Logged"
                 value={isLoading ? "–" : formatDuration(totals.minutes)}
               />
-              <Stat label="Base / hr" value={formatMoney(hourly, currency)} />
+              <Stat
+                label="Base / hr"
+                value={salarySettingsQuery.isLoading ? "—" : formatMoney(hourly, currency)}
+              />
             </dl>
           </section>
 
@@ -591,18 +619,17 @@ export default function BonusClient() {
                     min={0}
                     step={100}
                     value={monthlySalary}
-                    onChange={(v) => setMonthlySalary(v ?? 0)}
+                    onChange={(v) => setMonthlySalaryOverride(v ?? 0)}
                     className="min-w-0 flex-1"
                   />
                   <Select
                     aria-label="Salary currency"
                     value={currency}
-                    onChange={setCurrency}
+                    onChange={(value: SalarySettings["currency"]) => setCurrencyOverride(value)}
                     className="w-[82px]"
                     options={[
                       { value: "USD", label: "USD" },
                       { value: "KHR", label: "KHR" },
-                      { value: "THB", label: "THB" },
                     ]}
                   />
                 </Space.Compact>
@@ -649,7 +676,7 @@ export default function BonusClient() {
                     max={100}
                     step={0.5}
                     value={taxRate}
-                    onChange={(v) => setTaxRate(v ?? 0)}
+                    onChange={(v) => setTaxRateOverride(v ?? 0)}
                     className="min-w-0 flex-1"
                   />
                   <span className="flex items-center border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500">

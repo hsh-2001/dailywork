@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { ArrowRight, FolderKanban, Settings2, UserRound } from "lucide-react";
+import {
+  ArrowRight,
+  CircleDollarSign,
+  FolderKanban,
+  Settings2,
+  UserRound,
+} from "lucide-react";
 
 export default function SettingsPage() {
   return (
@@ -40,6 +46,23 @@ export default function SettingsPage() {
               Workspace
             </div>
           </div>
+          <Link
+            href="/settings/salary"
+            className="group flex min-h-14 items-center justify-between gap-4 border-b border-slate-100 px-4 py-3 transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-slate-500 sm:px-5"
+          >
+            <span className="flex items-center gap-3">
+              <span className="flex size-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+                <CircleDollarSign size={18} aria-hidden="true" />
+              </span>
+              <span>
+                <span className="block text-sm font-medium text-slate-800">Salary &amp; tax</span>
+                <span className="mt-0.5 block text-xs text-slate-500 sm:text-sm">
+                  Set default salary and overtime tax for bonus estimates.
+                </span>
+              </span>
+            </span>
+            <ArrowRight size={18} className="shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-700" aria-hidden="true" />
+          </Link>
           <Link
             href="/projects"
             className="group flex min-h-14 items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-slate-500 sm:px-5"
