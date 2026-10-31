@@ -5,7 +5,7 @@ import {
   useRecords,
   useUpdateRecordStatuses,
 } from "@/hooks/record.hook";
-import { Alert, Button, Checkbox, DatePicker, Grid, message, Modal, Select, Spin } from "antd";
+import { Alert, App, Button, Checkbox, DatePicker, Grid, Modal, Select, Spin } from "antd";
 import RecordList from "@/components/RecordList";
 import { CalendarDays, Check, ChevronDown, ClipboardList, Coffee, Filter, LoaderCircle, Plus, RotateCcw } from "lucide-react";
 import MobileDatePicker from "@/components/MobileDatePicker";
@@ -40,6 +40,7 @@ const statusLabel = (status: string) =>
   status.replaceAll("_", " ").toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
 
 export default function OTRecordClient() {
+  const { notification } = App.useApp();
   const router = useRouter();
   const [pagination, setPagination] = useState({ page: 1, pageSize: 10 });
   const [filters, setFilters] = useState<RecordFilters>({});
@@ -148,10 +149,12 @@ export default function OTRecordClient() {
       {
         onSuccess: () => {
           clearSelection();
-          message.success("Selected work log statuses updated");
+          notification.success({ title: "Selected work log statuses updated" });
         },
         onError: () => {
-          message.error("Couldn't update work log statuses. Please try again.");
+          notification.error({
+            title: "Couldn't update work log statuses. Please try again.",
+          });
         },
       },
     );

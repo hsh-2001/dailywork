@@ -6,19 +6,31 @@ import { ArrowUpRight, CalendarDays, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useRecords } from "@/hooks/record.hook";
 import { useSalarySettings } from "@/hooks/salary-settings.hook";
+import { useBonusCalculationSettings } from "@/hooks/bonus-calculation-settings.hook";
 import type { IRecordResponse } from "@/shares/dtos/record/recordResponse";
 import type { SalarySettings } from "@/shares/dtos/salary-settings/salarySettings";
 import dayjs from "dayjs";
 import { APP_TZ, formatTime } from "@/utils/datetime";
+import { getRecordDayType } from "@/utils/workday-type";
 
 type Rates = {
-  weekdayBefore: number;
-  weekdayAfter: number;
+  weekday: number;
+  normalHoliday: number;
   weekend: number;
-  cutoff: string;
+  specialDay: number;
 };
-type Parts = { before: number; after: number; weekend: number };
-const EMPTY_PARTS: Parts = { before: 0, after: 0, weekend: 0 };
+type Parts = {
+  weekday: number;
+  normalHoliday: number;
+  weekend: number;
+  specialDay: number;
+};
+const EMPTY_PARTS: Parts = {
+  weekday: 0,
+  normalHoliday: 0,
+  weekend: 0,
+  specialDay: 0,
+};
 
 const intersectsMinutes = (
   start: number,
@@ -30,16 +42,16 @@ const intersectsMinutes = (
 function calculateRecord(record: IRecordResponse, rates: Rates) {
   const none = { minutes: 0, multiplied: 0, parts: EMPTY_PARTS };
   if (!record.endTime || record.totalMinutes === null) return none;
-  const start = dayjs(record.startTime).tz(APP_TZ).valueOf();
-  const end = dayjs(record.endTime).tz(APP_TZ).valueOf();
+  const start = dayjs(record.startTime).valueOf();
+  const end = dayjs(record.endTime).valueOf();
   if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start)
     return none;
 
   const breakStart = record.breakStartTime
-    ? dayjs(record.breakStartTime).tz(APP_TZ).valueOf()
+    ? dayjs(record.breakStartTime).valueOf()
     : null;
   const breakEnd = record.breakEndTime
-    ? dayjs(record.breakEndTime).tz(APP_TZ).valueOf()
+    ? dayjs(record.breakEndTime).valueOf()
     : null;
   const unpaid = (a: number, b: number) =>
     breakStart !== null && breakEnd !== null
@@ -51,43 +63,21 @@ function calculateRecord(record: IRecordResponse, rates: Rates) {
         )
       : 0;
 
-  const date = dayjs.tz(`${record.workDate} 00:00`, APP_TZ);
-  const weekday = date.day() >= 1 && date.day() <= 5;
-  if (!weekday) {
-    const minutes = Math.max(
-      0,
-      intersectsMinutes(start, end, start, end) - unpaid(start, end),
-    );
-    return {
-      minutes,
-      multiplied: minutes * rates.weekend,
-      parts: { before: 0, after: 0, weekend: minutes },
-    };
-  }
-
-  const [h, m] = rates.cutoff.split(":").map(Number);
-  const cutoff = dayjs
-    .tz(
-      `${record.workDate} ${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`,
-      APP_TZ,
-    )
-    .valueOf();
-  const beforeEnd = Math.min(end, cutoff);
-  const before = Math.max(
+  const minutes = Math.max(
     0,
-    intersectsMinutes(start, beforeEnd, start, beforeEnd) -
-      unpaid(start, beforeEnd),
+    intersectsMinutes(start, end, start, end) - unpaid(start, end),
   );
-  const afterStart = Math.max(start, cutoff);
-  const after = Math.max(
-    0,
-    intersectsMinutes(afterStart, end, afterStart, end) -
-      unpaid(afterStart, end),
-  );
+  const dayType = getRecordDayType(record);
+  const multiplier = rates[dayType === "normalHoliday" ? "normalHoliday" : dayType];
   return {
-    minutes: before + after,
-    multiplied: before * rates.weekdayBefore + after * rates.weekdayAfter,
-    parts: { before, after, weekend: 0 },
+    minutes,
+    multiplied: minutes * multiplier,
+    parts: {
+      weekday: dayType === "weekday" ? minutes : 0,
+      normalHoliday: dayType === "normalHoliday" ? minutes : 0,
+      weekend: dayType === "weekend" ? minutes : 0,
+      specialDay: dayType === "specialDay" ? minutes : 0,
+    },
   };
 }
 
@@ -112,44 +102,69 @@ const formatDuration = (minutes: number) => {
   return remaining ? `${hours}h ${remaining}m` : `${hours}h`;
 };
 
-const formatMoney = (amount: number, currency: string) =>
-  new Intl.NumberFormat(undefined, {
+const formatMoney = (amount: number, currency: string) => {
+  if (currency === "KHR") {
+    const formattedAmount = new Intl.NumberFormat(undefined, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+    return `៛${formattedAmount}`;
+  }
+
+  return new Intl.NumberFormat(undefined, {
     style: "currency",
     currency,
+    currencyDisplay: "narrowSymbol",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
+};
 
-const ymd = (d: dayjs.Dayjs) => d.format("YYYY-MM-DD");
+const ymd = (date: Date) => date.toISOString().slice(0, 10);
 
 function getPresets() {
-  const now = dayjs().tz(APP_TZ);
-  const last = now.subtract(1, "month");
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: APP_TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    Number(parts.find((item) => item.type === type)?.value);
+  const now = new Date(Date.UTC(part("year"), part("month") - 1, part("day")));
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth();
+  const lastMonth = new Date(Date.UTC(year, month - 1, 1));
   return [
     {
       key: "this",
       label: "This month",
-      from: ymd(now.startOf("month")),
-      to: ymd(now.endOf("month")),
+      from: ymd(new Date(Date.UTC(year, month, 1))),
+      to: ymd(new Date(Date.UTC(year, month + 1, 0))),
     },
     {
       key: "last",
       label: "Last month",
-      from: ymd(last.startOf("month")),
-      to: ymd(last.endOf("month")),
+      from: ymd(new Date(Date.UTC(
+        lastMonth.getUTCFullYear(),
+        lastMonth.getUTCMonth(),
+        1,
+      ))),
+      to: ymd(new Date(Date.UTC(
+        lastMonth.getUTCFullYear(),
+        lastMonth.getUTCMonth() + 1,
+        0,
+      ))),
     },
     {
       key: "7d",
       label: "Last 7 days",
-      from: ymd(now.subtract(6, "day")),
+      from: ymd(new Date(Date.UTC(year, month, now.getUTCDate() - 6))),
       to: ymd(now),
     },
     { key: "all", label: "All time", from: "", to: "" },
   ];
 }
-
-const dateInput =
-  "h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100";
 
 export default function BonusClient() {
   const [dateFrom, setDateFrom] = useState(() => getPresets()[0].from);
@@ -158,18 +173,33 @@ export default function BonusClient() {
   const [submitStatus, setSubmitStatus] = useState("");
   const [monthlySalaryOverride, setMonthlySalaryOverride] = useState<number | null>(null);
   const [currencyOverride, setCurrencyOverride] = useState<SalarySettings["currency"] | null>(null);
+  const [salaryConversionBasis, setSalaryConversionBasis] = useState<{
+    amount: number;
+    currency: SalarySettings["currency"];
+  } | null>(null);
   const [taxRateOverride, setTaxRateOverride] = useState<number | null>(null);
-  const [workingDays, setWorkingDays] = useState<number>(22);
-  const [dailyHours, setDailyHours] = useState<number>(8);
-  const [cutoff, setCutoff] = useState("16:30");
-  const [weekdayBefore, setWeekdayBefore] = useState<number>(1);
-  const [weekdayAfter, setWeekdayAfter] = useState<number>(1.5);
-  const [weekendRate, setWeekendRate] = useState<number>(2);
+  const [workingDaysOverride, setWorkingDaysOverride] = useState<number | null>(null);
+  const [dailyHoursOverride, setDailyHoursOverride] = useState<number | null>(null);
+  const [weekdayRateOverride, setWeekdayRateOverride] = useState<number | null>(null);
+  const [normalHolidayRateOverride, setNormalHolidayRateOverride] = useState<number | null>(null);
+  const [weekendRateOverride, setWeekendRateOverride] = useState<number | null>(null);
+  const [specialDayRateOverride, setSpecialDayRateOverride] = useState<number | null>(null);
   const salarySettingsQuery = useSalarySettings();
-  const savedSalarySettings = salarySettingsQuery.data?.data;
-  const monthlySalary = monthlySalaryOverride ?? savedSalarySettings?.monthlySalary ?? 0;
-  const currency = currencyOverride ?? savedSalarySettings?.currency ?? "USD";
-  const taxRate = taxRateOverride ?? savedSalarySettings?.taxRate ?? 0;
+  const calculationSettingsQuery = useBonusCalculationSettings();
+  const savedSalarySettings = salarySettingsQuery.data?.data ?? [];
+  const savedCalculationSettings = calculationSettingsQuery.data?.data;
+  const currency = currencyOverride ?? "USD";
+  const selectedSalarySettings = savedSalarySettings.find(
+    (settings) => settings.currency === "USD",
+  );
+  const monthlySalary = monthlySalaryOverride ?? selectedSalarySettings?.monthlySalary ?? 0;
+  const taxRate = taxRateOverride ?? selectedSalarySettings?.taxRate ?? 0;
+  const workingDays = workingDaysOverride ?? savedCalculationSettings?.workingDaysPerMonth ?? 22;
+  const dailyHours = dailyHoursOverride ?? savedCalculationSettings?.hoursPerWorkday ?? 8;
+  const weekdayRate = weekdayRateOverride ?? savedCalculationSettings?.weekdayMultiplier ?? 1;
+  const normalHolidayRate = normalHolidayRateOverride ?? savedCalculationSettings?.normalHolidayMultiplier ?? 2;
+  const weekendRate = weekendRateOverride ?? savedCalculationSettings?.weekendMultiplier ?? 2;
+  const specialDayRate = specialDayRateOverride ?? savedCalculationSettings?.specialDayMultiplier ?? 2;
 
   const { data, isLoading, isError, isFetching, refetch } = useRecords({
     page: 1,
@@ -182,10 +212,10 @@ export default function BonusClient() {
 
   const records = data?.data ?? [];
   const rates: Rates = {
-    weekdayBefore,
-    weekdayAfter,
+    weekday: weekdayRate,
+    normalHoliday: normalHolidayRate,
     weekend: weekendRate,
-    cutoff,
+    specialDay: specialDayRate,
   };
   const hourly =
     workingDays > 0 && dailyHours > 0
@@ -200,11 +230,12 @@ export default function BonusClient() {
     (acc, r) => ({
       minutes: acc.minutes + r.minutes,
       multiplied: acc.multiplied + r.multiplied,
-      before: acc.before + r.parts.before,
-      after: acc.after + r.parts.after,
+      weekday: acc.weekday + r.parts.weekday,
+      normalHoliday: acc.normalHoliday + r.parts.normalHoliday,
       weekend: acc.weekend + r.parts.weekend,
+      specialDay: acc.specialDay + r.parts.specialDay,
     }),
-    { minutes: 0, multiplied: 0, before: 0, after: 0, weekend: 0 },
+    { minutes: 0, multiplied: 0, weekday: 0, normalHoliday: 0, weekend: 0, specialDay: 0 },
   );
   const payOf = (minutes: number, multiplier: number) =>
     (minutes * multiplier * hourly) / 60;
@@ -228,22 +259,13 @@ export default function BonusClient() {
 
   const bands = [
     {
-      key: "before",
+      key: "weekday",
       label: "Weekday",
-      sub: `${weekdayBefore}×`,
-      minutes: totals.before,
-      pay: payOf(totals.before, weekdayBefore),
+      sub: `${weekdayRate}×`,
+      minutes: totals.weekday,
+      pay: payOf(totals.weekday, weekdayRate),
       color: "bg-slate-300",
       dot: "bg-slate-300",
-    },
-    {
-      key: "after",
-      label: `After ${cutoff}`,
-      sub: `${weekdayAfter}×`,
-      minutes: totals.after,
-      pay: payOf(totals.after, weekdayAfter),
-      color: "bg-slate-500",
-      dot: "bg-slate-500",
     },
     {
       key: "weekend",
@@ -253,6 +275,24 @@ export default function BonusClient() {
       pay: payOf(totals.weekend, weekendRate),
       color: "bg-slate-700",
       dot: "bg-slate-700",
+    },
+    {
+      key: "normalHoliday",
+      label: "Normal holiday",
+      sub: `${normalHolidayRate}×`,
+      minutes: totals.normalHoliday,
+      pay: payOf(totals.normalHoliday, normalHolidayRate),
+      color: "bg-slate-500",
+      dot: "bg-slate-500",
+    },
+    {
+      key: "specialDay",
+      label: "Special day",
+      sub: `${specialDayRate}×`,
+      minutes: totals.specialDay,
+      pay: payOf(totals.specialDay, specialDayRate),
+      color: "bg-slate-600",
+      dot: "bg-slate-600",
     },
   ];
   const barBasis = totalPay > 0 ? "pay" : "minutes";
@@ -320,6 +360,24 @@ export default function BonusClient() {
             }
           />
         )}
+        {calculationSettingsQuery.isError && (
+          <Alert
+            className="mb-5"
+            type="error"
+            showIcon
+            message="Couldn't load your saved overtime calculation defaults"
+            description="The estimate may not reflect your saved calculation settings."
+            action={
+              <Button
+                size="small"
+                icon={<RotateCcw size={14} />}
+                onClick={() => calculationSettingsQuery.refetch()}
+              >
+                Retry
+              </Button>
+            }
+          />
+        )}
 
         <div className="grid gap-5 lg:grid-cols-[360px_1fr] lg:items-start">
           <section
@@ -336,31 +394,40 @@ export default function BonusClient() {
                 </span>
               )}
             </div>
-            {isLoading || salarySettingsQuery.isLoading ? (
+            {isLoading ||
+            salarySettingsQuery.isLoading ||
+            calculationSettingsQuery.isLoading ? (
               <Skeleton.Input active className="mt-3!" />
             ) : (
-              <p className="mt-2 text-4xl font-bold tabular-nums tracking-tight text-slate-950 sm:text-5xl">
+              <p className="mt-2 min-w-0 text-[clamp(1.75rem,8vw,3rem)] font-bold leading-tight tabular-nums tracking-tight text-slate-950 [overflow-wrap:anywhere]">
                 {formatMoney(netPay, currency)}
               </p>
             )}
             <p className="mt-1.5 text-sm text-slate-500">{rangeLabel}</p>
 
             <dl className="mt-4 space-y-2 border-t border-slate-100 pt-3 text-sm">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-start justify-between gap-3">
                 <dt className="text-slate-500">Gross overtime pay</dt>
-                <dd className="font-medium tabular-nums text-slate-800">
-                  {salarySettingsQuery.isLoading ? "—" : formatMoney(totalPay, currency)}
+                <dd className="max-w-[55%] text-right font-medium tabular-nums text-slate-800 [overflow-wrap:anywhere]">
+                  {salarySettingsQuery.isLoading || calculationSettingsQuery.isLoading
+                    ? "—"
+                    : formatMoney(totalPay, currency)}
                 </dd>
               </div>
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-start justify-between gap-3">
                 <dt className="text-slate-500">Estimated tax ({taxRate}%)</dt>
-                <dd className="font-medium tabular-nums text-slate-800">
-                  {salarySettingsQuery.isLoading ? "—" : `−${formatMoney(estimatedTax, currency)}`}
+                <dd className="max-w-[55%] text-right font-medium tabular-nums text-slate-800 [overflow-wrap:anywhere]">
+                  {salarySettingsQuery.isLoading || calculationSettingsQuery.isLoading
+                    ? "—"
+                    : `−${formatMoney(estimatedTax, currency)}`}
                 </dd>
               </div>
             </dl>
 
-            {monthlySalary <= 0 && !isLoading && !salarySettingsQuery.isLoading && (
+            {monthlySalary <= 0 &&
+              !isLoading &&
+              !salarySettingsQuery.isLoading &&
+              !calculationSettingsQuery.isLoading && (
               <p className="mt-4 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
                 Enter your monthly salary below to see an amount.
               </p>
@@ -388,7 +455,7 @@ export default function BonusClient() {
                 {bands.map((b) => (
                   <li
                     key={b.key}
-                    className="flex items-center justify-between gap-3 text-sm"
+                    className="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-x-2 gap-y-1 text-sm sm:grid-cols-[minmax(0,1fr)_minmax(7rem,auto)]"
                   >
                     <span className="flex min-w-0 items-center gap-2">
                       <span
@@ -400,13 +467,11 @@ export default function BonusClient() {
                         {b.sub}
                       </span>
                     </span>
-                    <span className="shrink-0 text-right tabular-nums">
-                      <span className="text-slate-500">
-                        {formatDuration(b.minutes)}
-                      </span>
-                      <span className="ml-3 inline-block min-w-[5.5rem] font-semibold text-slate-900">
-                        {formatMoney(b.pay, currency)}
-                      </span>
+                    <span className="min-w-0 text-right text-xs font-semibold tabular-nums text-slate-900 [overflow-wrap:anywhere] sm:text-sm">
+                      {formatMoney(b.pay, currency)}
+                    </span>
+                    <span className="text-xs tabular-nums text-slate-500">
+                      {formatDuration(b.minutes)}
                     </span>
                   </li>
                 ))}
@@ -424,7 +489,11 @@ export default function BonusClient() {
               />
               <Stat
                 label="Base / hr"
-                value={salarySettingsQuery.isLoading ? "—" : formatMoney(hourly, currency)}
+                value={
+                  salarySettingsQuery.isLoading || calculationSettingsQuery.isLoading
+                    ? "—"
+                    : formatMoney(hourly, currency)
+                }
               />
             </dl>
           </section>
@@ -552,10 +621,10 @@ export default function BonusClient() {
                       record={record}
                       minutes={minutes}
                       pay={(multiplied * hourly) / 60}
-                      weekdayBefore={weekdayBefore}
-                      weekdayAfter={weekdayAfter}
+                      weekdayRate={weekdayRate}
+                      normalHolidayRate={normalHolidayRate}
                       weekendRate={weekendRate}
-                      cutoff={cutoff}
+                      specialDayRate={specialDayRate}
                       currency={currency}
                     />
                   ))}
@@ -612,20 +681,49 @@ export default function BonusClient() {
             </p>
 
             <FormGroup title="Salary">
-              <Field label="Monthly salary">
+              <Field
+                label="Monthly salary"
+                className="grid-cols-[minmax(0,1fr)_minmax(0,210px)]"
+              >
                 <Space.Compact block>
                   <InputNumber
                     aria-label="Monthly base salary"
                     min={0}
                     step={100}
                     value={monthlySalary}
-                    onChange={(v) => setMonthlySalaryOverride(v ?? 0)}
-                    className="min-w-0 flex-1"
+                    onChange={(v) => {
+                      setMonthlySalaryOverride(v ?? 0);
+                      setSalaryConversionBasis(null);
+                    }}
+                    className="min-w-0 flex-1 [&_.ant-input-number-input]:px-1 [&_.ant-input-number-input]:text-xs"
                   />
                   <Select
                     aria-label="Salary currency"
                     value={currency}
-                    onChange={(value: SalarySettings["currency"]) => setCurrencyOverride(value)}
+                    onChange={(value: SalarySettings["currency"]) => {
+                      if (currency === value) {
+                        return;
+                      }
+                      const exchangeRate = savedCalculationSettings?.khrPerUsd ?? 4000;
+                      const conversionBasis = salaryConversionBasis ?? {
+                        amount: monthlySalary,
+                        currency,
+                      };
+                      const convertedSalary =
+                        conversionBasis.currency === value
+                          ? conversionBasis.amount
+                          : conversionBasis.currency === "USD"
+                            ? conversionBasis.amount * exchangeRate
+                            : conversionBasis.amount / exchangeRate;
+                      setCurrencyOverride(value);
+                      setSalaryConversionBasis(conversionBasis);
+                      setMonthlySalaryOverride(
+                        Number(
+                          convertedSalary.toFixed(value === "KHR" ? 0 : 2),
+                        ),
+                      );
+                      setTaxRateOverride(taxRate);
+                    }}
                     className="w-[82px]"
                     options={[
                       { value: "USD", label: "USD" },
@@ -641,7 +739,7 @@ export default function BonusClient() {
                     min={1}
                     max={31}
                     value={workingDays}
-                    onChange={(v) => setWorkingDays(v ?? 0)}
+                    onChange={(v) => setWorkingDaysOverride(v ?? 1)}
                     className="min-w-0 flex-1"
                   />
                   <span className="flex items-center border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500">
@@ -657,7 +755,7 @@ export default function BonusClient() {
                     max={24}
                     step={0.5}
                     value={dailyHours}
-                    onChange={(v) => setDailyHours(v ?? 0)}
+                    onChange={(v) => setDailyHoursOverride(v ?? 1)}
                     className="min-w-0 flex-1"
                   />
                   <span className="flex items-center border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500">
@@ -690,15 +788,15 @@ export default function BonusClient() {
             </FormGroup>
 
             <FormGroup title="Overtime multipliers">
-              <Field label="Weekday before cutoff">
+              <Field label="Weekday">
                 <Space.Compact block>
                   <InputNumber
-                    aria-label="Weekday before cutoff multiplier"
+                    aria-label="Weekday multiplier"
                     min={0}
                     max={10}
                     step={0.25}
-                    value={weekdayBefore}
-                    onChange={(v) => setWeekdayBefore(v ?? 0)}
+                    value={weekdayRate}
+                    onChange={(v) => setWeekdayRateOverride(v ?? 0)}
                     className="min-w-0 flex-1"
                   />
                   <span className="flex items-center border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500">
@@ -706,24 +804,15 @@ export default function BonusClient() {
                   </span>
                 </Space.Compact>
               </Field>
-              <Field label="Cutoff time">
-                <input
-                  type="time"
-                  aria-label="Weekday overtime cutoff time"
-                  value={cutoff}
-                  onChange={(e) => setCutoff(e.target.value || "16:30")}
-                  className={`${dateInput} w-full`}
-                />
-              </Field>
-              <Field label="Weekday after cutoff">
+              <Field label="Normal holiday">
                 <Space.Compact block>
                   <InputNumber
-                    aria-label="Weekday after cutoff multiplier"
+                    aria-label="Normal holiday multiplier"
                     min={0}
                     max={10}
                     step={0.25}
-                    value={weekdayAfter}
-                    onChange={(v) => setWeekdayAfter(v ?? 0)}
+                    value={normalHolidayRate}
+                    onChange={(v) => setNormalHolidayRateOverride(v ?? 0)}
                     className="min-w-0 flex-1"
                   />
                   <span className="flex items-center border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500">
@@ -739,7 +828,23 @@ export default function BonusClient() {
                     max={10}
                     step={0.25}
                     value={weekendRate}
-                    onChange={(v) => setWeekendRate(v ?? 0)}
+                    onChange={(v) => setWeekendRateOverride(v ?? 0)}
+                    className="min-w-0 flex-1"
+                  />
+                  <span className="flex items-center border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500">
+                    ×
+                  </span>
+                </Space.Compact>
+              </Field>
+              <Field label="Special day">
+                <Space.Compact block>
+                  <InputNumber
+                    aria-label="Special day multiplier"
+                    min={0}
+                    max={10}
+                    step={0.25}
+                    value={specialDayRate}
+                    onChange={(v) => setSpecialDayRateOverride(v ?? 0)}
                     className="min-w-0 flex-1"
                   />
                   <span className="flex items-center border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500">
@@ -751,7 +856,8 @@ export default function BonusClient() {
 
             <p className="mt-5 text-xs leading-5 text-slate-500">
               Base hourly = salary ÷ workdays ÷ hours. Pay = logged minutes ×
-              multiplier × base hourly. Phnom Penh time; recorded breaks are
+              the matching weekday, weekend, normal-holiday, or special-day
+              multiplier. Remarks determine holiday rates; recorded breaks are
               excluded.
             </p>
           </section>
@@ -767,7 +873,7 @@ function Stat({ label, value }: { label: string; value: string }) {
       <dt className="text-[11px] uppercase tracking-wide text-slate-500">
         {label}
       </dt>
-      <dd className="mt-0.5 text-sm font-semibold tabular-nums text-slate-900">
+      <dd className="mt-0.5 min-w-0 text-[clamp(0.7rem,2.8vw,0.875rem)] font-semibold tabular-nums text-slate-900 [overflow-wrap:anywhere]">
         {value}
       </dd>
     </div>
@@ -795,17 +901,19 @@ function FormGroup({
 function Field({
   label,
   children,
+  className,
 }: {
   label: string;
   children: React.ReactNode;
+  className?: string;
 }) {
   const id = useId();
   return (
-    <div className="grid grid-cols-[1fr_150px] items-center gap-3">
+    <div className={`grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,150px)] items-center gap-3 ${className ?? ""}`}>
       <span id={id} className="text-sm text-slate-700">
         {label}
       </span>
-      <div aria-labelledby={id}>{children}</div>
+      <div aria-labelledby={id} className="min-w-0">{children}</div>
     </div>
   );
 }
@@ -836,51 +944,44 @@ function LogRow({
   record,
   minutes,
   pay,
-  weekdayBefore,
-  weekdayAfter,
+  weekdayRate,
+  normalHolidayRate,
   weekendRate,
-  cutoff,
+  specialDayRate,
   currency,
 }: {
   record: IRecordResponse;
   minutes: number;
   pay: number;
-  weekdayBefore: number;
-  weekdayAfter: number;
+  weekdayRate: number;
+  normalHolidayRate: number;
   weekendRate: number;
-  cutoff: string;
+  specialDayRate: number;
   currency: string;
 }) {
   const inProgress = record.totalMinutes === null;
-  const weekend = [0, 6].includes(
-    dayjs.tz(`${record.workDate} 00:00`, APP_TZ).day(),
-  );
-  const startClock = dayjs(record.startTime).tz(APP_TZ).format("HH:mm");
-  const endClock = record.endTime
-    ? dayjs(record.endTime).tz(APP_TZ).format("HH:mm")
-    : startClock;
-  const crossesCutoff = startClock < cutoff && endClock > cutoff;
+  const dayType = getRecordDayType(record);
 
-  const chips = inProgress ? (
-    <Chip tone="muted">In progress</Chip>
-  ) : weekend ? (
-    <Chip tone="weekend">Weekend {weekendRate}×</Chip>
-  ) : crossesCutoff ? (
+  const chips = dayType === "specialDay" ? (
     <>
-      <Chip tone="base">{weekdayBefore}×</Chip>
-      <span aria-hidden="true" className="text-xs text-slate-400">
-        →
-      </span>
-      <Chip tone="high">{weekdayAfter}×</Chip>
+      <Chip tone="high">Special day {specialDayRate}×</Chip>
+      {inProgress && <Chip tone="muted">In progress</Chip>}
     </>
-  ) : endClock >= cutoff ? (
-    <Chip tone="high">{weekdayAfter}×</Chip>
+  ) : dayType === "normalHoliday" ? (
+    <>
+      <Chip tone="high">Normal holiday {normalHolidayRate}×</Chip>
+      {inProgress && <Chip tone="muted">In progress</Chip>}
+    </>
+  ) : inProgress ? (
+    <Chip tone="muted">In progress</Chip>
+  ) : dayType === "weekend" ? (
+    <Chip tone="weekend">Weekend {weekendRate}×</Chip>
   ) : (
-    <Chip tone="base">{weekdayBefore}×</Chip>
+    <Chip tone="base">Weekday {weekdayRate}×</Chip>
   );
 
   return (
-    <li className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 px-4 py-4 transition-colors hover:bg-slate-50 sm:px-5">
+    <li className="grid min-w-0 grid-cols-1 items-start gap-x-4 gap-y-2 px-4 py-4 transition-colors hover:bg-slate-50 sm:grid-cols-[minmax(0,1fr)_minmax(0,40%)] sm:px-5">
       <div className="min-w-0">
         <p className="text-xs font-medium text-slate-500">
           {weekdayShort(record.workDate)}, {prettyDate(record.workDate)}
@@ -899,12 +1000,12 @@ function LogRow({
         </div>
       </div>
 
-      <div className="shrink-0 self-start pt-0.5 text-right">
+      <div className="flex min-w-0 items-baseline justify-between gap-2 border-t border-slate-100 pt-2 text-right sm:block sm:border-0 sm:pt-0">
         <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400 sm:hidden">
-          Est. pay
+          Estimated pay
         </p>
         <p
-          className={`mt-0.5 text-sm font-semibold tabular-nums sm:text-base ${inProgress ? "text-slate-400" : "text-slate-900"}`}
+          className={`min-w-0 text-xs font-semibold tabular-nums [overflow-wrap:anywhere] sm:text-sm ${inProgress ? "text-slate-400" : "text-slate-900"}`}
         >
           {inProgress ? "—" : formatMoney(pay, currency)}
         </p>

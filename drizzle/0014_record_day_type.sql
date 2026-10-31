@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS "ot_records"
+  ADD COLUMN IF NOT EXISTS "day_type" varchar(20) NOT NULL DEFAULT 'NORMAL';

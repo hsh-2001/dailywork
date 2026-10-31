@@ -73,6 +73,7 @@ export async function getUserRecordPage(
       project: record.project,
       task: record.task,
       note: record.note,
+      dayType: record.dayType as IRecordPageResponse["data"][number]["dayType"],
       bookingStatus: record.bookingStatus as IRecordPageResponse["data"][number]["bookingStatus"],
       submitStatus: record.submitStatus as IRecordPageResponse["data"][number]["submitStatus"],
     })),

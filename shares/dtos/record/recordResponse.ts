@@ -2,6 +2,7 @@ import type { Pagination } from "@/shares/types/apiResponse";
 
 export type BookingStatus = "PENDING" | "BOOKED" | "CANCELLED";
 export type SubmitStatus = "NOT_SUBMITTED" | "SUBMITTED" | "APPROVED" | "REJECTED";
+export type WorkDaySelection = "NORMAL" | "NORMAL_HOLIDAY" | "SPECIAL_DAY";
 
 export interface IRecordResponse {
   id: number;
@@ -14,6 +15,7 @@ export interface IRecordResponse {
   project: string | null;
   task: string | null;
   note: string | null;
+  dayType: WorkDaySelection;
   bookingStatus: BookingStatus;
   submitStatus: SubmitStatus;
 }

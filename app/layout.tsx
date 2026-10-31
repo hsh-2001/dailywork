@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/providers/QueryProvider";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
+import { App as AntdApp } from "antd";
 import AppShell from "@/components/AppShell";
 import AuthProvider from "@/app/auth-provider";
 
@@ -37,7 +38,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <AntdRegistry>
           <AuthProvider>
             <QueryProvider>
-              <AppShell>{children}</AppShell>
+              <AntdApp notification={{ placement: "topLeft" }}>
+                <AppShell>{children}</AppShell>
+              </AntdApp>
             </QueryProvider>
           </AuthProvider>
         </AntdRegistry>

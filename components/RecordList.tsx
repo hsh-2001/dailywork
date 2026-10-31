@@ -3,6 +3,7 @@ import { Button, Checkbox, Grid, Pagination, Skeleton } from "antd";
 import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Clock3, Pencil, Trash2 } from "lucide-react";
 import type { IRecordResponse } from "@/shares/dtos/record/recordResponse";
 import { formatTime } from "@/utils/datetime";
+import { getRecordDayType } from "@/utils/workday-type";
 
 interface RecordListProps {
   data: IRecordResponse[];
@@ -126,6 +127,14 @@ export default function RecordList({
                       <p className="min-w-0 truncate text-[13px] font-semibold text-slate-900">
                         {record.workDate}
                       </p>
+                      {(getRecordDayType(record) === "specialDay" ||
+                        getRecordDayType(record) === "normalHoliday") && (
+                        <span className="shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-700 ring-1 ring-inset ring-slate-200">
+                          {getRecordDayType(record) === "specialDay"
+                            ? "Special day"
+                            : "Normal holiday"}
+                        </span>
+                      )}
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
                       <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-slate-700">
@@ -175,6 +184,14 @@ export default function RecordList({
                     </span>
                     <div className="min-w-0">
                       <p className="truncate text-[13px] font-semibold text-slate-900">{record.workDate}</p>
+                      {(getRecordDayType(record) === "specialDay" ||
+                        getRecordDayType(record) === "normalHoliday") && (
+                        <span className="mt-1 inline-flex rounded-full bg-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-700 ring-1 ring-inset ring-slate-200">
+                          {getRecordDayType(record) === "specialDay"
+                            ? "Special day"
+                            : "Normal holiday"}
+                        </span>
+                      )}
                     </div>
                   </div>
 

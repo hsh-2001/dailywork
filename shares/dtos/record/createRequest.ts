@@ -1,3 +1,5 @@
+import type { WorkDaySelection } from "@/shares/dtos/record/recordResponse";
+
 export interface ICreateRecordRequest {
   workDate: string;
   startTime: string;
@@ -7,6 +9,7 @@ export interface ICreateRecordRequest {
   project?: string;
   task?: string;
   note?: string;
+  dayType?: WorkDaySelection;
   bookingStatus?: "PENDING" | "BOOKED" | "CANCELLED";
   submitStatus?: "NOT_SUBMITTED" | "SUBMITTED" | "APPROVED" | "REJECTED";
 }

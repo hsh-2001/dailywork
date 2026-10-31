@@ -1,9 +1,8 @@
-import { pgTable, numeric, timestamp, varchar } from "drizzle-orm/pg-core";
+import { pgTable, numeric, primaryKey, timestamp, varchar } from "drizzle-orm/pg-core";
 import { usersTable } from "@/db/tables/users";
 
 export const salarySettingsTable = pgTable("salary_settings", {
   userId: varchar("user_id", { length: 255 })
-    .primaryKey()
     .references(() => usersTable.userId, { onDelete: "cascade" }),
   monthlySalary: numeric("monthly_salary", {
     precision: 14,
@@ -17,4 +16,6 @@ export const salarySettingsTable = pgTable("salary_settings", {
     .notNull()
     .default(0),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (table) => [
+  primaryKey({ columns: [table.userId, table.currency] }),
+]);

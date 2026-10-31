@@ -34,6 +34,7 @@ export const otRecordTable = pgTable("ot_records", {
   task: varchar("task", { length: 255 }),
 
   note: text("note"),
+  dayType: varchar("day_type", { length: 20 }).notNull().default("NORMAL"),
   bookingStatus: varchar("booking_status", { length: 30 }).notNull().default("PENDING"),
   submitStatus: varchar("submit_status", { length: 30 }).notNull().default("NOT_SUBMITTED"),
 

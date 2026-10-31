@@ -22,6 +22,7 @@ export async function PUT(req: NextRequest) {
     const { workDate, startTime, endTime, project, task, note } = body;
     const breakStartTime = body.breakStartTime ?? null;
     const breakEndTime = body.breakEndTime ?? null;
+    const dayType = body.dayType ?? "NORMAL";
     const bookingStatus = body.bookingStatus ?? "PENDING";
     const submitStatus = body.submitStatus ?? "NOT_SUBMITTED";
 
@@ -38,6 +39,9 @@ export async function PUT(req: NextRequest) {
     if (!["PENDING", "BOOKED", "CANCELLED"].includes(bookingStatus) ||
       !["NOT_SUBMITTED", "SUBMITTED", "APPROVED", "REJECTED"].includes(submitStatus)) {
       return ApiResponse.failed("Invalid booking or submit status", "INVALID_INPUT", 400);
+    }
+    if (!["NORMAL", "NORMAL_HOLIDAY", "SPECIAL_DAY"].includes(dayType)) {
+      return ApiResponse.failed("Invalid work log day type", "INVALID_INPUT", 400);
     }
 
     const start = new Date(startTime);
@@ -89,6 +93,7 @@ export async function PUT(req: NextRequest) {
         project: project ?? null,
         task: task ?? null,
         note: note ?? null,
+        dayType,
         bookingStatus,
         submitStatus,
       })

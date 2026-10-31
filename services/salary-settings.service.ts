@@ -1,15 +1,17 @@
 import api from "./api";
-import type { SalarySettings } from "@/shares/dtos/salary-settings/salarySettings";
+import type {
+  SalarySettingResponse,
+  SalarySettings,
+  SalarySettingsListResponse,
+} from "@/shares/dtos/salary-settings/salarySettings";
 
-type SalarySettingsResponse = { data: SalarySettings };
-
-const get = async (): Promise<SalarySettingsResponse> => {
-  const response = await api.get<SalarySettingsResponse>("/salary-settings");
+const get = async (): Promise<SalarySettingsListResponse> => {
+  const response = await api.get<SalarySettingsListResponse>("/salary-settings");
   return response.data;
 };
 
-const save = async (settings: SalarySettings): Promise<SalarySettingsResponse> => {
-  const response = await api.put<SalarySettingsResponse>("/salary-settings", settings);
+const save = async (settings: SalarySettings): Promise<SalarySettingResponse> => {
+  const response = await api.put<SalarySettingResponse>("/salary-settings", settings);
   return response.data;
 };
 

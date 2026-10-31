@@ -5,3 +5,11 @@ export interface SalarySettings {
   currency: SalaryCurrency;
   taxRate: number;
 }
+
+export interface SalarySettingsListResponse {
+  data: SalarySettings[];
+}
+
+export interface SalarySettingResponse {
+  data: SalarySettings;
+}

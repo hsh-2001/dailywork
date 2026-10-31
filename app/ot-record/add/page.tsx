@@ -17,6 +17,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { isAxiosError } from "axios";
+import { getRemarkDayType } from "@/utils/workday-type";
 
 function AddRecordPageContent() {
   const router = useRouter();
@@ -40,6 +41,7 @@ function AddRecordPageContent() {
 
   useEffect(() => {
     if (record) {
+      const remarkDayType = getRemarkDayType(record.note);
       form.setFieldsValue({
         ...record,
         workDate: dayjs.tz(record.workDate, APP_TZ),
@@ -50,6 +52,12 @@ function AddRecordPageContent() {
         project: record.project ?? undefined,
         task: record.task ?? undefined,
         note: record.note ?? undefined,
+        dayType:
+          remarkDayType === "specialDay"
+            ? "SPECIAL_DAY"
+            : remarkDayType === "normalHoliday"
+              ? "NORMAL_HOLIDAY"
+              : record.dayType ?? "NORMAL",
         bookingStatus: record.bookingStatus ?? "PENDING",
         submitStatus: record.submitStatus ?? "NOT_SUBMITTED",
       });
@@ -101,6 +109,7 @@ function AddRecordPageContent() {
         project: values.project,
         task: values.task,
         note: values.note,
+        dayType: values.dayType,
         bookingStatus: values.bookingStatus,
         submitStatus: values.submitStatus,
       };

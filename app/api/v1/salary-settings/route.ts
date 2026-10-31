@@ -7,8 +7,6 @@ import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
 
 const currencies: SalaryCurrency[] = ["USD", "KHR"];
-const defaults = { monthlySalary: 0, currency: "USD" as const, taxRate: 0 };
-
 export async function GET() {
   try {
     const user = await getCurrentAuthUser();
@@ -16,17 +14,28 @@ export async function GET() {
       return ApiResponse.failed("Authentication required", "UNAUTHORIZED", 401);
     }
 
-    const [settings] = await db
+    const savedSettings = await db
       .select({
         monthlySalary: salarySettingsTable.monthlySalary,
         currency: salarySettingsTable.currency,
         taxRate: salarySettingsTable.taxRate,
       })
       .from(salarySettingsTable)
-      .where(eq(salarySettingsTable.userId, user.id))
-      .limit(1);
+      .where(eq(salarySettingsTable.userId, user.id));
 
-    return ApiResponse.success(settings ?? defaults, "Salary settings retrieved successfully");
+    const settingsByCurrency = new Map(
+      savedSettings.map((settings) => [settings.currency, settings]),
+    );
+    const settings = currencies.map(
+      (currency) =>
+        settingsByCurrency.get(currency) ?? {
+          monthlySalary: 0,
+          currency,
+          taxRate: 0,
+        },
+    );
+
+    return ApiResponse.success(settings, "Salary settings retrieved successfully");
   } catch (error) {
     console.error("Error fetching salary settings:", error);
     return ApiResponse.failed("Failed to retrieve salary settings", "DB_ERROR", 500);
@@ -45,7 +54,11 @@ export async function PUT(req: NextRequest) {
       return ApiResponse.failed("Salary settings are required", "INVALID_INPUT", 400);
     }
 
-    const { monthlySalary, currency, taxRate } = body as {
+    const {
+      monthlySalary,
+      currency,
+      taxRate,
+    } = body as {
       monthlySalary?: unknown;
       currency?: unknown;
       taxRate?: unknown;
@@ -58,7 +71,7 @@ export async function PUT(req: NextRequest) {
       Number(monthlySalary.toFixed(2)) !== monthlySalary
     ) {
       return ApiResponse.failed(
-        "Monthly salary must be a non-negative amount with up to two decimal places",
+        "Base salary must be a non-negative amount with up to two decimal places",
         "INVALID_INPUT",
         400,
       );
@@ -79,7 +92,6 @@ export async function PUT(req: NextRequest) {
         400,
       );
     }
-
     const [settings] = await db
       .insert(salarySettingsTable)
       .values({
@@ -90,8 +102,13 @@ export async function PUT(req: NextRequest) {
         updatedAt: new Date(),
       })
       .onConflictDoUpdate({
-        target: salarySettingsTable.userId,
-        set: { monthlySalary, currency, taxRate, updatedAt: new Date() },
+        target: [salarySettingsTable.userId, salarySettingsTable.currency],
+        set: {
+          monthlySalary,
+          currency,
+          taxRate,
+          updatedAt: new Date(),
+        },
       })
       .returning({
         monthlySalary: salarySettingsTable.monthlySalary,

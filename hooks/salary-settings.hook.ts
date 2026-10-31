@@ -1,7 +1,10 @@
 "use client";
 
 import salarySettingsService from "@/services/salary-settings.service";
-import type { SalarySettings } from "@/shares/dtos/salary-settings/salarySettings";
+import type {
+  SalarySettings,
+  SalarySettingsListResponse,
+} from "@/shares/dtos/salary-settings/salarySettings";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const salarySettingsQueryKey = ["salary-settings"];
@@ -17,7 +20,17 @@ export const useSaveSalarySettings = () => {
   return useMutation({
     mutationFn: (settings: SalarySettings) => salarySettingsService.save(settings),
     onSuccess: (response) => {
-      queryClient.setQueryData(salarySettingsQueryKey, response);
+      queryClient.setQueryData<SalarySettingsListResponse>(
+        salarySettingsQueryKey,
+        (current) => ({
+          data: [
+            ...(current?.data ?? []).filter(
+              (setting) => setting.currency !== response.data.currency,
+            ),
+            response.data,
+          ],
+        }),
+      );
     },
   });
 };

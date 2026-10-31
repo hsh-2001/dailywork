@@ -1,8 +1,9 @@
 "use client";
 
-import { Form, Input, DatePicker, TimePicker, FormInstance, Grid, Select } from "antd";
+import { Form, Input, DatePicker, TimePicker, FormInstance, Grid, Radio, Select } from "antd";
 import type { Dayjs } from "dayjs";
 import type { IProjectResponse } from "@/shares/dtos/project/projectResponse";
+import type { WorkDaySelection } from "@/shares/dtos/record/recordResponse";
 import { CalendarDays } from "lucide-react";
 import MobileDatePicker from "./MobileDatePicker";
 import MobileTimePicker from "./MobileTimePicker";
@@ -16,6 +17,7 @@ export interface OTRecordFormValues {
   project?: string;
   task?: string;
   note?: string;
+  dayType: WorkDaySelection;
   bookingStatus: "PENDING" | "BOOKED" | "CANCELLED";
   submitStatus: "NOT_SUBMITTED" | "SUBMITTED" | "APPROVED" | "REJECTED";
 }
@@ -52,7 +54,11 @@ export default function OTRecordForm({
       form={form}
       layout="vertical"
       className="[&_.ant-form-item]:!mb-3 [&_.ant-form-item-label]:!pb-1"
-      initialValues={{ bookingStatus: "PENDING", submitStatus: "NOT_SUBMITTED" }}
+      initialValues={{
+        bookingStatus: "PENDING",
+        submitStatus: "NOT_SUBMITTED",
+        dayType: "NORMAL",
+      }}
       requiredMark
       size={size}
       autoComplete="off"
@@ -180,11 +186,24 @@ export default function OTRecordForm({
         </Form.Item>
       </div>
 
-      <Form.Item name="note" label="Note">
+      <Form.Item name="note" label="Remark">
         <Input.TextArea
           autoSize={{ minRows: 2, maxRows: 6 }}
           placeholder="Enter note"
           enterKeyHint="done"
+        />
+      </Form.Item>
+
+      <Form.Item name="dayType" label="Day type">
+        <Radio.Group
+          optionType="button"
+          buttonStyle="solid"
+          options={[
+            { value: "NORMAL", label: "Normal day" },
+            { value: "NORMAL_HOLIDAY", label: "Normal holiday" },
+            { value: "SPECIAL_DAY", label: "Special day" },
+          ]}
+          className="flex flex-wrap"
         />
       </Form.Item>
 

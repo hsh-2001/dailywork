@@ -5,7 +5,7 @@
 This project uses the OpenNext Cloudflare adapter to run the Next.js app on Workers.
 
 1. Install dependencies with `pnpm install`.
-2. Before deploying schema changes, run `pnpm db:push` against the target database. This creates the per-user salary settings table used by the Salary & tax settings page.
+2. Before deploying schema changes, apply `drizzle/0011_separate_bonus_calculation_settings.sql`, `drizzle/0012_special_day_bonus.sql`, `drizzle/0013_remark_based_bonus_rates.sql`, `drizzle/0014_record_day_type.sql`, `drizzle/0015_salary_settings_per_currency.sql`, and `drizzle/0016_bonus_exchange_rate.sql` to the target database in order, then run `pnpm db:push` to sync the schema.
 3. For local Worker preview, keep `NEXTJS_ENV=development` in `.dev.vars`. Local secrets and application variables belong in `.env` (already gitignored).
 4. Set production secrets before the first deploy:
 
