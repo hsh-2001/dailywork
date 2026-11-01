@@ -68,6 +68,7 @@ export class ApiPageResponse<T> {
     this.errorCode = errorCode;
     this.data = data;
     this.pagination = pagination;
+    this.summary = summary;
   }
 
   public static success<T>(
@@ -85,8 +86,8 @@ export class ApiPageResponse<T> {
       "SUCCESS",
       data,
       pagination,
+      summary,
     );
-    response.summary = summary;
 
     return NextResponse.json(response, {
       status: 200,

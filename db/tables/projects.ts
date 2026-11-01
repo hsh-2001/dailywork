@@ -6,7 +6,6 @@ import {
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
-import { usersTable } from "@/db/tables/users";
 
 export const projectTable = pgTable("projects", {
   id: bigserial("id", { mode: "number" }).primaryKey(),
