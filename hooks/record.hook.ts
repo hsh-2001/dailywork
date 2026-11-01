@@ -12,7 +12,10 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
-export const useRecords = (request: PaginationRequest & RecordFilters, enabled = true) => {
+export const useRecords = (
+  request: PaginationRequest & RecordFilters,
+  enabled = true,
+) => {
   return useQuery({
     queryKey: ["ot-records", request],
     queryFn: () => recordService.getRecords(request),
