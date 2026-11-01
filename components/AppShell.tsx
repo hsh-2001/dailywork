@@ -38,9 +38,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isAuthRoute && authSession.isSuccess && !authSession.data) {
-      router.replace("/auth/sign-in");
+      const next = `${pathname}${window.location.search}${window.location.hash}`;
+      router.replace(`/auth/sign-in?next=${encodeURIComponent(next)}`);
     }
-  }, [authSession.data, authSession.isSuccess, isAuthRoute, router]);
+  }, [authSession.data, authSession.isSuccess, isAuthRoute, pathname, router]);
 
   useEffect(() => {
     const viewport = window.visualViewport;

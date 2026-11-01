@@ -9,7 +9,14 @@ export function proxy(request: NextRequest) {
   if (!hasSessionCookie && path.startsWith("/api/")) {
     return NextResponse.json({ message: "Authentication required" }, { status: 401 });
   }
-  if (!hasSessionCookie) return NextResponse.redirect(new URL("/auth/sign-in", request.url));
+  if (!hasSessionCookie) {
+    const signInUrl = new URL("/auth/sign-in", request.url);
+    signInUrl.searchParams.set(
+      "next",
+      `${request.nextUrl.pathname}${request.nextUrl.search}`,
+    );
+    return NextResponse.redirect(signInUrl);
+  }
   return NextResponse.next();
 }
 

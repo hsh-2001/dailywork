@@ -33,7 +33,15 @@ export default function AuthPage({ isSignUp }: { isSignUp: boolean }) {
       const result = await response.json() as { message?: string };
       if (!response.ok) throw new Error(result.message || "Authentication failed.");
       await queryClient.invalidateQueries({ queryKey: authSessionQueryKey });
-      router.replace("/dashboard");
+      const requestedPath = new URLSearchParams(window.location.search).get("next");
+      let returnPath = "/dashboard";
+      if (requestedPath?.startsWith("/") && !requestedPath.startsWith("//")) {
+        const nextUrl = new URL(requestedPath, window.location.origin);
+        if (nextUrl.origin === window.location.origin && !nextUrl.pathname.startsWith("/auth/")) {
+          returnPath = `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
+        }
+      }
+      router.replace(returnPath);
       router.refresh();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Authentication failed.");

@@ -14,7 +14,7 @@ This project uses the OpenNext Cloudflare adapter to run the Next.js app on Work
    pnpm wrangler secret put JWT_SECRET
    ```
 
-   Add `TELEGRAM_CHAT_ID` and `TELEGRAM_API_TOKEN` as Worker secrets if the Telegram integration is used.
+   Configure `API_CENTER`, `TELEGRAM_CHAT_ID`, and `TELEGRAM_API_TOKEN` as Worker secrets if the Telegram integration is used.
 5. Build and run the Worker locally with `pnpm preview`.
 6. Deploy with `pnpm deploy`.
 

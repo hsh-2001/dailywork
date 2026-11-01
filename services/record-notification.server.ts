@@ -3,7 +3,6 @@ import "server-only";
 import { otRecordTable } from "@/db/tables/ot_records";
 import { formatTime } from "@/utils/datetime";
 import dayjs from "dayjs";
-import { after } from "next/server";
 
 const escapeTelegramHtml = (value: string) =>
   value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
@@ -43,45 +42,56 @@ function formatRecordNotification(
   return lines.join("\n");
 }
 
-export function notifyRecordChange(
+export async function notifyRecordChange(
   record: typeof otRecordTable.$inferSelect,
   action: "created" | "updated",
 ) {
-  after(async () => {
-    const chatId = process.env.TELEGRAM_CHAT_ID;
-    const token = process.env.TELEGRAM_API_TOKEN;
-    if (!chatId || !token) {
-      console.error("Unable to send OT record notification: TELEGRAM_CHAT_ID or TELEGRAM_API_TOKEN is not configured");
-      return;
-    }
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const token = process.env.TELEGRAM_API_TOKEN;
+  const apiCenter = process.env.API_CENTER;
+  if (!chatId || !token || !apiCenter) {
+    console.error("Unable to send OT record notification: API_CENTER, TELEGRAM_CHAT_ID, or TELEGRAM_API_TOKEN is not configured");
+    return;
+  }
 
-    try {
-      const API_CENTER = process.env.API_CENTER;
-      const response = await fetch(`${API_CENTER}/telegram/send`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+  let endpoint: URL;
+  try {
+    const baseUrl = new URL(apiCenter);
+    if (baseUrl.protocol !== "https:" || baseUrl.username || baseUrl.password) {
+      throw new Error("API_CENTER must be an HTTPS URL without embedded credentials.");
+    }
+    endpoint = new URL("/telegram/send", baseUrl);
+  } catch (error) {
+    console.error("Unable to send OT record notification: API_CENTER is invalid", error);
+    return;
+  }
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          chatId,
-          text: formatRecordNotification(record, action),
-          parse_mode: "HTML",
-        }),
-      });
+      },
+      body: JSON.stringify({
+        chatId,
+        text: formatRecordNotification(record, action),
+        parse_mode: "HTML",
+      }),
+      signal: AbortSignal.timeout(10_000),
+    });
 
-      if (!response.ok) {
-        console.error("Unable to send OT record notification", {
-          status: response.status,
-          statusText: response.statusText,
-          requestId:
-            response.headers.get("cf-ray") ??
-            response.headers.get("x-request-id") ??
-            undefined,
-        });
-      }
-    } catch (error) {
-      console.error("Unable to send OT record notification", error);
+    if (!response.ok) {
+      console.error("Unable to send OT record notification", {
+        status: response.status,
+        statusText: response.statusText,
+        requestId:
+          response.headers.get("cf-ray") ??
+          response.headers.get("x-request-id") ??
+          undefined,
+      });
     }
-  });
+  } catch (error) {
+    console.error("Unable to send OT record notification", error);
+  }
 }
