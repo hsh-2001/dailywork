@@ -30,7 +30,7 @@ The Pages project serves a static Next.js export. Pages Functions proxy API requ
 2. Create the Pages project once:
 
    ```bash
-   pnpm exec wrangler pages project create daily-work-frontend --production-branch main
+   pnpm exec wrangler pages project create dailywork-one --production-branch main
    ```
 
 3. Build and deploy the frontend:
@@ -39,5 +39,6 @@ The Pages project serves a static Next.js export. Pages Functions proxy API requ
    pnpm pages:deploy
    ```
 
-   The production site is available at `https://daily-work-frontend.pages.dev`.
+   The production site is available at `https://dailywork-one.pages.dev`.
+
 The existing `pnpm deploy` command continues to deploy the full-stack Worker independently.
