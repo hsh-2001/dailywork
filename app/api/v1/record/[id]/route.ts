@@ -109,7 +109,7 @@ export async function PUT(req: NextRequest) {
       return ApiResponse.failed("Record not found", "NOT_FOUND", 404);
     }
 
-    await notifyRecordChange(result[0], "updated");
+    notifyRecordChange(result[0], "updated");
 
     return ApiResponse.success(result[0], "Record updated successfully");
   } catch (error) {

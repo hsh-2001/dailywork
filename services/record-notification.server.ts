@@ -3,6 +3,7 @@ import "server-only";
 import { otRecordTable } from "@/db/tables/ot_records";
 import { formatTime } from "@/utils/datetime";
 import dayjs from "dayjs";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 const escapeTelegramHtml = (value: string) =>
   value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
@@ -42,7 +43,7 @@ function formatRecordNotification(
   return lines.join("\n");
 }
 
-export async function notifyRecordChange(
+export function notifyRecordChange(
   record: typeof otRecordTable.$inferSelect,
   action: "created" | "updated",
 ) {
@@ -67,7 +68,8 @@ export async function notifyRecordChange(
   }
 
   try {
-    const response = await fetch(endpoint, {
+    const { ctx } = getCloudflareContext();
+    ctx.waitUntil(fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -79,19 +81,21 @@ export async function notifyRecordChange(
         parse_mode: "HTML",
       }),
       signal: AbortSignal.timeout(10_000),
-    });
-
-    if (!response.ok) {
-      console.error("Unable to send OT record notification", {
-        status: response.status,
-        statusText: response.statusText,
-        requestId:
-          response.headers.get("cf-ray") ??
-          response.headers.get("x-request-id") ??
-          undefined,
-      });
-    }
+    }).then((response) => {
+      if (!response.ok) {
+        console.error("Unable to send OT record notification", {
+          status: response.status,
+          statusText: response.statusText,
+          requestId:
+            response.headers.get("cf-ray") ??
+            response.headers.get("x-request-id") ??
+            undefined,
+        });
+      }
+    }).catch((error: unknown) => {
+      console.error("Unable to send OT record notification", error);
+    }));
   } catch (error) {
-    console.error("Unable to send OT record notification", error);
+    console.error("Unable to schedule OT record notification", error);
   }
 }

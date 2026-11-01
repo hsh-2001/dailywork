@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
       })
       .returning();
 
-    await notifyRecordChange(result[0], "created");
+    notifyRecordChange(result[0], "created");
 
     return ApiResponse.success(result[0], "Record created successfully");
   } catch (error) {
