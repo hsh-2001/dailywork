@@ -6,16 +6,20 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-export const usersTable = pgTable("users", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  username: varchar({ length: 255 }).notNull().unique(),
-  email: varchar({ length: 255 }).notNull().unique(),
-  userId: varchar("user_id", { length: 255 }),
-  name: varchar({ length: 255 }),
-  image: varchar({ length: 2048 }),
-  phone: varchar({ length: 20 }).unique(),
-  // Nullable while accounts created before local password authentication are migrated.
-  password: varchar({ length: 255 }),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  modifiedAt: timestamp("modified_at").defaultNow().notNull(),
-}, (table) => [uniqueIndex("users_user_id_unique").on(table.userId)]);
+export const usersTable = pgTable(
+  "users",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    username: varchar({ length: 255 }).notNull().unique(),
+    email: varchar({ length: 255 }).notNull().unique(),
+    userId: varchar("user_id", { length: 255 }),
+    name: varchar({ length: 255 }),
+    image: varchar({ length: 2048 }),
+    phone: varchar({ length: 20 }).unique(),
+    // Nullable while accounts created before local password authentication are migrated.
+    password: varchar({ length: 255 }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    modifiedAt: timestamp("modified_at").defaultNow().notNull(),
+  },
+  (table) => [uniqueIndex("users_user_id_unique").on(table.userId)],
+);

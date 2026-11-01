@@ -60,7 +60,6 @@ export async function getCurrentUserLocation(): Promise<UserLocation> {
   let result: unknown;
   try {
     result = await response.json();
-    console.log("Location API response:", result);
   } catch {
     throw new Error("The location API returned an invalid response.");
   }
