@@ -1,10 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { Alert, Skeleton } from "antd";
 import { ArrowLeft, UserRound } from "lucide-react";
 import ProfileSettings from "@/components/ProfileSettings";
-import { getCurrentAuthUser } from "@/lib/auth/current-user";
+import { useAuthSession } from "@/hooks/auth-session.hook";
 
-export default async function ProfilePage() {
-  const user = await getCurrentAuthUser();
+export default function ProfilePage() {
+  const userQuery = useAuthSession();
+  const user = userQuery.data;
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
@@ -18,7 +22,13 @@ export default async function ProfilePage() {
           <p className="mt-0.5 max-w-2xl text-xs text-slate-500 sm:text-sm">Manage your profile details and password.</p>
         </div>
 
-        {user ? (
+        {userQuery.isLoading ? (
+          <section className="mt-4 rounded-xl border border-slate-200 bg-white p-5">
+            <Skeleton active />
+          </section>
+        ) : userQuery.isError ? (
+          <Alert className="mt-4" type="error" showIcon message="Unable to load your profile." />
+        ) : user ? (
           <section className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
             <div className="border-b border-slate-100 px-4 py-2.5 sm:px-5">
               <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">

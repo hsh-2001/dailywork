@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "daily-work-frontend",
+  "pages_build_output_dir": "./out",
+  "compatibility_date": "2026-10-18",
+  "vars": {
+    "WORKER_API_ORIGIN": "https://daily-work.senghong-learning.workers.dev"
+  }
+}

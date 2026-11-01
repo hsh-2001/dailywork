@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import AuthControls from "@/components/AuthControls";
+import { useAuthSession } from "@/hooks/auth-session.hook";
 import {
   ChartNoAxesCombined,
   ClipboardList,
@@ -26,12 +27,20 @@ const isRouteActive = (pathname: string, href: string) =>
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const isAuthRoute = pathname.startsWith("/auth/");
+  const authSession = useAuthSession();
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const activeQuickIndex = Math.max(
     0,
     navigation.findIndex(({ href }) => isRouteActive(pathname, href)),
   );
+
+  useEffect(() => {
+    if (!isAuthRoute && authSession.isSuccess && !authSession.data) {
+      router.replace("/auth/sign-in");
+    }
+  }, [authSession.data, authSession.isSuccess, isAuthRoute, router]);
 
   useEffect(() => {
     const viewport = window.visualViewport;

@@ -21,3 +21,23 @@ This project uses the OpenNext Cloudflare adapter to run the Next.js app on Work
 The Worker name and runtime settings are in `wrangler.jsonc`; update `name` if deploying under a different Worker name. Add a custom domain in the Cloudflare dashboard or configure a `workers_dev`/route entry in that file.
 
 Cloudflare's OpenNext adapter supports the app's Neon PostgreSQL connection through the serverless driver.
+
+## Deploy a static frontend to Cloudflare Pages
+
+The Pages project serves a static Next.js export. Pages Functions proxy API requests and dynamic note pages to the existing `daily-work` Worker, which continues to handle authentication, database access, and server rendering for note details.
+
+1. Keep `WORKER_API_ORIGIN` in `cloudflare-pages/wrangler.jsonc` pointed at the backend Worker URL.
+2. Create the Pages project once:
+
+   ```bash
+   pnpm exec wrangler pages project create daily-work-frontend --production-branch main
+   ```
+
+3. Build and deploy the frontend:
+
+   ```bash
+   pnpm pages:deploy
+   ```
+
+   The production site is available at `https://daily-work-frontend.pages.dev`.
+The existing `pnpm deploy` command continues to deploy the full-stack Worker independently.

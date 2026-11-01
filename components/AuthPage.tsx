@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { authSessionQueryKey } from "@/hooks/auth-session.hook";
 
-export default function AuthPage() {
-  const { path } = useParams<{ path: string }>();
-  const isSignUp = path === "sign-up";
+export default function AuthPage({ isSignUp }: { isSignUp: boolean }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -31,6 +32,7 @@ export default function AuthPage() {
       });
       const result = await response.json() as { message?: string };
       if (!response.ok) throw new Error(result.message || "Authentication failed.");
+      await queryClient.invalidateQueries({ queryKey: authSessionQueryKey });
       router.replace("/dashboard");
       router.refresh();
     } catch (cause) {

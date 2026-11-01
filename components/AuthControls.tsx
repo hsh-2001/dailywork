@@ -3,24 +3,16 @@
 import { Button } from "antd";
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-
-type User = { name: string | null; email: string };
+import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { authSessionQueryKey, useAuthSession } from "@/hooks/auth-session.hook";
 
 export default function AuthControls() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const queryClient = useQueryClient();
+  const { data: user } = useAuthSession();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState("");
-
-  useEffect(() => {
-    void fetch("/api/auth/session").then(async (response) => {
-      if (response.ok) {
-        const result = await response.json() as { data: User | null };
-        setUser(result.data);
-      }
-    });
-  }, []);
 
   if (!user) return null;
   const handleSignOut = async () => {
@@ -32,6 +24,7 @@ export default function AuthControls() {
         const result = await response.json().catch(() => null) as { message?: string } | null;
         throw new Error(result?.message || "Unable to sign out. Please try again.");
       }
+      queryClient.setQueryData(authSessionQueryKey, null);
       router.replace("/auth/sign-in");
       router.refresh();
     } catch (cause) {
