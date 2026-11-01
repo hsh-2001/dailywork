@@ -87,8 +87,8 @@ export default function NoteDetailPage({ noteId }: { noteId: number }) {
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Note</p>
             <h1 className="break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">{note.title}</h1>
             <p className="mt-2 text-xs text-slate-400">Updated {dayjs(note.updatedAt).format("MMMM D, YYYY [at] h:mm A")}</p>
-            {note.status === "COMPLETED" && <p className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2.5 py-1 text-sm font-medium text-slate-700"><Check size={15} aria-hidden="true" />Completed</p>}
-            {note.deadline && <p className={`mt-3 inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-sm font-medium ${note.status !== "COMPLETED" && dayjs(note.deadline).isBefore(dayjs(), "day") ? "bg-red-50 text-red-700" : "bg-slate-100 text-slate-700"}`}>
+            {note.status === "COMPLETED" && <p className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2.5 py-1 text-sm font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200"><Check size={15} aria-hidden="true" />Completed</p>}
+            {note.deadline && <p className={`mt-3 inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-sm font-medium ring-1 ring-inset ${note.status !== "COMPLETED" && dayjs(note.deadline).isBefore(dayjs(), "day") ? "bg-red-50 text-red-700 ring-red-200" : dayjs(note.deadline).isSame(dayjs(), "day") ? "bg-amber-50 text-amber-700 ring-amber-200" : "bg-blue-50 text-blue-700 ring-blue-200"}`}>
               <CalendarClock size={15} aria-hidden="true" />
               <time dateTime={note.deadline}>{note.status !== "COMPLETED" && dayjs(note.deadline).isBefore(dayjs(), "day") ? "Overdue · " : "Due "}{dayjs(note.deadline).format("MMMM D, YYYY")}</time>
             </p>}

@@ -231,8 +231,8 @@ export default function ProjectsPage() {
                             <span
                               className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
                                 project.status === "ACTIVE"
-                                  ? "bg-slate-100 text-slate-700"
-                                  : "bg-slate-100 text-slate-500"
+                                  ? "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200"
+                                  : "bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200"
                               }`}
                             >
                               {project.status === "ACTIVE"

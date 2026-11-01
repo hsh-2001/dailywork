@@ -185,7 +185,11 @@ export default function DashboardClient() {
                       </p>
                       <p className="mt-0.5 text-xs text-slate-500">
                         {record.workDate} · {formatTime(record.startTime)}–
-                        {record.endTime ? formatTime(record.endTime) : "In progress"}
+                        {record.endTime ? formatTime(record.endTime) : (
+                          <span className="ml-1 inline-flex rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 ring-1 ring-inset ring-amber-200">
+                            In progress
+                          </span>
+                        )}
                       </p>
                     </div>
                     <span className="shrink-0 text-sm font-medium tabular-nums text-slate-700">

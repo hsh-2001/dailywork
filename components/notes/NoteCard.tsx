@@ -63,7 +63,7 @@ export default function NoteCard({
         <div className="mt-1.5 line-clamp-3 max-h-12 overflow-hidden text-xs leading-4 text-slate-500 [&_blockquote]:border-slate-200 [&_blockquote]:pl-2 [&_h1]:text-sm [&_h2]:text-xs [&_h3]:text-xs">
           <NoteContent content={note.content} />
         </div>
-        {note.status === "COMPLETED" && <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold leading-4 text-slate-700 ring-1 ring-inset ring-slate-200"><Check size={11} aria-hidden="true" />Completed</span>}
+        {note.status === "COMPLETED" && <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold leading-4 text-emerald-700 ring-1 ring-inset ring-emerald-200"><Check size={11} aria-hidden="true" />Completed</span>}
         {note.deadline && (() => {
           const deadline = dayjs(note.deadline);
           const overdue = note.status !== "COMPLETED" && deadline.isBefore(dayjs(), "day");
@@ -72,8 +72,8 @@ export default function NoteCard({
           const badgeColor = overdue
             ? "bg-red-50 text-red-700 ring-red-200"
             : dueToday
-              ? "bg-slate-100 text-slate-700 ring-slate-200"
-              : "bg-slate-50 text-slate-600 ring-slate-200";
+              ? "bg-amber-50 text-amber-700 ring-amber-200"
+              : "bg-blue-50 text-blue-700 ring-blue-200";
           return <span className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold leading-4 ring-1 ring-inset ${badgeColor}`}>
             <CalendarClock size={11} aria-hidden="true" />
             <time dateTime={note.deadline}>{label} · {deadline.format("MMM D, YYYY")}</time>

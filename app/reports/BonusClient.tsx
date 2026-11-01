@@ -983,14 +983,14 @@ function Chip({
   tone,
   children,
 }: {
-  tone: "base" | "high" | "weekend" | "muted";
+  tone: "base" | "high" | "weekend" | "inProgress";
   children: React.ReactNode;
 }) {
   const tones = {
     base: "bg-slate-50 text-slate-700 ring-slate-200",
     high: "bg-slate-100 text-slate-800 ring-slate-300",
     weekend: "bg-slate-200/70 text-slate-700 ring-slate-300",
-    muted: "bg-slate-50 text-slate-600 ring-slate-200",
+    inProgress: "bg-amber-50 text-amber-700 ring-amber-200",
   };
   return (
     <span
@@ -1028,15 +1028,15 @@ function LogRow({
   const chips = dayType === "specialDay" ? (
     <>
       <Chip tone="high">Special day {specialDayRate}×</Chip>
-      {inProgress && <Chip tone="muted">In progress</Chip>}
+      {inProgress && <Chip tone="inProgress">In progress</Chip>}
     </>
   ) : dayType === "normalHoliday" ? (
     <>
       <Chip tone="high">Normal holiday {normalHolidayRate}×</Chip>
-      {inProgress && <Chip tone="muted">In progress</Chip>}
+      {inProgress && <Chip tone="inProgress">In progress</Chip>}
     </>
   ) : inProgress ? (
-    <Chip tone="muted">In progress</Chip>
+    <Chip tone="inProgress">In progress</Chip>
   ) : dayType === "weekend" ? (
     <Chip tone="weekend">Weekend {weekendRate}×</Chip>
   ) : (

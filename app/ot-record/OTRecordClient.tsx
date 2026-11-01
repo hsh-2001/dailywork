@@ -7,6 +7,7 @@ import {
 } from "@/hooks/record.hook";
 import { Alert, App, Button, Checkbox, DatePicker, Grid, Modal, Select, Spin } from "antd";
 import RecordList from "@/components/RecordList";
+import RecordStatusBadges from "@/components/RecordStatusBadges";
 import { CalendarDays, Check, ChevronDown, ClipboardList, Coffee, Filter, LoaderCircle, Plus, RotateCcw } from "lucide-react";
 import MobileDatePicker from "@/components/MobileDatePicker";
 import type {
@@ -22,19 +23,6 @@ import { formatTime } from "@/utils/datetime";
 
 const formatTotal = (minutes: number | null) =>
   minutes == null ? "—" : `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
-
-const bookingStatusStyle: Record<BookingStatus, string> = {
-  PENDING: "bg-slate-50 text-slate-700 ring-slate-200",
-  BOOKED: "bg-slate-100 text-slate-700 ring-slate-200",
-  CANCELLED: "bg-slate-100 text-slate-700 ring-slate-200",
-};
-
-const submitStatusStyle: Record<SubmitStatus, string> = {
-  NOT_SUBMITTED: "bg-slate-100 text-slate-700 ring-slate-200",
-  SUBMITTED: "bg-slate-50 text-slate-700 ring-slate-200",
-  APPROVED: "bg-slate-100 text-slate-700 ring-slate-200",
-  REJECTED: "bg-slate-200 text-slate-800 ring-slate-300",
-};
 
 const statusLabel = (status: string) =>
   status.replaceAll("_", " ").toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
@@ -584,14 +572,7 @@ export default function OTRecordClient() {
                   </p>
                 )}
                 {record.note && <p className="mt-1.5 whitespace-pre-line border-l-2 border-slate-200 pl-2 text-[11px] leading-4 text-slate-600">{record.note}</p>}
-                <div className="mt-2 flex flex-wrap gap-1">
-                  <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold ring-1 ring-inset ${bookingStatusStyle[record.bookingStatus]}`}>
-                    {statusLabel(record.bookingStatus)}
-                  </span>
-                  <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold ring-1 ring-inset ${submitStatusStyle[record.submitStatus]}`}>
-                    {statusLabel(record.submitStatus)}
-                  </span>
-                </div>
+                <RecordStatusBadges bookingStatus={record.bookingStatus} submitStatus={record.submitStatus} />
               </li>
             ))}
           </ul>

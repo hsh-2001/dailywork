@@ -4,6 +4,7 @@ import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Clock3, Pencil, Tr
 import type { IRecordResponse } from "@/shares/dtos/record/recordResponse";
 import { formatTime } from "@/utils/datetime";
 import { getRecordDayType } from "@/utils/workday-type";
+import RecordStatusBadges from "@/components/RecordStatusBadges";
 
 interface RecordListProps {
   data: IRecordResponse[];
@@ -27,24 +28,6 @@ const formatTotal = (value: number | null) => {
   if (value == null) return "—";
   return `${Math.floor(value / 60)}h ${value % 60}m`;
 };
-
-function StatusBadges({ bookingStatus, submitStatus }: Pick<IRecordResponse, "bookingStatus" | "submitStatus">) {
-  const booking = {
-    PENDING: ["Pending booking", "bg-slate-50 text-slate-700 ring-slate-200"],
-    BOOKED: ["Booked", "bg-slate-100 text-slate-700 ring-slate-200"],
-    CANCELLED: ["Booking cancelled", "bg-slate-100 text-slate-600 ring-slate-200"],
-  }[bookingStatus];
-  const submission = {
-    NOT_SUBMITTED: ["Not submitted", "bg-slate-100 text-slate-600 ring-slate-200"],
-    SUBMITTED: ["Submitted", "bg-slate-50 text-slate-700 ring-slate-200"],
-    APPROVED: ["Approved", "bg-slate-100 text-slate-700 ring-slate-200"],
-    REJECTED: ["Rejected", "bg-slate-200 text-slate-800 ring-slate-300"],
-  }[submitStatus];
-
-  return <div className="mt-1 flex flex-wrap gap-1">
-    {[booking, submission].map(([label, color]) => <span key={label} className={`rounded-full px-1.5 py-0.5 text-[9px] font-medium leading-3 ring-1 ring-inset ${color}`}>{label}</span>)}
-  </div>;
-}
 
 function LoadingRecords() {
   return (
@@ -166,10 +149,10 @@ export default function RecordList({
                     </p>
                     <p className="flex shrink-0 items-center gap-1 whitespace-nowrap tabular-nums text-slate-500">
                       <Clock3 size={12} aria-hidden="true" />
-                      {formatTime(record.startTime)}–{record.endTime ? formatTime(record.endTime) : "In progress"}
+                      {formatTime(record.startTime)}–{record.endTime ? formatTime(record.endTime) : <span className="ml-1 inline-flex rounded-full bg-amber-50 px-1.5 py-0.5 text-[9px] font-semibold text-amber-700 ring-1 ring-inset ring-amber-200">In progress</span>}
                     </p>
                   </div>
-                  <StatusBadges bookingStatus={record.bookingStatus} submitStatus={record.submitStatus} />
+                  <RecordStatusBadges bookingStatus={record.bookingStatus} submitStatus={record.submitStatus} />
                   {record.note && (
                     <p className="mt-1 line-clamp-2 whitespace-pre-line break-words border-l-2 border-slate-200 pl-2 text-[11px] leading-4 text-slate-500">
                       {record.note}
@@ -197,7 +180,7 @@ export default function RecordList({
 
                   <div className="flex items-center gap-2 text-[13px] text-slate-600 md:pl-0">
                     <Clock3 size={14} className="shrink-0 text-slate-400" aria-hidden="true" />
-                    <span className="tabular-nums">{formatTime(record.startTime)} – {record.endTime ? formatTime(record.endTime) : "In progress"}</span>
+                    <span className="tabular-nums">{formatTime(record.startTime)} – {record.endTime ? formatTime(record.endTime) : <span className="ml-1 inline-flex rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-inset ring-amber-200">In progress</span>}</span>
                   </div>
 
                   <div className="min-w-0 md:pr-2">
@@ -209,7 +192,7 @@ export default function RecordList({
                         ? record.task
                         : record.note || (record.project ? "No task details" : "Add project or task details")}
                     </p>
-                    <StatusBadges bookingStatus={record.bookingStatus} submitStatus={record.submitStatus} />
+                    <RecordStatusBadges bookingStatus={record.bookingStatus} submitStatus={record.submitStatus} />
                   </div>
 
                   <div className="flex items-center justify-between border-t border-slate-100 pt-2 md:justify-end md:border-0 md:pt-0">
