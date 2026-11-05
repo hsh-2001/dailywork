@@ -162,8 +162,8 @@ export default function NotesPage() {
                     <NoteCard
                       key={note.id}
                       note={note}
-                      onOpen={(selected) => router.push(`/notes/${selected.id}`)}
-                      onEdit={(selected) => router.push(`/notes/${selected.id}/edit`)}
+                      onOpen={(selected) => router.push(`/notes/detail?id=${selected.id}`)}
+                      onEdit={(selected) => router.push(`/notes/edit?id=${selected.id}`)}
                       onTogglePin={handleTogglePin}
                       onToggleStatus={handleToggleStatus}
                       onDelete={(selectedNote) => {

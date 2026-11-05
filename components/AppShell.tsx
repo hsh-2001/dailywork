@@ -11,13 +11,11 @@ import {
   ClipboardList,
   LayoutDashboard,
   Settings,
-  StickyNote,
 } from "lucide-react";
 
 const navigation = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Work logs", href: "/ot-record", icon: ClipboardList },
-  { label: "Notes", href: "/notes", icon: StickyNote },
   { label: "Bonus", href: "/reports", icon: ChartNoAxesCombined },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
@@ -160,12 +158,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         aria-hidden={keyboardOpen || isAuthRoute}
         className={`${keyboardOpen || isAuthRoute ? "hidden" : "fixed inset-x-0 bottom-0 z-20 px-3 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.2rem)]"} lg:hidden`}
       >
-        <ul className="relative mx-auto grid max-w-xl grid-cols-5 rounded-full border border-slate-200/80 bg-white/90 p-1 shadow-[0_8px_24px_rgba(15,23,42,0.14)] backdrop-blur-2xl">
+        <ul className="relative mx-auto grid max-w-xl grid-cols-4 rounded-full border border-slate-200/80 bg-white/90 p-1 shadow-[0_8px_24px_rgba(15,23,42,0.14)] backdrop-blur-2xl">
           <span
             aria-hidden="true"
             className="pointer-events-none absolute bottom-1 left-1 top-1 z-0 rounded-full border border-white/90 bg-white/55 shadow-[0_4px_14px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-xl transition-transform duration-300 ease-out motion-reduce:transition-none"
             style={{
-              width: "calc((100% - 0.5rem) / 5)",
+              width: "calc((100% - 0.5rem) / 4)",
               transform: `translateX(${activeQuickIndex * 100}%)`,
             }}
           />

@@ -72,7 +72,7 @@ export default function NoteDetailPage({ noteId }: { noteId: number }) {
             >
               <span className="hidden min-[420px]:inline">{note.status === "COMPLETED" ? "Mark active" : "Complete"}</span>
             </Button>
-            <Button type="primary" icon={<Pencil size={15} />} onClick={() => router.push(`/notes/${note.id}/edit`)} aria-label="Edit note" title="Edit note" className="!min-w-0 !rounded-lg !px-2 sm:!px-3">
+            <Button type="primary" icon={<Pencil size={15} />} onClick={() => router.push(`/notes/edit?id=${note.id}`)} aria-label="Edit note" title="Edit note" className="!min-w-0 !rounded-lg !px-2 sm:!px-3">
               <span className="hidden min-[420px]:inline">Edit</span>
             </Button>
           </div>

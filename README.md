@@ -24,7 +24,7 @@ Cloudflare's OpenNext adapter supports the app's Neon PostgreSQL connection thro
 
 ## Deploy a static frontend to Cloudflare Pages
 
-The Pages project serves a static Next.js export. Pages Functions proxy API requests and dynamic note pages to the existing `daily-work` Worker, which continues to handle authentication, database access, and server rendering for note details.
+The Pages project serves a static Next.js export. Pages Functions proxy API requests and direct dynamic note URLs to the existing `daily-work` Worker. In-app detail and edit navigation uses statically generated routes with the note ID in the query string, because a static export cannot generate unknown note IDs.
 
 1. Keep `WORKER_API_ORIGIN` in `cloudflare-pages/wrangler.jsonc` pointed at the backend Worker URL.
 2. Create the Pages project once:
