@@ -32,7 +32,7 @@ export default function SettingsPage() {
               <span>
                 <span className="block text-sm font-medium text-slate-800">Profile</span>
                 <span className="mt-0.5 block text-xs text-slate-500 sm:text-sm">
-                  Update your name and password.
+                  Update your name and account details.
                 </span>
               </span>
             </span>

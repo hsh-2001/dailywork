@@ -16,7 +16,7 @@ export const usersTable = pgTable(
     name: varchar({ length: 255 }),
     image: varchar({ length: 2048 }),
     phone: varchar({ length: 20 }).unique(),
-    // Nullable while accounts created before local password authentication are migrated.
+    // Legacy local password hash; Firebase Authentication now owns passwords.
     password: varchar({ length: 255 }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     modifiedAt: timestamp("modified_at").defaultNow().notNull(),

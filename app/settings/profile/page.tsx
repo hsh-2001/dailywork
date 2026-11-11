@@ -19,7 +19,7 @@ export default function ProfilePage() {
         <div className="mt-3">
           <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">Your account</p>
           <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">Profile</h1>
-          <p className="mt-0.5 max-w-2xl text-xs text-slate-500 sm:text-sm">Manage your profile details and password.</p>
+          <p className="mt-0.5 max-w-2xl text-xs text-slate-500 sm:text-sm">Manage your profile details.</p>
         </div>
 
         {userQuery.isLoading ? (

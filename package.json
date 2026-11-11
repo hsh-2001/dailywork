@@ -9,7 +9,7 @@
     "lint": "eslint",
     "db:push": "npx drizzle-kit push",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy -- --keep-vars",
     "pages:build": "CLOUDFLARE_PAGES_BUILD=1 next build && rm -rf cloudflare-pages/out && cp -R out cloudflare-pages/out",
     "pages:deploy": "pnpm pages:build && cd cloudflare-pages && wrangler pages deploy out --project-name dailywork-one --branch main",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",

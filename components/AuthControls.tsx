@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { authSessionQueryKey, useAuthSession } from "@/hooks/auth-session.hook";
+import { signOut } from "firebase/auth";
+import { getFirebaseAuth } from "@/lib/auth/firebase";
 
 export default function AuthControls() {
   const router = useRouter();
@@ -24,6 +26,7 @@ export default function AuthControls() {
         const result = await response.json().catch(() => null) as { message?: string } | null;
         throw new Error(result?.message || "Unable to sign out. Please try again.");
       }
+      await signOut(getFirebaseAuth()).catch(() => undefined);
       queryClient.setQueryData(authSessionQueryKey, null);
       router.replace("/auth/sign-in");
       router.refresh();

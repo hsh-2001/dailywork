@@ -14,17 +14,19 @@ This project uses the OpenNext Cloudflare adapter to run the Next.js app on Work
    pnpm wrangler secret put JWT_SECRET
    ```
 
+   For Firebase email-link sign-in, set `FIREBASE_API_KEY` as a runtime secret on the backend Worker that serves `WORKER_API_ORIGIN` (`daily-work.senghong-learning.workers.dev` in this repo). The Pages build needs all four `NEXT_PUBLIC_FIREBASE_*` values to build the frontend. Enable Email/Password and Email link (passwordless sign-in) in Firebase Authentication. Email links verify the address as part of sign-in. Existing local accounts can sign in with the same verified email and keep their existing Daily Work records. `.env` is local only; configure production values in Cloudflare. The `pnpm deploy` command passes `--keep-vars` so dashboard-configured Worker variables survive redeploys.
+
    Configure `API_CENTER`, `TELEGRAM_CHAT_ID`, and `TELEGRAM_API_TOKEN` as Worker secrets if the Telegram integration is used.
 5. Build and run the Worker locally with `pnpm preview`.
 6. Deploy with `pnpm deploy`.
 
-The Worker name and runtime settings are in `wrangler.jsonc`; update `name` if deploying under a different Worker name. Add a custom domain in the Cloudflare dashboard or configure a `workers_dev`/route entry in that file.
+The backend Worker name and runtime settings are in `wrangler.jsonc`; it is named `daily-work` to match the Pages proxy origin. Add a custom domain in the Cloudflare dashboard or configure a `workers_dev`/route entry in that file.
 
 Cloudflare's OpenNext adapter supports the app's Neon PostgreSQL connection through the serverless driver.
 
 ## Deploy a static frontend to Cloudflare Pages
 
-The Pages project serves a static Next.js export. Pages Functions proxy API requests and direct dynamic note URLs to the existing `daily-work` Worker. In-app detail and edit navigation uses statically generated routes with the note ID in the query string, because a static export cannot generate unknown note IDs.
+The Pages project serves a static Next.js export. Pages Functions proxy API requests and direct dynamic note URLs to the Worker configured by `WORKER_API_ORIGIN` in `cloudflare-pages/wrangler.jsonc`. In-app detail and edit navigation uses statically generated routes with the note ID in the query string, because a static export cannot generate unknown note IDs.
 
 1. Keep `WORKER_API_ORIGIN` in `cloudflare-pages/wrangler.jsonc` pointed at the backend Worker URL.
 2. Create the Pages project once:

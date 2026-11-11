@@ -12,7 +12,7 @@ const firebaseConfig = {
 
 export function getFirebaseAuth() {
   if (Object.values(firebaseConfig).some((value) => !value)) {
-    throw new Error("Google sign-in is not configured. Set the Firebase public environment variables.");
+    throw new Error("Firebase Authentication is not configured. Set the Firebase public environment variables.");
   }
   const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
   return getAuth(app);
