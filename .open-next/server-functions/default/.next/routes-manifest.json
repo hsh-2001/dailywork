@@ -63,14 +63,6 @@
       "namedRegex": "^/api/v1/record/(?<nxtPid>[^/]+?)(?:/)?$"
     },
     {
-      "page": "/auth/[path]",
-      "regex": "^/auth/([^/]+?)(?:/)?$",
-      "routeKeys": {
-        "nxtPpath": "nxtPpath"
-      },
-      "namedRegex": "^/auth/(?<nxtPpath>[^/]+?)(?:/)?$"
-    },
-    {
       "page": "/notes/[id]",
       "regex": "^/notes/([^/]+?)(?:/)?$",
       "routeKeys": {
@@ -137,6 +129,12 @@
       "namedRegex": "^/api/auth/signup(?:/)?$"
     },
     {
+      "page": "/api/v1/bonus-calculation-settings",
+      "regex": "^/api/v1/bonus\\-calculation\\-settings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/v1/bonus\\-calculation\\-settings(?:/)?$"
+    },
+    {
       "page": "/api/v1/location",
       "regex": "^/api/v1/location(?:/)?$",
       "routeKeys": {},
@@ -161,6 +159,12 @@
       "namedRegex": "^/api/v1/record(?:/)?$"
     },
     {
+      "page": "/api/v1/salary-settings",
+      "regex": "^/api/v1/salary\\-settings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/v1/salary\\-settings(?:/)?$"
+    },
+    {
       "page": "/api/v1/user",
       "regex": "^/api/v1/user(?:/)?$",
       "routeKeys": {},
@@ -171,6 +175,18 @@
       "regex": "^/apple\\-icon\\.png(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/apple\\-icon\\.png(?:/)?$"
+    },
+    {
+      "page": "/auth/sign-in",
+      "regex": "^/auth/sign\\-in(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/sign\\-in(?:/)?$"
+    },
+    {
+      "page": "/auth/sign-up",
+      "regex": "^/auth/sign\\-up(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/sign\\-up(?:/)?$"
     },
     {
       "page": "/dashboard",
@@ -189,6 +205,18 @@
       "regex": "^/notes(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/notes(?:/)?$"
+    },
+    {
+      "page": "/notes/detail",
+      "regex": "^/notes/detail(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/notes/detail(?:/)?$"
+    },
+    {
+      "page": "/notes/edit",
+      "regex": "^/notes/edit(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/notes/edit(?:/)?$"
     },
     {
       "page": "/notes/new",
@@ -227,10 +255,22 @@
       "namedRegex": "^/settings(?:/)?$"
     },
     {
+      "page": "/settings/bonus-calculation",
+      "regex": "^/settings/bonus\\-calculation(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/settings/bonus\\-calculation(?:/)?$"
+    },
+    {
       "page": "/settings/profile",
       "regex": "^/settings/profile(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/settings/profile(?:/)?$"
+    },
+    {
+      "page": "/settings/salary",
+      "regex": "^/settings/salary(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/settings/salary(?:/)?$"
     }
   ],
   "dataRoutes": [],

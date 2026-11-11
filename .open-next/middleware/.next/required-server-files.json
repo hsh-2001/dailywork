@@ -15,10 +15,9 @@
     "useFileSystemPublicRoutes": true,
     "generateEtags": true,
     "pageExtensions": [
-      "tsx",
       "ts",
-      "jsx",
-      "js"
+      "tsx",
+      "worker.tsx"
     ],
     "instrumentationClientInject": [],
     "poweredByHeader": true,

@@ -104,6 +104,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               alt=""
               width={40}
               height={40}
+              unoptimized
               className="size-8 rounded-lg object-cover shadow-sm ring-1 ring-slate-900/5 transition-transform group-hover:scale-[1.03] sm:size-9 sm:rounded-xl"
               priority
             />

@@ -13,74 +13,7 @@ import dayjs from "dayjs";
 import { APP_TZ, formatTime } from "@/utils/datetime";
 import { getRecordDayType } from "@/utils/workday-type";
 import MobileDatePicker from "@/components/MobileDatePicker";
-
-type Rates = {
-  weekday: number;
-  normalHoliday: number;
-  weekend: number;
-  specialDay: number;
-};
-type Parts = {
-  weekday: number;
-  normalHoliday: number;
-  weekend: number;
-  specialDay: number;
-};
-const EMPTY_PARTS: Parts = {
-  weekday: 0,
-  normalHoliday: 0,
-  weekend: 0,
-  specialDay: 0,
-};
-
-const intersectsMinutes = (
-  start: number,
-  end: number,
-  clipStart: number,
-  clipEnd: number,
-) => Math.max(0, Math.min(end, clipEnd) - Math.max(start, clipStart)) / 60_000;
-
-function calculateRecord(record: IRecordResponse, rates: Rates) {
-  const none = { minutes: 0, multiplied: 0, parts: EMPTY_PARTS };
-  if (!record.endTime || record.totalMinutes === null) return none;
-  const start = dayjs(record.startTime).valueOf();
-  const end = dayjs(record.endTime).valueOf();
-  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start)
-    return none;
-
-  const breakStart = record.breakStartTime
-    ? dayjs(record.breakStartTime).valueOf()
-    : null;
-  const breakEnd = record.breakEndTime
-    ? dayjs(record.breakEndTime).valueOf()
-    : null;
-  const unpaid = (a: number, b: number) =>
-    breakStart !== null && breakEnd !== null
-      ? intersectsMinutes(
-          start,
-          end,
-          Math.max(a, breakStart),
-          Math.min(b, breakEnd),
-        )
-      : 0;
-
-  const minutes = Math.max(
-    0,
-    intersectsMinutes(start, end, start, end) - unpaid(start, end),
-  );
-  const dayType = getRecordDayType(record);
-  const multiplier = rates[dayType === "normalHoliday" ? "normalHoliday" : dayType];
-  return {
-    minutes,
-    multiplied: minutes * multiplier,
-    parts: {
-      weekday: dayType === "weekday" ? minutes : 0,
-      normalHoliday: dayType === "normalHoliday" ? minutes : 0,
-      weekend: dayType === "weekend" ? minutes : 0,
-      specialDay: dayType === "specialDay" ? minutes : 0,
-    },
-  };
-}
+import { calculateRecordBonus, formatBonusMoney } from "@/utils/bonus-estimate";
 
 const prettyDate = (value: string) =>
   new Intl.DateTimeFormat("en", {
@@ -101,24 +34,6 @@ const formatDuration = (minutes: number) => {
   if (!hours && !remaining) return "0h";
   if (!hours) return `${remaining}m`;
   return remaining ? `${hours}h ${remaining}m` : `${hours}h`;
-};
-
-const formatMoney = (amount: number, currency: string) => {
-  if (currency === "KHR") {
-    const formattedAmount = new Intl.NumberFormat(undefined, {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-    return `៛${formattedAmount}`;
-  }
-
-  return new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency,
-    currencyDisplay: "narrowSymbol",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
 };
 
 const ymd = (date: Date) => date.toISOString().slice(0, 10);
@@ -215,7 +130,7 @@ export default function BonusClient() {
   });
 
   const records = data?.data ?? [];
-  const rates: Rates = {
+  const rates = {
     weekday: weekdayRate,
     normalHoliday: normalHolidayRate,
     weekend: weekendRate,
@@ -227,7 +142,7 @@ export default function BonusClient() {
       : 0;
   const rows = records.map((record) => ({
     record,
-    ...calculateRecord(record, rates),
+    ...calculateRecordBonus(record, rates),
   }));
 
   const totals = rows.reduce(
@@ -422,7 +337,7 @@ export default function BonusClient() {
             ) : (
               <p className="mt-2 min-w-0 text-[clamp(1.75rem,8vw,3rem)] font-bold leading-tight tabular-nums tracking-tight text-slate-950 [overflow-wrap:anywhere]">
                 <AmountMask visible={amountsVisible}>
-                  {formatMoney(netPay, currency)}
+                  {formatBonusMoney(netPay, currency)}
                 </AmountMask>
               </p>
             )}
@@ -436,7 +351,7 @@ export default function BonusClient() {
                     ? "—"
                     : (
                       <AmountMask visible={amountsVisible}>
-                        {formatMoney(totalPay, currency)}
+                        {formatBonusMoney(totalPay, currency)}
                       </AmountMask>
                     )}
                 </dd>
@@ -448,7 +363,7 @@ export default function BonusClient() {
                     ? "—"
                     : (
                       <AmountMask visible={amountsVisible}>
-                        −{formatMoney(estimatedTax, currency)}
+                        −{formatBonusMoney(estimatedTax, currency)}
                       </AmountMask>
                     )}
                 </dd>
@@ -500,7 +415,7 @@ export default function BonusClient() {
                     </span>
                     <span className="min-w-0 text-right text-xs font-semibold tabular-nums text-slate-900 [overflow-wrap:anywhere] sm:text-sm">
                       <AmountMask visible={amountsVisible}>
-                        {formatMoney(b.pay, currency)}
+                        {formatBonusMoney(b.pay, currency)}
                       </AmountMask>
                     </span>
                     <span className="text-xs tabular-nums text-slate-500">
@@ -525,7 +440,7 @@ export default function BonusClient() {
                 value={
                   salarySettingsQuery.isLoading || calculationSettingsQuery.isLoading
                     ? "—"
-                    : formatMoney(hourly, currency)
+                    : formatBonusMoney(hourly, currency)
                 }
                 blurred={!amountsVisible}
               />
@@ -1104,7 +1019,7 @@ function LogRow({
           className={`min-w-0 text-xs font-semibold tabular-nums [overflow-wrap:anywhere] sm:text-sm ${inProgress ? "text-slate-400" : "text-slate-900"}`}
         >
           <AmountMask visible={amountsVisible}>
-            {inProgress ? "—" : formatMoney(pay, currency)}
+            {inProgress ? "—" : formatBonusMoney(pay, currency)}
           </AmountMask>
         </p>
       </div>
