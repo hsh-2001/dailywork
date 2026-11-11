@@ -60,7 +60,7 @@ export default function MobileDatePicker({
     [min]
   );
   const maxDate = useMemo(
-    () => max ?? toWheelDate(dayjs().tz(APP_TZ).add(1, "year").endOf("year")),
+    () => max ?? toWheelDate(dayjs.tz("2030-12-31", APP_TZ)),
     [max]
   );
 

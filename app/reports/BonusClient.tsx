@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { Alert, Button, DatePicker, InputNumber, Select, Skeleton, Space } from "antd";
+import { Alert, Button, DatePicker, Grid, InputNumber, Select, Skeleton, Space } from "antd";
 import { ArrowUpRight, CalendarDays, Eye, EyeOff, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useRecords } from "@/hooks/record.hook";
@@ -12,6 +12,7 @@ import type { SalarySettings } from "@/shares/dtos/salary-settings/salarySetting
 import dayjs from "dayjs";
 import { APP_TZ, formatTime } from "@/utils/datetime";
 import { getRecordDayType } from "@/utils/workday-type";
+import MobileDatePicker from "@/components/MobileDatePicker";
 
 type Rates = {
   weekday: number;
@@ -167,6 +168,8 @@ function getPresets() {
 }
 
 export default function BonusClient() {
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
   const [amountsVisible, setAmountsVisible] = useState(false);
   const [dateFrom, setDateFrom] = useState(() => getPresets()[0].from);
   const [dateTo, setDateTo] = useState(() => getPresets()[0].to);
@@ -579,28 +582,58 @@ export default function BonusClient() {
               </div>
 
               <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-                <DatePicker
+                {isMobile ? (
+                  <MobileDatePicker
+                    title="From date"
+                    placeholder="From date"
+                    allowClear
+                    value={dateFrom ? dayjs(dateFrom) : null}
+                    onChange={(value) => {
+                      const nextFrom = value?.format("YYYY-MM-DD") ?? "";
+                      setDateFrom(nextFrom);
+                      if (nextFrom && dateTo && nextFrom > dateTo) setDateTo(nextFrom);
+                    }}
+                  />
+                ) : <DatePicker
                   aria-label="From date"
                   allowClear
                   value={dateFrom ? dayjs(dateFrom) : null}
-                  maxDate={dateTo ? dayjs(dateTo) : undefined}
-                  onChange={(value) => setDateFrom(value?.format("YYYY-MM-DD") ?? "")}
+                  onChange={(value) => {
+                    const nextFrom = value?.format("YYYY-MM-DD") ?? "";
+                    setDateFrom(nextFrom);
+                    if (nextFrom && dateTo && nextFrom > dateTo) setDateTo(nextFrom);
+                  }}
                   placeholder="From date"
                   size="large"
                   suffixIcon={<CalendarDays size={15} />}
                   className="w-full!"
-                />
-                <DatePicker
+                />}
+                {isMobile ? (
+                  <MobileDatePicker
+                    title="To date"
+                    placeholder="To date"
+                    allowClear
+                    value={dateTo ? dayjs(dateTo) : null}
+                    onChange={(value) => {
+                      const nextTo = value?.format("YYYY-MM-DD") ?? "";
+                      setDateTo(nextTo);
+                      if (nextTo && dateFrom && nextTo < dateFrom) setDateFrom(nextTo);
+                    }}
+                  />
+                ) : <DatePicker
                   aria-label="To date"
                   allowClear
                   value={dateTo ? dayjs(dateTo) : null}
-                  minDate={dateFrom ? dayjs(dateFrom) : undefined}
-                  onChange={(value) => setDateTo(value?.format("YYYY-MM-DD") ?? "")}
+                  onChange={(value) => {
+                    const nextTo = value?.format("YYYY-MM-DD") ?? "";
+                    setDateTo(nextTo);
+                    if (nextTo && dateFrom && nextTo < dateFrom) setDateFrom(nextTo);
+                  }}
                   placeholder="To date"
                   size="large"
                   suffixIcon={<CalendarDays size={15} />}
                   className="w-full!"
-                />
+                />}
                 <Select
                   aria-label="Booking status filter"
                   value={bookingStatus || undefined}

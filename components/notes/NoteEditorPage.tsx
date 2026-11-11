@@ -3,16 +3,19 @@
 import NoteRichEditor from "@/components/notes/NoteRichEditor";
 import { useCreateNote, useNote, useUpdateNote } from "@/hooks/note.hook";
 import type { INoteRequest } from "@/shares/dtos/note/note";
-import { Alert, Button, DatePicker, Form, Input, Skeleton } from "antd";
+import { Alert, Button, DatePicker, Form, Grid, Input, Skeleton } from "antd";
 import { ArrowLeft, CalendarClock } from "lucide-react";
 import dayjs, { type Dayjs } from "dayjs";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import MobileDatePicker from "@/components/MobileDatePicker";
 
 type NoteEditorValues = Omit<INoteRequest, "deadline"> & { deadline?: Dayjs | null };
 
 export default function NoteEditorPage({ noteId }: { noteId: number | null }) {
   const router = useRouter();
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
   const [form] = Form.useForm<NoteEditorValues>();
   const noteQuery = useNote(noteId ?? 0);
   const createNote = useCreateNote();
@@ -90,13 +93,17 @@ export default function NoteEditorPage({ noteId }: { noteId: number | null }) {
               />
             </Form.Item>
             <Form.Item name="deadline" className="!mb-4">
-              <DatePicker
-                allowClear
-                format="MMM D, YYYY"
-                placeholder="Set a deadline"
-                suffixIcon={<CalendarClock size={15} />}
-                className="!w-full sm:!w-64"
-              />
+              {isMobile ? (
+                <MobileDatePicker title="Deadline" allowClear placeholder="Set a deadline" />
+              ) : (
+                <DatePicker
+                  allowClear
+                  format="MMM D, YYYY"
+                  placeholder="Set a deadline"
+                  suffixIcon={<CalendarClock size={15} />}
+                  className="!w-full sm:!w-64"
+                />
+              )}
             </Form.Item>
             <Form.Item
               name="content"

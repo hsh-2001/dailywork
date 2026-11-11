@@ -276,16 +276,20 @@ export default function OTRecordClient() {
                       title="From date"
                       placeholder="From date"
                       value={dateRange?.[0] ?? null}
-                      max={dateRange?.[1] ? new Date(dateRange[1].year(), dateRange[1].month(), dateRange[1].date()) : undefined}
-                      onChange={(value) => setDateRange([value, dateRange?.[1] ?? null])}
+                      onChange={(value) => {
+                        const to = dateRange?.[1] ?? null;
+                        setDateRange([value, value && to && value.isAfter(to, "day") ? value : to]);
+                      }}
                     />
                   ) : (
                     <DatePicker
                       allowClear
                       aria-label="From date"
                       value={dateRange?.[0] ?? null}
-                      onChange={(value) => setDateRange([value, dateRange?.[1] ?? null])}
-                      disabledDate={(current) => Boolean(dateRange?.[1] && current.isAfter(dateRange[1], "day"))}
+                      onChange={(value) => {
+                        const to = dateRange?.[1] ?? null;
+                        setDateRange([value, value && to && value.isAfter(to, "day") ? value : to]);
+                      }}
                       placeholder="From date"
                       suffixIcon={<CalendarDays size={15} />}
                       className="w-full!"
@@ -300,16 +304,20 @@ export default function OTRecordClient() {
                       title="To date"
                       placeholder="To date"
                       value={dateRange?.[1] ?? null}
-                      min={dateRange?.[0] ? new Date(dateRange[0].year(), dateRange[0].month(), dateRange[0].date()) : undefined}
-                      onChange={(value) => setDateRange([dateRange?.[0] ?? null, value])}
+                      onChange={(value) => {
+                        const from = dateRange?.[0] ?? null;
+                        setDateRange([value && from && value.isBefore(from, "day") ? value : from, value]);
+                      }}
                     />
                   ) : (
                     <DatePicker
                       allowClear
                       aria-label="To date"
                       value={dateRange?.[1] ?? null}
-                      onChange={(value) => setDateRange([dateRange?.[0] ?? null, value])}
-                      disabledDate={(current) => Boolean(dateRange?.[0] && current.isBefore(dateRange[0], "day"))}
+                      onChange={(value) => {
+                        const from = dateRange?.[0] ?? null;
+                        setDateRange([value && from && value.isBefore(from, "day") ? value : from, value]);
+                      }}
                       placeholder="To date"
                       suffixIcon={<CalendarDays size={15} />}
                       className="w-full!"
