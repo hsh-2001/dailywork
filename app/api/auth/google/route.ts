@@ -6,6 +6,7 @@ import { usersTable } from "@/db/tables/users";
 import { setSession } from "@/lib/auth/server";
 
 type FirebaseLookup = { users?: Array<{ localId?: string; email?: string; displayName?: string; photoUrl?: string; emailVerified?: boolean }> };
+type FirebaseError = { error?: { message?: string } };
 
 export async function POST(request: Request) {
   try {
@@ -18,7 +19,12 @@ export async function POST(request: Request) {
     const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(apiKey)}`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ idToken: body.idToken }),
     });
-    if (!response.ok) return NextResponse.json({ message: "Google sign-in could not be verified." }, { status: 401 });
+    if (!response.ok) {
+      const failure = await response.json().catch(() => null) as FirebaseError | null;
+      const code = failure?.error?.message?.split(" ")[0];
+      console.error("Firebase token verification failed", { status: response.status, code });
+      return NextResponse.json({ message: code ? `Firebase token verification failed: ${code}.` : `Firebase token verification failed (${response.status}).` }, { status: 401 });
+    }
     const result = await response.json() as FirebaseLookup;
     const profile = result.users?.[0];
     const email = profile?.email?.trim().toLowerCase();

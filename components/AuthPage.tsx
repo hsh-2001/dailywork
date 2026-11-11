@@ -25,8 +25,14 @@ export default function AuthPage({ isSignUp }: { isSignUp: boolean }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
       });
-      const result = await response.json() as { message?: string };
-      if (!response.ok) throw new Error(result.message || "Google sign-in failed.");
+      const responseText = await response.text();
+      let result: { message?: string } | null = null;
+      try {
+        result = JSON.parse(responseText) as { message?: string };
+      } catch {
+        // A platform error page may be HTML instead of the API's JSON response.
+      }
+      if (!response.ok) throw new Error(result?.message || `Google sign-in request failed (${response.status}).`);
       await queryClient.invalidateQueries({ queryKey: authSessionQueryKey });
       const requestedPath = new URLSearchParams(window.location.search).get("next");
       let returnPath = "/dashboard";
